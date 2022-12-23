@@ -31,3 +31,17 @@ And the differences:
 * Count loops are different
 * All the variable types have had an overhaul in ezr²
 * ezr² is much faster
+
+## Progress
+* **beta-1.0.0.0.2** - [23-12-22]
+	* Fixed bug in `baseFunction` class - Changed `newContext.symbolTable = new symbolTable(context.parent.symbolTable)` to `newContext.symbolTable = new symbolTable(newContext.parent.symbolTable)`
+	* For builtin function `run`, changed filename from full path to just file name
+	* Removed unused `GenerateContext` definition in `item` class
+	* Fixed bug in `shell` (now `biShell` - builtin shell) for paths given through command line - `Replace("\\", "\\\\")`
+
+* **beta-1.0.0.0.1** - [23-12-22]
+	* Fixed bug for builtin function `get` - Changed message output from `Writeline` to `Write`
+	* Changed `value` class' `execute` function check from `left is not baseFunction` to `left is value`
+
+* **beta-1.0.0.0.0** - [22-12-22]
+	* Initial release!

@@ -15,4 +15,8 @@
     <Content Include="Graphics\Icon.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Builds\Installer\" />
+  </ItemGroup>
+
 </Project>

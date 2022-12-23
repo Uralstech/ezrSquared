@@ -12,7 +12,7 @@ namespace ezrSquared.Shell
         {
             string filepath = string.Empty;
             if (args.Length > 0)
-                filepath = args[0];
+                filepath = args[0].Replace("\\", "\\\\");
 
             ezr instance = new ezr();
             Console.WriteLine($"ezr² Shell version- ({VERSION}) release- [{VERSION_DATE}]");
@@ -65,7 +65,7 @@ namespace ezrSquared.Shell
                     filepath = string.Empty;
                 }
 
-                error? error = instance.run("shell", script, out item? result);
+                error? error = instance.run("<ezr² biShell>", script, out item? result);
                 if (error != null) Console.WriteLine(error.asString());
                 else if (result != null)
                 {

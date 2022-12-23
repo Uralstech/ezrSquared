@@ -132,13 +132,6 @@ namespace ezrSquared.Classes.Values
             return null;
         }
 
-        internal context generateContext()
-        {
-            context newContext = new context($"{GetType().Name}-internal", context, startPos, false);
-            newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
-            return newContext;
-        }
-
         public virtual runtimeResult execute(item[] args) { return new runtimeResult().failure(illegalOperation()); }
         public virtual runtimeResult retrieve(node node) { return new runtimeResult().failure(illegalOperation()); }
 
@@ -156,7 +149,7 @@ namespace ezrSquared.Classes.Values
         public override int GetHashCode() { throw new Exception($"No GetHashCode method defined for '{GetType().Name}'!"); }
     }
 
-    public abstract class value: item
+    public abstract class value : item
     {
         public dynamic storedValue;
         internal context? internalContext;
@@ -170,7 +163,7 @@ namespace ezrSquared.Classes.Values
 
         internal context generateContext()
         {
-            context newContext = new context($"{GetType().Name}-internal", context, startPos, false);
+            context newContext = new context($"<<{GetType().Name}> internal>", context, startPos, false);
             newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
             return newContext;
         }
@@ -770,9 +763,9 @@ namespace ezrSquared.Classes.Values
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Start cannot be less than zero", context));
-            else  if (endAsInt > storedValue.ToString().Length)
+            else if (endAsInt > storedValue.ToString().Length)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "End cannot be greater than length of string", context));
-            else  if (startAsInt > endAsInt)
+            else if (startAsInt > endAsInt)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Start cannot be greater than end", context));
 
             return result.success(new @string(storedValue.ToString().Substring(startAsInt, endAsInt)));
@@ -793,7 +786,7 @@ namespace ezrSquared.Classes.Values
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
-            else  if (startAsInt > storedValue.ToString().Length)
+            else if (startAsInt > storedValue.ToString().Length)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of string", context));
 
             return result.success(new @string(storedValue.ToString().Insert(startAsInt, ((@string)substring).storedValue.ToString())));
@@ -854,7 +847,7 @@ namespace ezrSquared.Classes.Values
                 return result.success(new integerNumber(integer));
             return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Could not convert string to integerNumber", context));
         }
-        
+
         public runtimeResult asFloat(context context)
         {
             runtimeResult result = new runtimeResult();
@@ -1436,7 +1429,7 @@ namespace ezrSquared.Classes.Values
         public override string ToString()
         {
             string[] elementStrings = new string[storedValue.Count];
-            KeyValuePair <item, item>[] values = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
+            KeyValuePair<item, item>[] values = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
             for (int i = 0; i < values.Length; i++)
                 elementStrings[i] = $"{values[i].Key} : {values[i].Value}";
             return '{' + string.Join(", ", elementStrings) + '}';
@@ -1462,7 +1455,7 @@ namespace ezrSquared.Classes.Values
         internal context generateContext()
         {
             context newContext = new context(name, context, startPos, false);
-            newContext.symbolTable = new symbolTable(context.parent.symbolTable);
+            newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
             return newContext;
         }
 
@@ -1633,7 +1626,7 @@ namespace ezrSquared.Classes.Values
                 return result.failure(new runtimeError(startPos, endPos, RT_IO, $"Failed to load script \"{path}\"\n{exception.Message}", context));
             }
 
-            error? error = new main.ezr().run(path, script, out item? _);
+            error? error = new main.ezr().run(Path.GetFileName(path), script, out item? _);
             if (error != null)
                 return result.failure(new runtimeError(startPos, endPos, RT_RUN, $"Failed to execute script \"{path}\"\n\n{error.asString()}", context));
             return result.success(new nothing());

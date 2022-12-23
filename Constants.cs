@@ -2,7 +2,7 @@
 {
     public static class Constants
     {
-        public const string VERSION = "beta-1.0.0.0.1";
+        public const string VERSION = "beta-1.0.0.0.2";
         public const string VERSION_DATE = "23.12.2022";
 
         public const string LETTERS_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
