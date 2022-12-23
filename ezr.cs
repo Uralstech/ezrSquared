@@ -2430,7 +2430,7 @@ namespace ezrSquared.main
                 if (node.operatorToken.type == TOKENTYPE.PERIOD)
                 {
                     left = left.copy().setPosition(node.startPos, node.endPos);
-                    if (left is not baseFunction)
+                    if (left is value)
                         left = result.register(left.execute(new item[0]));
                     if (result.shouldReturn()) return result;
 

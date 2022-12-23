@@ -1587,9 +1587,9 @@ namespace ezrSquared.Classes.Values
             if (message is not nothing)
             {
                 if (message is @string)
-                    Console.WriteLine(((@string)message).ToPureString());
+                    Console.Write(((@string)message).ToPureString());
                 else
-                    Console.WriteLine(message.ToString());
+                    Console.Write(message.ToString());
             }
 
             string? input = Console.ReadLine();
