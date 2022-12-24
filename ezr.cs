@@ -51,9 +51,14 @@ namespace ezrSquared.main
                         advance();
                     else if (currentChar == '@')
                         skipComment();
-                    else if (currentChar == '\'' || currentChar == '"')
+                    else if (currentChar == '\'')
                     {
-                        tokens.Add(compileString(out error));
+                        tokens.Add(compileString((char)currentChar, TOKENTYPE.CHARLIST, out error));
+                        if (error != null) return emptyTokenArray;
+                    }
+                    else if (currentChar == '"')
+                    {
+                        tokens.Add(compileString((char)currentChar, TOKENTYPE.STRING, out error));
                         if (error != null) return emptyTokenArray;
                     }
                     else if (currentChar == '<')
@@ -219,13 +224,12 @@ namespace ezrSquared.main
                 return new token(TOKENTYPE.MINUS, startPos, pos);
             }
 
-            private token compileString(out error? error)
+            private token compileString(char stringChar, TOKENTYPE targetToken, out error? error)
             {
                 error = null;
                 string stringToReturn = "";
                 position startPos = pos.copy();
                 bool escapeChar = false;
-                char stringChar = (char)currentChar;
                 advance();
 
                 Dictionary<char, char> escapeChars = new Dictionary<char, char>()
@@ -262,7 +266,7 @@ namespace ezrSquared.main
                     error = new invalidGrammarError($"Expected '{stringChar}'", prevPosition, pos);
 
                 advance();
-                return new token(TOKENTYPE.STRING, stringToReturn, startPos, pos);
+                return new token(targetToken, stringToReturn, startPos, pos);
             }
 
             private token compileIdentifier()
@@ -360,7 +364,7 @@ namespace ezrSquared.main
             {
                 parseResult result = statements();
                 if (result.error == null && currentToken.type != TOKENTYPE.ENDOFFILE)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
                 return result;
             }
 
@@ -448,7 +452,7 @@ namespace ezrSquared.main
 
                 node expression = result.register(this.expression());
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
                 return result.success(expression);
             }
 
@@ -541,7 +545,7 @@ namespace ezrSquared.main
 
                 node node = result.register(binaryOperation(compExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.KEY, "and"), new TypeValuePair(TOKENTYPE.KEY, "or" ) }));
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
                 return result.success(node);
             }
 
@@ -592,7 +596,7 @@ namespace ezrSquared.main
 
                 node node = result.register(binaryOperation(arithExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.ISEQUAL), new TypeValuePair(TOKENTYPE.NOTEQUAL), new TypeValuePair(TOKENTYPE.LESSTHAN), new TypeValuePair(TOKENTYPE.GREATERTHAN), new TypeValuePair(TOKENTYPE.LESSTHANOREQUAL), new TypeValuePair(TOKENTYPE.GREATERTHANOREQUAL) }));
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
                 return result.success(node);
             }
 
@@ -649,7 +653,7 @@ namespace ezrSquared.main
                     {
                         argNodes.Add(result.register(expression()));
                         if (result.error != null)
-                            return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
 
                         while (currentToken.type == TOKENTYPE.COMMA)
                         {
@@ -701,6 +705,13 @@ namespace ezrSquared.main
                     advance();
 
                     return result.success(new stringNode(token, startPos, currentToken.startPos.copy()));
+                }
+                else if (token.type == TOKENTYPE.CHARLIST)
+                {
+                    result.registerAdvance();
+                    advance();
+
+                    return result.success(new charListNode(token, startPos, currentToken.startPos.copy()));
                 }
                 else if (token.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                 {
@@ -805,7 +816,7 @@ namespace ezrSquared.main
                     return result.success(includeExpression);
                 }
 
-                return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', '!', '(', '[' or '{'", currentToken.startPos, currentToken.endPos));
+                return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', '!', '(', '[' or '{'", currentToken.startPos, currentToken.endPos));
             }
 
             private parseResult arrayExpression()
@@ -829,7 +840,7 @@ namespace ezrSquared.main
                     skipNewlines(result);
                     node firstElement = result.register(expression());
                     if (result.error != null)
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
 
                     List<node> nodeList = new List<node> { firstElement };
                     bool moreElements = true;
@@ -855,7 +866,7 @@ namespace ezrSquared.main
                     {
                         if (moreElements)
                             return result.failure(new invalidGrammarError("Expected ',' or ')'", currentToken.startPos, currentToken.endPos));
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', or ')'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', or ')'", currentToken.startPos, currentToken.endPos));
                     }
 
                     elementNodes = nodeList.ToArray();
@@ -887,7 +898,7 @@ namespace ezrSquared.main
                     skipNewlines(result);
                     node element = result.register(expression());
                     if (result.error != null)
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ']'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ']'", currentToken.startPos, currentToken.endPos));
 
                     List<node> nodeList = new List<node> { element };
                     skipNewlines(result);
@@ -1276,7 +1287,7 @@ namespace ezrSquared.main
 
                         token? error = null;
                         token? varName = null;
-                        if (currentToken.type == TOKENTYPE.STRING)
+                        if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                         {
                             error = currentToken;
                             result.registerAdvance();
@@ -1306,7 +1317,7 @@ namespace ezrSquared.main
                         if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
                         {
                             if (error == null && varName == null)
-                                return result.failure(new invalidGrammarError("Expected [ERROR-TAG], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
+                                return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                             else if (varName == null)
                                 return result.failure(new invalidGrammarError("Expected 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                             return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
@@ -1349,7 +1360,7 @@ namespace ezrSquared.main
 
                     token? error = null;
                     token? varName = null;
-                    if (currentToken.type == TOKENTYPE.STRING)
+                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                     {
                         error = currentToken;
                         result.registerAdvance();
@@ -1379,7 +1390,7 @@ namespace ezrSquared.main
                     if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
                     {
                         if (error == null && varName == null)
-                            return result.failure(new invalidGrammarError("Expected [ERROR-TAG], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                         else if (varName == null)    
                             return result.failure(new invalidGrammarError("Expected 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                         return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
@@ -1559,7 +1570,7 @@ namespace ezrSquared.main
                 advance();
 
                 token file;
-                if (currentToken.type == TOKENTYPE.STRING)
+                if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                     file = currentToken;
                 else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                 {
@@ -1567,7 +1578,7 @@ namespace ezrSquared.main
                     file.type = TOKENTYPE.ID;
                 }
                 else
-                    return result.failure(new invalidGrammarError("Expected [STRING] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                 result.registerAdvance();
                 advance();
 
@@ -1577,7 +1588,7 @@ namespace ezrSquared.main
                     result.registerAdvance();
                     advance();
 
-                    if (currentToken.type == TOKENTYPE.STRING)
+                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                         nickname = currentToken;
                     else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
@@ -1585,7 +1596,7 @@ namespace ezrSquared.main
                         nickname.type = TOKENTYPE.ID;
                     }
                     else
-                        return result.failure(new invalidGrammarError("Expected [STRING] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                     result.registerAdvance();
                     advance();
                 }
@@ -1936,7 +1947,7 @@ namespace ezrSquared.main
 
                         token? error = null;
                         token? varName = null;
-                        if (currentToken.type == TOKENTYPE.STRING)
+                        if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                         {
                             error = currentToken;
                             result.registerAdvance();
@@ -1966,7 +1977,7 @@ namespace ezrSquared.main
                         if (currentToken.type != TOKENTYPE.COLON)
                         {
                             if (error == null && varName == null)
-                                return result.failure(new invalidGrammarError("Expected [STRING], [IDENTIFIER], '->' or ':'", currentToken.startPos, currentToken.endPos));
+                                return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], '->' or ':'", currentToken.startPos, currentToken.endPos));
                             else if (varName == null)
                                 return result.failure(new invalidGrammarError("Expected '->' or ':'", currentToken.startPos, currentToken.endPos));
                             return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
@@ -2009,7 +2020,7 @@ namespace ezrSquared.main
 
                     token? error = null;
                     token? varName = null;
-                    if (currentToken.type == TOKENTYPE.STRING)
+                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                     {
                         error = currentToken;
                         result.registerAdvance();
@@ -2039,7 +2050,7 @@ namespace ezrSquared.main
                     if (currentToken.type != TOKENTYPE.COLON)
                     {
                         if (error == null && varName == null)
-                            return result.failure(new invalidGrammarError("Expected [ERROR-TAG], '->' or ':'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], '->' or ':'", currentToken.startPos, currentToken.endPos));
                         else if (varName == null)
                             return result.failure(new invalidGrammarError("Expected '->' or ':'", currentToken.startPos, currentToken.endPos));
                         return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
@@ -2218,7 +2229,7 @@ namespace ezrSquared.main
                 advance();
 
                 token file;
-                if (currentToken.type == TOKENTYPE.STRING)
+                if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                     file = currentToken;
                 else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                 {
@@ -2226,7 +2237,7 @@ namespace ezrSquared.main
                     file.type = TOKENTYPE.ID;
                 }
                 else
-                    return result.failure(new invalidGrammarError("Expected [STRING] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                 result.registerAdvance();
                 advance();
 
@@ -2236,7 +2247,7 @@ namespace ezrSquared.main
                     result.registerAdvance();
                     advance();
 
-                    if (currentToken.type == TOKENTYPE.STRING)
+                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
                         nickname = currentToken;
                     else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
@@ -2244,7 +2255,7 @@ namespace ezrSquared.main
                         nickname.type = TOKENTYPE.ID;
                     }
                     else
-                        return result.failure(new invalidGrammarError("Expected [STRING] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                     result.registerAdvance();
                     advance();
                 }
@@ -2338,6 +2349,11 @@ namespace ezrSquared.main
             private runtimeResult visit_stringNode(stringNode node, context context)
             {
                 return new runtimeResult().success(new @string(node.valueToken.value.ToString()).setPosition(node.startPos, node.endPos).setContext(context));
+            }
+
+            private runtimeResult visit_charListNode(charListNode node, context context)
+            {
+                return new runtimeResult().success(new characterList(node.valueToken.value.ToString()).setPosition(node.startPos, node.endPos).setContext(context));
             }
 
             private runtimeResult visit_arrayNode(arrayNode node, context context)
@@ -2657,7 +2673,7 @@ namespace ezrSquared.main
                                     if (tag_ == null)
                                         return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"'{catchTagToken.value}' is not defined", context));
                                     else if (tag_ is not @string)
-                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"Error tag must be a [STRING]", context));
+                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"Error tag must be a string", context));
                                     catchTag = ((@string)tag_).storedValue;
                                 }
                                 else
@@ -2798,7 +2814,7 @@ namespace ezrSquared.main
                 string name;
                 if (node.nicknameToken != null)
                 {
-                    if (node.nicknameToken.type == TOKENTYPE.STRING)
+                    if (node.nicknameToken.type == TOKENTYPE.STRING || node.nicknameToken.type == TOKENTYPE.CHARLIST)
                         name = node.nicknameToken.value.ToString();
                     else
                     {

@@ -53,6 +53,11 @@ namespace ezrSquared.Classes.Nodes
     {
         public stringNode(token valueToken, position startPos, position endPos) : base(valueToken, startPos, endPos) { }
     }
+    
+    public class charListNode : valueNode
+    {
+        public charListNode(token valueToken, position startPos, position endPos) : base(valueToken, startPos, endPos) { }
+    }
 
     public class arrayNode : arraylikeNode
     {

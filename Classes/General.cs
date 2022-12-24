@@ -33,7 +33,8 @@ namespace ezrSquared.Classes.General
         NEWLINE = 26,
         ENDOFFILE = 27,
         QEY = 28,
-        ARROW = 29
+        ARROW = 29,
+        CHARLIST = 30
     }
 
     public class position

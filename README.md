@@ -16,7 +16,7 @@ The documentation won't be out till the full, stable release
 Yeah! Check them out [here](https://github.com/Uralstech/ezrSquared/tree/master/Tests)
 
 ## When will ezr² release?
-idk lol
+idk lol - but till it fully releases, try the beta version! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
 
 ## The name feels familiar...
 ezr² is heavily inspired by [ezrlang](https://github.com/Uralstech/ezrlang), which is another one of my projects -
@@ -38,27 +38,32 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **beta-1.1.0.0.0** - [24-12-22]
+	* New `characterList` class - a type of mutable `string`
+	* Added `set` function to list - to replace element at given `index` with given `value`
+	* Added `remove_at` function to list - to remove element at given `index`
+	* Fixed `insert` function in list - changed `index` check to `indexAsInt > ((List<item>)storedValue).Count`
+	* Added `as_string` function to `array`, `list` and `dictionary`
+	* And many more! Check the commits!
+
 * **beta-1.0.0.0.2** - [23-12-22]
-	* Fixed bug in `baseFunction` class - Changed `new symbolTable(context.parent.symbolTable)` to `new symbolTable(newContext.parent.symbolTable)`
-	* For builtin function `run`, changed filename from full path to just file name
-	* Removed unused `GenerateContext` definition in `item` class
-	* Fixed bug in `shell` (now `biShell` - builtin shell) for paths given through command line - `Replace("\\", "\\\\")`
+	* Fixed bug in `baseFunction` class - changed `symboltable` creation to `new symbolTable(newContext.parent.symbolTable)`
+	* Fixed bug in builtin function `run` - changed `filename` from full path to just file name
+	* Fixed bug in `item` class - removed `GenerateContext` definition
+	* Fixed bug in `shell` (now `biShell` - builtin shell) for paths given through CMD - added `Replace("\\", "\\\\")`
 
 * **beta-1.0.0.0.1** - [23-12-22]
-	* Fixed bug for builtin function `get` - Changed message output from `Writeline` to `Write`
-	* Changed `value` class' `execute` function check from `left is not baseFunction` to `left is value`
+	* Fixed bug for builtin function `get` - changed message output from `Writeline` to `Write`
+	* Changed `value` class' `execute` function check - to `left is value`
 
 * **beta-1.0.0.0.0** - [22-12-22]
 	* Initial release!
 
 ### Planned
-* **beta-1.1.0.0.0**
-	* New `characterList` class - a type of mutable `string`
-	
 * **beta-1.2.0.0.0**
-	* C# assisted ezr² libraries - like ezr Python libraries for ezrlang
+	* `C# assisted ezr² libraries` - like `ezr Python libraries` for `ezrlang`
 
 * **1.0.0.0.0**
 	* Overhaul of `object` class - with `object` definitions being different from instances
-	* Builtin libraries - for I/O, Math, Time, etc
+	* Builtin libraries - for `I/O`, `Math`, `Time`, etc
 	* Finished documentation

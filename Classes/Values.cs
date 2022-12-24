@@ -207,11 +207,13 @@ namespace ezrSquared.Classes.Values
             base.execute(args);
 
             internalContext.symbolTable.set("as_string", new predefinedFunction("boolean_as_string", asString, new string[0]));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("boolean_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_integer", new predefinedFunction("boolean_as_integer", asInteger, new string[0]));
             return new runtimeResult().success(this);
         }
 
         private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
         private runtimeResult asInteger(context context) { return new runtimeResult().success(new integerNumber(isTrue() ? 1 : 0)); }
 
         public override bool isTrue() { return (bool)storedValue; }
@@ -229,12 +231,14 @@ namespace ezrSquared.Classes.Values
             base.execute(args);
 
             internalContext.symbolTable.set("as_string", new predefinedFunction("nothing_as_string", asString, new string[0]));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("nothing_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_integer", new predefinedFunction("nothing_as_integer", asInteger, new string[0]));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("nothing_as_boolean", asBoolean, new string[0]));
             return new runtimeResult().success(this);
         }
 
         private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
         private runtimeResult asInteger(context context) { return new runtimeResult().success(new integerNumber(0)); }
         private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(false)); }
 
@@ -414,12 +418,14 @@ namespace ezrSquared.Classes.Values
             base.execute(args);
 
             internalContext.symbolTable.set("as_string", new predefinedFunction("integer_as_string", asString, new string[0]));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("integer_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_float", new predefinedFunction("integer_as_float", asFloat, new string[0]));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("integer_as_boolean", asBoolean, new string[0]));
             return new runtimeResult().success(this);
         }
 
         private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
         private runtimeResult asFloat(context context) { return new runtimeResult().success(new floatNumber((float)storedValue)); }
         private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
 
@@ -598,6 +604,7 @@ namespace ezrSquared.Classes.Values
             base.execute(args);
 
             internalContext.symbolTable.set("as_string", new predefinedFunction("float_as_string", asString, new string[0]));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("float_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_integer", new predefinedFunction("float_as_integer", asInteger, new string[0]));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("float_as_boolean", asBoolean, new string[0]));
             internalContext.symbolTable.set("round_to", new predefinedFunction("float_round_to", roundTo, new string[1] { "digit" }));
@@ -605,6 +612,7 @@ namespace ezrSquared.Classes.Values
         }
 
         private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
         private runtimeResult asInteger(context context) { return new runtimeResult().success(new integerNumber((int)storedValue)); }
         private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
         private runtimeResult roundTo(context context)
@@ -630,6 +638,8 @@ namespace ezrSquared.Classes.Values
             error = null;
             if (other is @string)
                 return new @string(storedValue + ((@string)other).storedValue).setContext(context);
+            else if (other is characterList)
+                return new @string(storedValue + string.Join("", ((characterList)other).storedValue)).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -670,7 +680,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "String division by negative value", context);
                     return null;
                 }
 
@@ -687,7 +697,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "String division by negative value", context);
                     return null;
                 }
 
@@ -728,6 +738,8 @@ namespace ezrSquared.Classes.Values
             error = null;
             if (other is @string)
                 return new boolean(((@string)other).storedValue.Contains(storedValue)).setContext(context);
+            else if (other is characterList)
+                return new boolean(string.Join("", ((characterList)other).storedValue).Contains(storedValue)).setContext(context);
             return base.checkIn(other, out error);
         }
 
@@ -744,6 +756,7 @@ namespace ezrSquared.Classes.Values
             internalContext.symbolTable.set("as_integer", new predefinedFunction("string_as_integer", asInteger, new string[0] { }));
             internalContext.symbolTable.set("as_float", new predefinedFunction("string_as_float", asFloat, new string[0] { }));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("string_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("string_character_list", asCharList, new string[0] { }));
             return new runtimeResult().success(this);
         }
 
@@ -840,7 +853,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new @string(string.Join(storedValue.ToString(), arrayAsString)));
         }
 
-        public runtimeResult asInteger(context context)
+        private runtimeResult asInteger(context context)
         {
             runtimeResult result = new runtimeResult();
             if (int.TryParse(storedValue.ToString(), out int integer))
@@ -848,7 +861,7 @@ namespace ezrSquared.Classes.Values
             return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Could not convert string to integerNumber", context));
         }
 
-        public runtimeResult asFloat(context context)
+        private runtimeResult asFloat(context context)
         {
             runtimeResult result = new runtimeResult();
             if (float.TryParse(storedValue.ToString(), out float float_))
@@ -856,13 +869,317 @@ namespace ezrSquared.Classes.Values
             return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Could not convert string to floatNumber", context));
         }
 
-        public runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(storedValue)); }
+        private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
 
         public override bool isTrue() { return storedValue.Length > 0; }
         public override item copy() { return new @string(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"\"{storedValue}\""; }
         public string ToPureString() { return storedValue; }
+    }
+    
+    public class characterList : value
+    {
+        public characterList(string value) : base(value.ToCharArray().ToList()) { }
+        public characterList(List<char> value) : base(value) { }
+
+        public override item? addedTo(item other, out error? error)
+        {
+            error = null;
+            if (other is @string)
+            {
+                ((List<char>)storedValue).AddRange(((@string)other).storedValue.ToString().ToCharArray());
+                return new nothing().setContext(context);
+            }
+            else if (other is characterList)
+            {
+                ((List<char>)storedValue).AddRange(((characterList)other).storedValue);
+                return new nothing().setContext(context);
+            }
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? multedBy(item other, out error? error)
+        {
+            error = null;
+            if (other is integerNumber)
+            {
+                int otherValue = ((integerNumber)other).storedValue;
+                if (otherValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList multiplication by negative value", context);
+                    return null;
+                }
+
+                char[] multedValues = new char[storedValue.Count * otherValue];
+
+                for (int i = 0; i < otherValue; i++)
+                    storedValue.CopyTo(multedValues, storedValue.Count * i);
+                return new characterList(multedValues.ToList()).setContext(context);
+            }
+            else if (other is floatNumber)
+            {
+                float otherValue = ((floatNumber)other).storedValue;
+                if (otherValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList multiplication by negative value", context);
+                    return null;
+                }
+
+                char[] multedValues = new char[storedValue.Count * (int)otherValue];
+
+                for (int i = 0; i < (int)otherValue; i++)
+                    storedValue.CopyTo(multedValues, storedValue.Count * i);
+                return new characterList(multedValues.ToList()).setContext(context);
+            }
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? divedBy(item other, out error? error)
+        {
+            error = null;
+            if (other is integerNumber)
+            {
+                int otherValue = ((integerNumber)other).storedValue;
+                if (otherValue == 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
+                    return null;
+                }
+                else if (otherValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList division by negative value", context);
+                    return null;
+                }
+
+                char[] divedValues = new char[storedValue.Count / otherValue];
+                for (int i = 0; i < divedValues.Length; i++)
+                    divedValues[i] = storedValue[i];
+
+                return new characterList(divedValues.ToList()).setContext(context);
+            }
+            else if (other is floatNumber)
+            {
+                float otherValue = ((floatNumber)other).storedValue;
+                if (otherValue == 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
+                    return null;
+                }
+                else if (otherValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList division by negative value", context);
+                    return null;
+                }
+
+                char[] divedValues = new char[(int)(storedValue.Count / otherValue)];
+                for (int i = 0; i < divedValues.Length; i++)
+                    divedValues[i] = storedValue[i];
+
+                return new characterList(divedValues.ToList()).setContext(context);
+            }
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? compareLessThanOrEqual(item other, out error? error)
+        {
+            error = null;
+            if (other is integerNumber)
+            {
+                int otherValue = ((integerNumber)other).storedValue;
+                if (otherValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
+                    return null;
+                }
+                else if (otherValue >= storedValue.Count)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be greater than or equal to length of characterList", context);
+                    return null;
+                }
+
+                return new @string(storedValue[otherValue].ToString()).setContext(context);
+            }
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? checkIn(item other, out error? error)
+        {
+            error = null;
+            if (other is @string)
+                return new boolean(((@string)other).storedValue.Contains(storedValue)).setContext(context);
+            else if (other is characterList)
+                return new boolean(string.Join("", ((characterList)other).storedValue).Contains(string.Join("", storedValue))).setContext(context);
+            return base.checkIn(other, out error);
+        }
+
+        public override runtimeResult execute(item[] args)
+        {
+            base.execute(args);
+
+            internalContext.symbolTable.set("length", new integerNumber(((List<char>)storedValue).Count));
+            internalContext.symbolTable.set("slice", new predefinedFunction("character_list_slice", charListSlice, new string[2] { "start", "end" }));
+            internalContext.symbolTable.set("insert", new predefinedFunction("character_list_insert", charListInsert, new string[2] { "index", "value" }));
+            internalContext.symbolTable.set("set", new predefinedFunction("character_list_set", charListSet, new string[2] { "index", "value" }));
+            internalContext.symbolTable.set("remove", new predefinedFunction("character_list_remove", charListRemove, new string[1] { "value" }));
+            internalContext.symbolTable.set("remove_at", new predefinedFunction("character_list_remove_at", charListRemoveAt, new string[1] { "index" }));
+            internalContext.symbolTable.set("as_integer", new predefinedFunction("character_list_as_integer", asInteger, new string[0] { }));
+            internalContext.symbolTable.set("as_float", new predefinedFunction("character_list_as_float", asFloat, new string[0] { }));
+            internalContext.symbolTable.set("as_boolean", new predefinedFunction("character_list_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_string", new predefinedFunction("character_list_as_string", asString, new string[0] { }));
+            return new runtimeResult().success(this);
+        }
+
+        public runtimeResult charListSlice(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item start = context.symbolTable.get("start");
+            item end = context.symbolTable.get("end");
+
+            if (start is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Start must be an integerNumber", context));
+            else if (end is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "End must be an integerNumber", context));
+
+            int startAsInt = (int)((integerNumber)start).storedValue;
+            int endAsInt = (int)((integerNumber)end).storedValue + 1;
+
+            if (startAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Start cannot be less than zero", context));
+            else if (endAsInt > ((List<char>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "End cannot be greater than length of characterList", context));
+            else if (startAsInt >= endAsInt - 1)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Start cannot be greater than or equal to end", context));
+
+            return result.success(new characterList(((List<char>)storedValue).GetRange(startAsInt, endAsInt - startAsInt)));
+        }
+
+        public runtimeResult charListInsert(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item index = context.symbolTable.get("index");
+            item value = context.symbolTable.get("value");
+
+            if (index is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index must be an integerNumber", context));
+
+            int indexAsInt = (int)((integerNumber)index).storedValue;
+
+            if (indexAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
+            else if (indexAsInt > ((List<char>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of characterList", context));
+
+            if (value is not @string && value is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be a string or characterList", context));
+
+            string value_ = (value is @string) ? ((@string)value).storedValue : string.Join("", ((characterList)value).storedValue);
+            if (value_.Length > 1 || value_.Length < 1)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be of length 1", context));
+
+            ((List<char>)storedValue).Insert(indexAsInt, value_[0]);
+            return result.success(new nothing());
+        }
+
+        public runtimeResult charListSet(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item index = context.symbolTable.get("index");
+            item value = context.symbolTable.get("value");
+            
+            if (index is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index must be an integerNumber", context));
+
+            int indexAsInt = (int)((integerNumber)index).storedValue;
+
+            if (indexAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
+            else if (indexAsInt >= ((List<char>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of characterList", context));
+
+            if (value is not @string && value is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be a string or characterList", context));
+
+            string value_ = (value is @string) ? ((@string)value).storedValue : string.Join("", ((characterList)value).storedValue);
+            if (value_.Length > 1 || value_.Length < 1)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be of length 1", context));
+
+            ((List<char>)storedValue)[indexAsInt] = value_[0];
+            return result.success(new nothing());
+        }
+
+        public runtimeResult charListRemove(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item value = context.symbolTable.get("value");
+
+            if (value is not @string && value is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be a string or characterList", context));
+
+            string value_ = (value is @string) ? ((@string)value).storedValue : string.Join("", ((characterList)value).storedValue);
+            if (value_.Length > 1 || value_.Length < 1)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Value must be of length 1", context));
+
+            char charValue = value_[0];
+            if (!((List<char>)storedValue).Contains(charValue))
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "CharacterList does not contain value", context));
+
+            ((List<char>)storedValue).Remove(charValue);
+            return result.success(new nothing());
+        }
+
+        public runtimeResult charListRemoveAt(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item index = context.symbolTable.get("index");
+
+            if (index is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index must be an integerNumber", context));
+
+            int indexAsInt = (int)((integerNumber)index).storedValue;
+
+            if (indexAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
+            else if (indexAsInt >= ((List<char>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of characterList", context));
+
+            ((List<char>)storedValue).RemoveAt(indexAsInt);
+            return result.success(new nothing());
+        }
+
+        private runtimeResult asInteger(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            if (int.TryParse(string.Join("", storedValue), out int integer))
+                return result.success(new integerNumber(integer));
+            return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Could not convert string to integerNumber", context));
+        }
+
+        private runtimeResult asFloat(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            if (float.TryParse(string.Join("", storedValue), out float float_))
+                return result.success(new floatNumber(float_));
+            return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Could not convert string to floatNumber", context));
+        }
+
+        private runtimeResult asString(context context) { return new runtimeResult().success(new @string(string.Join("", storedValue))); }
+        private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+
+        public override bool isTrue() { return storedValue.Count > 0; }
+        public override item copy() { return new characterList(storedValue).setPosition(startPos, endPos).setContext(context); }
+
+        public override string ToString() { return $"'{string.Join("", storedValue)}'"; }
+        public string ToPureString() { return string.Join("", storedValue); }
     }
 
     public class array : value
@@ -903,9 +1220,9 @@ namespace ezrSquared.Classes.Values
                     return null;
                 }
 
-                item[] multedValues = new item[(int)(storedValue.Length * otherValue)];
+                item[] multedValues = new item[storedValue.Length * (int)otherValue];
 
-                for (int i = 0; i < otherValue; i++)
+                for (int i = 0; i < (int)otherValue; i++)
                     storedValue.CopyTo(multedValues, storedValue.Length * i);
                 return new array(multedValues).setContext(context);
             }
@@ -927,7 +1244,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Array division by negative value", context);
                     return null;
                 }
 
@@ -947,7 +1264,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Array division by negative value", context);
                     return null;
                 }
 
@@ -993,6 +1310,8 @@ namespace ezrSquared.Classes.Values
             internalContext.symbolTable.set("length", new integerNumber(((item[])storedValue).Length));
             internalContext.symbolTable.set("slice", new predefinedFunction("array_slice", arraySlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("array_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_string", new predefinedFunction("array_as_string", asString, new string[0] { }));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("array_as_character_list", asCharList, new string[0] { }));
             return new runtimeResult().success(this);
         }
 
@@ -1020,7 +1339,9 @@ namespace ezrSquared.Classes.Values
             return result.success(new array(((item[])storedValue)[startAsInt..endAsInt]));
         }
 
-        public runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
 
         public override bool isTrue() { return storedValue.Length > 0; }
         public override item copy() { return new array(storedValue).setPosition(startPos, endPos).setContext(context); }
@@ -1123,9 +1444,9 @@ namespace ezrSquared.Classes.Values
                     return null;
                 }
 
-                item[] multedValues = new item[(int)(storedValue.Count * otherValue)];
+                item[] multedValues = new item[storedValue.Count * (int)otherValue];
 
-                for (int i = 0; i < otherValue; i++)
+                for (int i = 0; i < (int)otherValue; i++)
                     storedValue.CopyTo(multedValues, storedValue.Count * i);
                 return new list(multedValues).setContext(context);
             }
@@ -1147,7 +1468,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "List division by negative value", context);
                     return null;
                 }
 
@@ -1167,7 +1488,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "List division by negative value", context);
                     return null;
                 }
 
@@ -1213,8 +1534,12 @@ namespace ezrSquared.Classes.Values
             internalContext.symbolTable.set("length", new integerNumber(((List<item>)storedValue).Count));
             internalContext.symbolTable.set("slice", new predefinedFunction("list_slice", listSlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("insert", new predefinedFunction("list_insert", listInsert, new string[2] { "index", "value" }));
+            internalContext.symbolTable.set("set", new predefinedFunction("list_set", listSet, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("remove", new predefinedFunction("list_remove", listRemove, new string[1] { "value" }));
+            internalContext.symbolTable.set("remove_at", new predefinedFunction("list_remove_at", listRemoveAt, new string[1] { "index" }));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("list_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_string", new predefinedFunction("list_as_string", asString, new string[0] { }));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("list_as_character_list", asCharList, new string[0] { }));
             return new runtimeResult().success(this);
         }
 
@@ -1255,10 +1580,30 @@ namespace ezrSquared.Classes.Values
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
-            else if (indexAsInt > storedValue.ToString().Length)
+            else if (indexAsInt > ((List<item>)storedValue).Count)
                 return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of list", context));
 
             ((List<item>)storedValue).Insert(indexAsInt, value);
+            return result.success(new nothing());
+        }
+
+        public runtimeResult listSet(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item index = context.symbolTable.get("index");
+            item value = context.symbolTable.get("value");
+
+            if (index is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index must be an integerNumber", context));
+
+            int indexAsInt = (int)((integerNumber)index).storedValue;
+
+            if (indexAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
+            else if (indexAsInt >= ((List<item>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of list", context));
+
+            ((List<item>)storedValue)[indexAsInt] = value;
             return result.success(new nothing());
         }
 
@@ -1274,7 +1619,28 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        public runtimeResult listRemoveAt(context context)
+        {
+            runtimeResult result = new runtimeResult();
+            item index = context.symbolTable.get("index");
+
+            if (index is not integerNumber)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index must be an integerNumber", context));
+
+            int indexAsInt = (int)((integerNumber)index).storedValue;
+
+            if (indexAsInt < 0)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be less than zero", context));
+            else if (indexAsInt >= ((List<item>)storedValue).Count)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Index cannot be greater than length of list", context));
+
+            ((List<item>)storedValue).RemoveAt(indexAsInt);
+            return result.success(new nothing());
+        }
+
+        private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
 
         public override bool isTrue() { return storedValue.Count > 0; }
         public override item copy() { return new list(storedValue).setPosition(startPos, endPos).setContext(context); }
@@ -1347,7 +1713,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Dictionary division by negative value", context);
                     return null;
                 }
 
@@ -1369,7 +1735,7 @@ namespace ezrSquared.Classes.Values
                 }
                 else if (otherValue < 0)
                 {
-                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by negative value", context);
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Dictionary division by negative value", context);
                     return null;
                 }
 
@@ -1418,10 +1784,14 @@ namespace ezrSquared.Classes.Values
             internalContext.symbolTable.set("values", new array(values));
             internalContext.symbolTable.set("pairs", new array(keyValuePairs));
             internalContext.symbolTable.set("as_boolean", new predefinedFunction("dictionary_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_string", new predefinedFunction("dictionary_as_string", asString, new string[0] { }));
+            internalContext.symbolTable.set("as_character_list", new predefinedFunction("dictionary_as_character_list", asCharList, new string[0] { }));
             return new runtimeResult().success(this);
         }
 
-        public runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBoolean(context context) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asString(context context) { return new runtimeResult().success(new @string(ToString())); }
+        private runtimeResult asCharList(context context) { return new runtimeResult().success(new characterList(ToString())); }
 
         public override bool isTrue() { return storedValue.Count > 0; }
         public override item copy() { return new dictionary(storedValue).setPosition(startPos, endPos).setContext(context); }
@@ -1553,6 +1923,8 @@ namespace ezrSquared.Classes.Values
             item value = context.symbolTable.get("message");
             if (value is @string)
                 Console.WriteLine(((@string)value).ToPureString());
+            else if (value is characterList)
+                Console.WriteLine(((characterList)value).ToPureString());
             else
                 Console.WriteLine(value.ToString());
 
@@ -1566,12 +1938,15 @@ namespace ezrSquared.Classes.Values
             item tag = context.symbolTable.get("tag");
             item message = context.symbolTable.get("message");
 
-            if (tag is not @string)
-                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Tag must be a string", context));
-            if (message is not @string)
-                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Message must be a string", context));
+            if (tag is not @string && tag is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Tag must be a string or characterList", context));
+            if (message is not @string && message is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Message must be a string or characterList", context));
 
-            return new runtimeResult().failure(new runtimeError(startPos, endPos, ((@string)tag).ToPureString(), ((@string)message).ToPureString(), context));
+            string msg = (message is @string) ? ((@string)message).ToPureString() : ((characterList)message).ToPureString();
+            string tg = (tag is @string) ? ((@string)tag).ToPureString() : ((characterList)tag).ToPureString();
+
+            return new runtimeResult().failure(new runtimeError(startPos, endPos, tg, msg, context));
         }
 
         private runtimeResult _get(context context)
@@ -1581,6 +1956,8 @@ namespace ezrSquared.Classes.Values
             {
                 if (message is @string)
                     Console.Write(((@string)message).ToPureString());
+                else if (message is characterList)
+                    Console.Write(((characterList)message).ToPureString());
                 else
                     Console.Write(message.ToString());
             }
@@ -1609,10 +1986,10 @@ namespace ezrSquared.Classes.Values
         {
             runtimeResult result = new runtimeResult();
             item file = context.symbolTable.get("file");
-            if (file is not @string)
-                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "File must be a string", context));
+            if (file is not @string && file is not characterList)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "File must be a string or characterList", context));
 
-            string path = ((@string)file).storedValue;
+            string path = (file is @string) ? ((@string)file).storedValue : string.Join("", ((characterList)file).storedValue);
             if (!File.Exists(path))
                 return result.failure(new runtimeError(startPos, endPos, RT_IO, $"Script \"{path}\" does not exist", context));
 
