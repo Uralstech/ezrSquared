@@ -33,7 +33,7 @@ And the differences:
 * ezr² is much faster
 
 ## Progress
-**For those confused by the version config: 1 -> Major 0 -> Feature 0 -> Function 0 -> Library 0 -> Patch**
+**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Function; 4th place -> Library; 5th place -> Patch**
 
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
