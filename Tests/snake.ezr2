@@ -1,0 +1,31 @@
+﻿item HEIGHT: 10
+item WIDTH: 20
+item PIXELS: HEIGHT * WIDTH
+
+function generate_screen with h, w do
+	item screen: ''
+
+	count to h do
+		count to w do screen + " "
+		screen + "\n"
+	end
+
+	return screen
+end
+
+function doht do
+	clear()
+
+	global item POSITION: POSITION + 1
+	if POSITION > PIXELS do global item POSITION: 0
+
+	item screen: generate_screen(HEIGHT, WIDTH)
+	screen.set(POSITION, "O")
+	show(screen)
+end
+
+item POSITION: 0
+while true do
+	doht()
+	count to 500000 do skip
+end

@@ -2730,7 +2730,7 @@ namespace ezrSquared.main
                 for (int i = 0; i < node.argNameTokens.Length; i++)
                     argNames[i] = node.argNameTokens[i].value.ToString();
 
-                item @object = new @object(name, node.bodyNode, argNames).setPosition(node.startPos, node.endPos).setContext(context);
+                item @object = new @class(name, node.bodyNode, argNames).setPosition(node.startPos, node.endPos).setContext(context);
                 context.symbolTable.set(name, @object);
                 return result.success(@object);
             }
@@ -2841,7 +2841,7 @@ namespace ezrSquared.main
                         formattedFileName += name[i];
                 }
                 
-                item value = result.register(new @object(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                item value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                 if (result.shouldReturn()) return result;
 
                 context.symbolTable.set(formattedFileName, value);
@@ -2850,11 +2850,8 @@ namespace ezrSquared.main
         }
 
 
-        private static context globalPredefinedContext = new context("<GLC>", null, null, true);
-        private static symbolTable globalPredefinedSymbolTable = new symbolTable();
-
-        private context runtimeContext = new context("<main>", globalPredefinedContext, new position(0, 0, 0, "<main>", ""), true);
-        private symbolTable runtimeSymbolTable = new symbolTable(globalPredefinedSymbolTable);
+        public static context globalPredefinedContext = new context("<GLC>", null, null, true);
+        public static symbolTable globalPredefinedSymbolTable = new symbolTable();
 
         private boolean TRUE = new(true);
         private boolean FALSE = new(false);
@@ -2912,10 +2909,9 @@ namespace ezrSquared.main
             globalPredefinedSymbolTable.set("run", funcRun);
 
             globalPredefinedContext.symbolTable = globalPredefinedSymbolTable;
-            runtimeContext.symbolTable = runtimeSymbolTable;
         }
 
-        public error? run(string file, string input, out item? result)
+        public error? run(string file, string input, context runtimeContext, out item? result)
         {
             result = null;
             string fullFilePath = Path.GetDirectoryName(Path.GetFullPath(file));

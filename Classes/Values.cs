@@ -4,6 +4,7 @@ using ezrSquared.Classes.Nodes;
 using ezrSquared.Classes.Helpers;
 using static ezrSquared.Constants.Constants;
 using static ezrSquared.main.ezr;
+using ezrSquared.main;
 using System.Reflection;
 
 namespace ezrSquared.Classes.Values
@@ -2003,7 +2004,10 @@ namespace ezrSquared.Classes.Values
                 return result.failure(new runtimeError(startPos, endPos, RT_IO, $"Failed to load script \"{path}\"\n{exception.Message}", context));
             }
 
-            error? error = new main.ezr().run(Path.GetFileName(path), script, out item? _);
+            context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
+            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedSymbolTable);
+
+            error? error = new main.ezr().run(Path.GetFileName(path), script, runtimeContext, out item? _);
             if (error != null)
                 return result.failure(new runtimeError(startPos, endPos, RT_RUN, $"Failed to execute script \"{path}\"\n\n{error.asString()}", context));
             return result.success(new nothing());
@@ -2054,49 +2058,61 @@ namespace ezrSquared.Classes.Values
         public override bool Equals(object? obj) { if (obj is function) return GetHashCode() == ((function)obj).GetHashCode(); return false; }
     }
 
-    public class @object : baseFunction
+    public class @class : baseFunction
     {
         private node bodyNode;
         private string[] argNames;
-        private context? internalContext;
         private interpreter interpreter;
 
-        public @object(string name, node bodyNode, string[] argNames, context? internalContext = null) : base(name)
+        public @class(string name, node bodyNode, string[] argNames) : base(name)
         {
             this.bodyNode = bodyNode;
             this.argNames = argNames;
-            this.internalContext = internalContext;
             this.interpreter = new interpreter();
         }
 
         public override runtimeResult execute(item[] args)
         {
             runtimeResult result = new runtimeResult();
-            internalContext = generateContext();
+            context internalContext = generateContext();
 
             result.register(checkAndPopulateArgs(argNames, args, internalContext));
             if (result.shouldReturn()) return result;
 
             result.register(interpreter.visit(bodyNode, internalContext));
             if (result.shouldReturn()) return result;
-            return result.success(copy());
+
+            return result.success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
+        }
+
+        public override item copy() { return new @class(name, bodyNode, argNames).setPosition(startPos, endPos).setContext(context); }
+
+        public override string ToString() { return $"<class {name}>"; }
+        public override int GetHashCode() { return ToString().GetHashCode(); }
+        public override bool Equals(object? obj) { if (obj is @class) return GetHashCode() == ((@class)obj).GetHashCode(); return false; }
+    }
+
+    public class @object : baseFunction
+    {
+        private context internalContext;
+        private interpreter interpreter;
+
+        public @object(string name, context internalContext) : base(name)
+        {
+            this.internalContext = internalContext;
+            this.interpreter = new interpreter();
         }
 
         public override runtimeResult retrieve(node node)
         {
             runtimeResult result = new runtimeResult();
 
-            if (internalContext != null)
-            {
-                item value = result.register(interpreter.visit(node, internalContext));
-                if (result.shouldReturn()) return result;
-                return result.success(value);
-            }
-
-            return result.failure(new runtimeError(node.startPos, node.endPos, RT_ILLEGALOP, "'retrieve' method called on uninitialized object", context));
+            item value = result.register(interpreter.visit(node, internalContext));
+            if (result.shouldReturn()) return result;
+            return result.success(value);
         }
 
-        public override item copy() { return new @object(name, bodyNode, argNames, internalContext).setPosition(startPos, endPos).setContext(context); }
+        public override item copy() { return new @object(name, internalContext).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<object {name}>"; }
         public override int GetHashCode() { return ToString().GetHashCode(); }

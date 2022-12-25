@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="Builds\Installer\" />
+    <Folder Include="Libraries\" />
   </ItemGroup>
 
 </Project>

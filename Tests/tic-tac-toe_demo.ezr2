@@ -2,41 +2,41 @@
 @ https://github.com/Uralstech/ezrlang
 
 @ Main game matrix
-item game: [['-', '-', '-'],
-            ['-', '-', '-'],
-            ['-', '-', '-']]
+item game: [["-", "-", "-"],
+            ["-", "-", "-"],
+            ["-", "-", "-"]]
 
 @ Winning cases
-item wins: [[['n', 'n', 'n'],
-             ['-', '-', '-'],
-             ['-', '-', '-']],
-            [['-', '-', '-'],
-             ['n', 'n', 'n'],
-             ['-', '-', '-']],
-            [['-', '-', '-'],
-             ['-', '-', '-'],
-             ['n', 'n', 'n']],
-            [['n', '-', '-'],
-             ['n', '-', '-'],
-             ['n', '-', '-']],
-            [['-', 'n', '-'],
-             ['-', 'n', '-'],
-             ['-', 'n', '-']],
-            [['-', '-', 'n'],
-             ['-', '-', 'n'],
-             ['-', '-', 'n']],
-            [['-', '-', 'n'],
-             ['-', 'n', '-'],
-             ['n', '-', '-']],
-            [['n', '-', '-'],
-             ['-', 'n', '-'],
-             ['-', '-', 'n']]]
+item wins: [[["n", "n", "n"],
+             ["-", "-", "-"],
+             ["-", "-", "-"]],
+            [["-", "-", "-"],
+             ["n", "n", "n"],
+             ["-", "-", "-"]],
+            [["-", "-", "-"],
+             ["-", "-", "-"],
+             ["n", "n", "n"]],
+            [["n", "-", "-"],
+             ["n", "-", "-"],
+             ["n", "-", "-"]],
+            [["-", "n", "-"],
+             ["-", "n", "-"],
+             ["-", "n", "-"]],
+            [["-", "-", "n"],
+             ["-", "-", "n"],
+             ["-", "-", "n"]],
+            [["-", "-", "n"],
+             ["-", "n", "-"],
+             ["n", "-", "-"]],
+            [["n", "-", "-"],
+             ["-", "n", "-"],
+             ["-", "-", "n"]]]
 
 @ Function to show game matrix in more readable form
 function SHOW_GAME do
     count to game.length as i do
-        item s: ''
-        count to (game <= i).length as j do item s: (s + ((game <= i) <= j)) + ' '
+        item s: ""
+        count to (game <= i).length as j do item s: s + (game <= i <= j) + " "
         
         show(s)
     end
@@ -50,18 +50,18 @@ function Check_result do
         item o_pts: 0
         count to game.length as j do
             count to (game <= j).length as k do
-                if (((wins <= i) <= j) <= k) = 'n' do
-                    if ((game <= j) <= k) = 'x' do item x_pts: x_pts + 1
-                    if ((game <= j) <= k) = 'o' do item o_pts: o_pts + 1
+                if (((wins <= i) <= j) <= k) = "n" do
+                    if ((game <= j) <= k) = "x" do item x_pts: x_pts + 1
+                    if ((game <= j) <= k) = "o" do item o_pts: o_pts + 1
                 end
 
-                if ((game <= j) <= k) = '-' do item full: false
+                if ((game <= j) <= k) = "-" do item full: false
             end
 
             if x_pts >= 3 do
-                return 'x'
+                return "x"
             else if o_pts >= 3 do
-                return 'o'
+                return "o"
             end
         end
     end
@@ -69,12 +69,12 @@ function Check_result do
     return full.as_integer().as_string()
 end
 
-@ Function to register the players' current move
+@ Function to register the players" current move
 function Move with position, char do
     item y: if position <= 3 do 0 else if position <= 6 do 1 else if position <= 9 do 2 else do -1
     item x: if position <= 3 do position - 1 else if position <= 6 do position - 4 else if position <= 9 do position - 7 else do -1
-    if ((y < 0) or (x < 0)) or (position <= 0) do return 'INVALID POSITION'
-    if ((game <= y) <= x) ! '-' do return 'INVALID POSITION'
+    if ((y < 0) or (x < 0)) or (position <= 0) do return "INVALID POSITION"
+    if ((game <= y) <= x) ! "-" do return "INVALID POSITION"
 
     item gamey : game <= y
 
@@ -88,41 +88,41 @@ function Move with position, char do
 end
 
 @ Showing the matrix
-show('\n')
+show("\n")
 SHOW_GAME()
 
 @ Main gameloop
-item char: 'x'
+item char: "x"
 while true do
     try do
-        item move: get(('Enter position (' + char) + ') ').as_integer()
+        item move: get(("Enter position (" + char) + ") ").as_integer()
     error do
         show("INVALID INPUT")
         skip
     end
 
     item move: Move(move, char)
-    if type_of(move) = 'string' do
+    if type_of(move) = "string" do
         show(move)
         skip
     else do
         item game: move
     end
 
-    show('\n')
+    show("\n")
     SHOW_GAME()
 
     item result: Check_result()
-    if result = '1' do
-        show('Draw!')
+    if result = "1" do
+        show("Draw!")
         stop
-    else if result = 'x' do
-        show('X has won!')
+    else if result = "x" do
+        show("X has won!")
         stop
-    else if result = 'o' do
-        show('O has won!')
+    else if result = "o" do
+        show("O has won!")
         stop
     end
 
-    item char: if char = 'x' do 'o' else do 'x'
+    item char: if char = "x" do "o" else do "x"
 end

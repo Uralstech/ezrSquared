@@ -1,6 +1,7 @@
 ﻿using ezrSquared.main;
 using ezrSquared.Classes.Errors;
 using ezrSquared.Classes.Values;
+using ezrSquared.Classes.General;
 using static ezrSquared.Constants.Constants;
 using System.Text.RegularExpressions;
 
@@ -15,13 +16,17 @@ namespace ezrSquared.Shell
                 filepath = args[0].Replace("\\", "\\\\");
 
             ezr instance = new ezr();
-            Console.WriteLine($"ezr² Shell version- ({VERSION}) release- [{VERSION_DATE}]");
+            Console.WriteLine($"ezr² biShell version- ({VERSION}) release- [{VERSION_DATE}]");
             Regex regex = new Regex("\\s");
 
             string[] commands = new string[] { "switch mode", "run code", "quit shell" };
             bool isScript = false;
             string script = string.Empty;
             int scriptLine = 1;
+
+
+            context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
+            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedSymbolTable);
 
             while (true)
             {
@@ -65,7 +70,7 @@ namespace ezrSquared.Shell
                     filepath = string.Empty;
                 }
 
-                error? error = instance.run("<ezr² biShell>", script, out item? result);
+                error? error = instance.run("<ezr² biShell>", script, runtimeContext, out item? result);
                 if (error != null) Console.WriteLine(error.asString());
                 else if (result != null)
                 {
