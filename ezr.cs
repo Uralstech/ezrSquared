@@ -5,6 +5,8 @@ using ezrSquared.Classes.Values;
 using ezrSquared.Classes.Helpers;
 using static ezrSquared.Constants.Constants;
 using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace ezrSquared.main
 {
@@ -2803,14 +2805,6 @@ namespace ezrSquared.main
                     return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to load script \"{file}\"\n{exception.Message}", context));
                 }
 
-                token[] tokens = new lexer(file, script).compileTokens(out error? error);
-                if (error != null)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
-
-                parseResult parseResult = new parser(tokens).parse();
-                if (parseResult.error != null)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
-
                 string name;
                 if (node.nicknameToken != null)
                 {
@@ -2840,9 +2834,52 @@ namespace ezrSquared.main
                     else
                         formattedFileName += name[i];
                 }
-                
-                item value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
-                if (result.shouldReturn()) return result;
+
+                item value;
+                string? extension = Path.GetExtension(realFilepath);
+                if (extension == null) extension = "";
+
+                if (extension == ".cs")
+                {
+                    try
+                    {
+                        value = CSharpScript.EvaluateAsync<item>(script, ScriptOptions.Default.WithReferences(
+                            typeof(item).Assembly,
+                            typeof(value).Assembly,
+                            typeof(boolean).Assembly,
+                            typeof(nothing).Assembly,
+                            typeof(integerNumber).Assembly,
+                            typeof(floatNumber).Assembly,
+                            typeof(@string).Assembly,
+                            typeof(characterList).Assembly,
+                            typeof(array).Assembly,
+                            typeof(list).Assembly,
+                            typeof(dictionary).Assembly,
+                            typeof(baseFunction).Assembly,
+                            typeof(predefinedFunction).Assembly,
+                            typeof(builtInFunction).Assembly,
+                            typeof(function).Assembly,
+                            typeof(@class).Assembly,
+                            typeof(@object).Assembly)).Result;
+                    }
+                    catch (Exception error)
+                    {
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.Message}", context));
+                    }
+                }
+                else
+                {
+                    token[] tokens = new lexer(file, script).compileTokens(out error? error);
+                    if (error != null)
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
+
+                    parseResult parseResult = new parser(tokens).parse();
+                    if (parseResult.error != null)
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
+
+                    value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                    if (result.shouldReturn()) return result;
+                }
 
                 context.symbolTable.set(formattedFileName, value);
                 return result.success(value);

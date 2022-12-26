@@ -38,6 +38,9 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **beta-1.3.0.0.0** - [26-12-22]
+	* Support for `C# assisted ezr² libraries` - like `ezr Python libraries` for `ezrlang`
+
 * **beta-1.2.0.0.0** - [25-12-22]
 	* Overhaul of `object` class - object definitions are now the `class` type and instances are the `object` type
 	* Made `run` function in `ezr.cs` require own context
@@ -64,9 +67,6 @@ And the differences:
 	* Initial release!
 
 ### Planned
-
-* **beta-1.3.0.0.0**
-	* Support for `C# assisted ezr² libraries` - like `ezr Python libraries` for `ezrlang`
 
 * **1.0.0.0.0**
 	* Builtin libraries - for `I/O`, `Math`, `Time`, etc

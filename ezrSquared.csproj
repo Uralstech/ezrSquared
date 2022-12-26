@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,12 +12,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Graphics\Icon.ico" />
+    <Compile Remove="Libraries\Test.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Builds\Installer\" />
-    <Folder Include="Libraries\" />
+    <Content Include="Graphics\Icon.ico" />
+    <Content Include="Libraries\Test.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+  	<Folder Include="Builds\Installer\" />
+  	<Folder Include="Libraries\" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.4.0" />
   </ItemGroup>
 
 </Project>
