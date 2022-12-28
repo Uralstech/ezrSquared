@@ -39,7 +39,7 @@ And the differences:
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
 * **beta-1.3.0.0.1** - [28-12-22]
-	* Made CSAELs (CSharp Assisted Ezr² Libraries) much better - check the `test` CSAEL included in ezr²
+	* Made CSAELs (`CSharp Assisted Ezr² Libraries`) much better - check the `test` CSAEL included in ezr²
 	* Some other improvements which I'm too lazy to point out - check the commits
 
 * **beta-1.3.0.0.0** - [26-12-22]
