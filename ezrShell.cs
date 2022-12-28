@@ -1,8 +1,8 @@
-﻿using ezrSquared.main;
-using ezrSquared.Classes.Errors;
-using ezrSquared.Classes.Values;
-using ezrSquared.Classes.General;
-using static ezrSquared.Constants.Constants;
+﻿using ezrSquared.Main;
+using ezrSquared.Errors;
+using ezrSquared.Values;
+using ezrSquared.General;
+using static ezrSquared.Constants.constants;
 using System.Text.RegularExpressions;
 
 namespace ezrSquared.Shell

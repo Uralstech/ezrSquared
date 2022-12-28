@@ -1,8 +1,8 @@
-﻿using ezrSquared.Classes.General;
+﻿using ezrSquared.General;
 
-namespace ezrSquared.Classes.Errors
+namespace ezrSquared.Errors
 {
-    public class error
+    public abstract class error
     {
         public string name;
         public string details;

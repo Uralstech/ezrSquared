@@ -1,9 +1,9 @@
 ﻿namespace ezrSquared.Constants
 {
-    public static class Constants
+    public static class constants
     {
-        public const string VERSION = "beta-1.3.0.0.0";
-        public const string VERSION_DATE = "26.12.2022";
+        public const string VERSION = "beta-1.3.0.0.1";
+        public const string VERSION_DATE = "28.12.2022";
 
         public const string LETTERS_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
         public const string ALPHANUM_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";

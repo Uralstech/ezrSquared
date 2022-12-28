@@ -1,13 +1,13 @@
-﻿using ezrSquared.Classes.Errors;
-using ezrSquared.Classes.General;
-using ezrSquared.Classes.Nodes;
-using ezrSquared.Classes.Helpers;
-using static ezrSquared.Constants.Constants;
-using static ezrSquared.main.ezr;
-using ezrSquared.main;
+﻿using ezrSquared.Errors;
+using ezrSquared.General;
+using ezrSquared.Nodes;
+using ezrSquared.Helpers;
+using static ezrSquared.Constants.constants;
+using static ezrSquared.Main.ezr;
+using ezrSquared.Main;
 using System.Reflection;
 
-namespace ezrSquared.Classes.Values
+namespace ezrSquared.Values
 {
     public abstract class item
     {
@@ -138,7 +138,7 @@ namespace ezrSquared.Classes.Values
 
         public virtual item copy() { throw new Exception($"No copy method defined for '{GetType().Name}'!"); }
 
-        internal error illegalOperation(item? other = null)
+        public error illegalOperation(item? other = null)
         {
             if (other != null)
                 return new runtimeError(this.startPos, other.endPos, RT_ILLEGALOP, $"Illegal operation for types '{this.GetType().Name}' and '{other.GetType().Name}'", this.context);
@@ -153,8 +153,8 @@ namespace ezrSquared.Classes.Values
     public abstract class value : item
     {
         public dynamic storedValue;
-        internal context? internalContext;
-        internal interpreter interpreter;
+        public context? internalContext;
+        private interpreter interpreter;
 
         public value(dynamic storedValue)
         {
@@ -162,7 +162,7 @@ namespace ezrSquared.Classes.Values
             interpreter = new interpreter();
         }
 
-        internal context generateContext()
+        public context generateContext()
         {
             context newContext = new context($"<<{GetType().Name}> internal>", context, startPos, false);
             newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
@@ -761,7 +761,7 @@ namespace ezrSquared.Classes.Values
             return new runtimeResult().success(this);
         }
 
-        public runtimeResult stringSlice(context context)
+        private runtimeResult stringSlice(context context)
         {
             runtimeResult result = new runtimeResult();
             item start = context.symbolTable.get("start");
@@ -785,7 +785,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new @string(storedValue.ToString().Substring(startAsInt, endAsInt)));
         }
 
-        public runtimeResult stringInsert(context context)
+        private runtimeResult stringInsert(context context)
         {
             runtimeResult result = new runtimeResult();
             item start = context.symbolTable.get("index");
@@ -806,7 +806,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new @string(storedValue.ToString().Insert(startAsInt, ((@string)substring).storedValue.ToString())));
         }
 
-        public runtimeResult stringReplace(context context)
+        private runtimeResult stringReplace(context context)
         {
             runtimeResult result = new runtimeResult();
             item old = context.symbolTable.get("old");
@@ -819,7 +819,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new @string(storedValue.ToString().Replace(((@string)old).storedValue.ToString(), ((@string)new_).storedValue.ToString())));
         }
 
-        public runtimeResult stringSplit(context context)
+        private runtimeResult stringSplit(context context)
         {
             runtimeResult result = new runtimeResult();
             item substring = context.symbolTable.get("substring");
@@ -834,7 +834,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new array(elements));
         }
 
-        public runtimeResult stringJoin(context context)
+        private runtimeResult stringJoin(context context)
         {
             runtimeResult result = new runtimeResult();
             item array = context.symbolTable.get("array");
@@ -1040,7 +1040,7 @@ namespace ezrSquared.Classes.Values
             return new runtimeResult().success(this);
         }
 
-        public runtimeResult charListSlice(context context)
+        private runtimeResult charListSlice(context context)
         {
             runtimeResult result = new runtimeResult();
             item start = context.symbolTable.get("start");
@@ -1064,7 +1064,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new characterList(((List<char>)storedValue).GetRange(startAsInt, endAsInt - startAsInt)));
         }
 
-        public runtimeResult charListInsert(context context)
+        private runtimeResult charListInsert(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1091,7 +1091,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult charListSet(context context)
+        private runtimeResult charListSet(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1118,7 +1118,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult charListRemove(context context)
+        private runtimeResult charListRemove(context context)
         {
             runtimeResult result = new runtimeResult();
             item value = context.symbolTable.get("value");
@@ -1138,7 +1138,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult charListRemoveAt(context context)
+        private runtimeResult charListRemoveAt(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1316,7 +1316,7 @@ namespace ezrSquared.Classes.Values
             return new runtimeResult().success(this);
         }
 
-        public runtimeResult arraySlice(context context)
+        private runtimeResult arraySlice(context context)
         {
             runtimeResult result = new runtimeResult();
             item start = context.symbolTable.get("start");
@@ -1544,7 +1544,7 @@ namespace ezrSquared.Classes.Values
             return new runtimeResult().success(this);
         }
 
-        public runtimeResult listSlice(context context)
+        private runtimeResult listSlice(context context)
         {
             runtimeResult result = new runtimeResult();
             item start = context.symbolTable.get("start");
@@ -1568,7 +1568,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new list(((List<item>)storedValue).GetRange(startAsInt, endAsInt - startAsInt)));
         }
 
-        public runtimeResult listInsert(context context)
+        private runtimeResult listInsert(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1588,7 +1588,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult listSet(context context)
+        private runtimeResult listSet(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1608,7 +1608,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult listRemove(context context)
+        private runtimeResult listRemove(context context)
         {
             runtimeResult result = new runtimeResult();
             item value = context.symbolTable.get("value");
@@ -1620,7 +1620,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        public runtimeResult listRemoveAt(context context)
+        private runtimeResult listRemoveAt(context context)
         {
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
@@ -1819,18 +1819,18 @@ namespace ezrSquared.Classes.Values
 
     public abstract class baseFunction : item
     {
-        internal string name;
+        public string name;
         public baseFunction(string? name) : base()
         { this.name = (name != null) ? name : "<anonymous>"; }
 
-        internal context generateContext()
+        public context generateContext()
         {
             context newContext = new context(name, context, startPos, false);
             newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
             return newContext;
         }
 
-        internal runtimeResult checkArgs(string[] argNames, item[] args)
+        public runtimeResult checkArgs(string[] argNames, item[] args)
         {
             runtimeResult result = new runtimeResult();
             if (args.Length > argNames.Length)
@@ -1841,7 +1841,7 @@ namespace ezrSquared.Classes.Values
             return result.success(new nothing());
         }
 
-        internal void populateArgs(string[] argNames, item[] args, context context)
+        public void populateArgs(string[] argNames, item[] args, context context)
         {
             for (int i = 0; i < args.Length; i++)
             {
@@ -1853,7 +1853,7 @@ namespace ezrSquared.Classes.Values
             }
         }
 
-        internal runtimeResult checkAndPopulateArgs(string[] argNames, item[] args, context context)
+        public runtimeResult checkAndPopulateArgs(string[] argNames, item[] args, context context)
         {
             runtimeResult result = new runtimeResult();
             item returnValue = result.register(checkArgs(argNames, args));
@@ -1894,10 +1894,10 @@ namespace ezrSquared.Classes.Values
         public override string ToString() { return $"<predefined function <{name}>>"; }
     }
 
-    public class builtInFunction : baseFunction
+    public class builtinFunction : baseFunction
     {
         private string[] argNames;
-        public builtInFunction(string? name, string[] argNames) : base(name)
+        public builtinFunction(string? name, string[] argNames) : base(name)
         { this.argNames = argNames; }
 
         public override runtimeResult execute(item[] args)
@@ -2007,13 +2007,13 @@ namespace ezrSquared.Classes.Values
             context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
             runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedSymbolTable);
 
-            error? error = new main.ezr().run(Path.GetFileName(path), script, runtimeContext, out item? _);
+            error? error = new Main.ezr().run(Path.GetFileName(path), script, runtimeContext, out item? _);
             if (error != null)
                 return result.failure(new runtimeError(startPos, endPos, RT_RUN, $"Failed to execute script \"{path}\"\n\n{error.asString()}", context));
             return result.success(new nothing());
         }
 
-        public override item copy() { return new builtInFunction(name, argNames).setPosition(startPos, endPos).setContext(context); }
+        public override item copy() { return new builtinFunction(name, argNames).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin function <{name}>>"; }
     }

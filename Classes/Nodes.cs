@@ -1,6 +1,6 @@
-﻿using ezrSquared.Classes.General;
+﻿using ezrSquared.General;
 
-namespace ezrSquared.Classes.Nodes
+namespace ezrSquared.Nodes
 {
     public class node
     {

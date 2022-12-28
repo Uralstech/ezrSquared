@@ -1,6 +1,6 @@
-﻿using ezrSquared.Classes.Values;
+﻿using ezrSquared.Values;
 
-namespace ezrSquared.Classes.General
+namespace ezrSquared.General
 {
     public enum TOKENTYPE : int
     {

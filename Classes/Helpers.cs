@@ -1,8 +1,8 @@
-﻿using ezrSquared.Classes.Errors;
-using ezrSquared.Classes.Nodes;
-using ezrSquared.Classes.Values;
+﻿using ezrSquared.Errors;
+using ezrSquared.Nodes;
+using ezrSquared.Values;
 
-namespace ezrSquared.Classes.Helpers
+namespace ezrSquared.Helpers
 {
     public class parseResult
     {

@@ -1,14 +1,14 @@
-﻿using ezrSquared.Classes.General;
-using ezrSquared.Classes.Errors;
-using ezrSquared.Classes.Nodes;
-using ezrSquared.Classes.Values;
-using ezrSquared.Classes.Helpers;
-using static ezrSquared.Constants.Constants;
+﻿using ezrSquared.General;
+using ezrSquared.Errors;
+using ezrSquared.Nodes;
+using ezrSquared.Values;
+using ezrSquared.Helpers;
+using static ezrSquared.Constants.constants;
 using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
-namespace ezrSquared.main
+namespace ezrSquared.Main
 {
     public class ezr
     {
@@ -2841,26 +2841,16 @@ namespace ezrSquared.main
 
                 if (extension == ".cs")
                 {
+                    Script<item> csScript = CSharpScript.Create<item>(script, ScriptOptions.Default.WithReferences(typeof(ezr).Assembly).WithImports("ezrSquared.Main", "ezrSquared.Nodes", "ezrSquared.Errors", "ezrSquared.Helpers", "ezrSquared.General", "ezrSquared.Values", "ezrSquared.Constants.constants"));
+                    csScript.Compile();
+
                     try
                     {
-                        value = CSharpScript.EvaluateAsync<item>(script, ScriptOptions.Default.WithReferences(
-                            typeof(item).Assembly,
-                            typeof(value).Assembly,
-                            typeof(boolean).Assembly,
-                            typeof(nothing).Assembly,
-                            typeof(integerNumber).Assembly,
-                            typeof(floatNumber).Assembly,
-                            typeof(@string).Assembly,
-                            typeof(characterList).Assembly,
-                            typeof(array).Assembly,
-                            typeof(list).Assembly,
-                            typeof(dictionary).Assembly,
-                            typeof(baseFunction).Assembly,
-                            typeof(predefinedFunction).Assembly,
-                            typeof(builtInFunction).Assembly,
-                            typeof(function).Assembly,
-                            typeof(@class).Assembly,
-                            typeof(@object).Assembly)).Result;
+                        Task<ScriptState<item>> exeTask = csScript.RunAsync();
+                        if (exeTask.Result.ReturnValue == null)
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\nReturn value is null", context));
+
+                        value = exeTask.Result.ReturnValue.setPosition(node.startPos, node.endPos).setContext(context);
                     }
                     catch (Exception error)
                     {
@@ -2907,13 +2897,13 @@ namespace ezrSquared.main
         private @string RTRUN = new(RT_RUN);
         private @string RTIO = new(RT_IO);
 
-        private builtInFunction funcShow = new("show", new string[1] { "message" });
-        private builtInFunction funcShowError = new("show_error", new string[2] { "tag", "message" });
-        private builtInFunction funcGet = new("get", new string[1] { "message" });
-        private builtInFunction funcClear = new("clear", new string[0]);
-        private builtInFunction funcHash = new("hash", new string[1] { "value" });
-        private builtInFunction funcTypeOf = new("type_of", new string[1] { "value" });
-        private builtInFunction funcRun = new("run", new string[1] { "file" });
+        private builtinFunction funcShow = new("show", new string[1] { "message" });
+        private builtinFunction funcShowError = new("show_error", new string[2] { "tag", "message" });
+        private builtinFunction funcGet = new("get", new string[1] { "message" });
+        private builtinFunction funcClear = new("clear", new string[0]);
+        private builtinFunction funcHash = new("hash", new string[1] { "value" });
+        private builtinFunction funcTypeOf = new("type_of", new string[1] { "value" });
+        private builtinFunction funcRun = new("run", new string[1] { "file" });
 
         public static string LIBPATH = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"\Libraries\");
         public static List<string> LOCALLIBPATHS = new List<string>();
