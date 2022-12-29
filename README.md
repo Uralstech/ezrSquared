@@ -38,6 +38,13 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.0.0.0.0** - [29-12-22]
+	* Removed CSAEL support - because I believe CSAELs are unnecessary (check the release notes to know more)
+	* Added (UNTESTED) builtin IO libraries (`file`, `folder` and `path`)
+	* Added `try_as_integer` and `try_as_float` functions to `strings` and `character_lists`
+	* A TON of 'polishing' - take that as you will, check the commits
+	* Removed `test` CSAEL	
+
 * **beta-1.3.0.0.1** - [28-12-22]
 	* Made CSAELs (`CSharp Assisted Ezr² Libraries`) much better - check the `test` CSAEL included in ezr²
 	* Some other improvements which I'm too lazy to point out - check the commits
@@ -72,6 +79,15 @@ And the differences:
 
 ### Planned
 
-* **1.0.0.0.0**
-	* Builtin libraries - for `IO`, `Math`, `Time`, etc
+* **prerelease-1.1.0.0.0**
+	* Builtin `Math` library
+	
+* **prerelease-1.2.0.0.0**
+	* Builtin `Time` library, with integration to the IO libraries
+	* Builtin `Random` library
+
+* **prerelease-1.3.0.0.0**
+	* Maybe some other libraries?
+
+* **release-1.0.0.0.0**
 	* Finished documentation

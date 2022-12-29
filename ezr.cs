@@ -5,8 +5,8 @@ using ezrSquared.Values;
 using ezrSquared.Helpers;
 using static ezrSquared.Constants.constants;
 using System.Reflection;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
+
+using ezrSquared.Libraries.IO;
 
 namespace ezrSquared.Main
 {
@@ -2344,8 +2344,8 @@ namespace ezrSquared.Main
             private runtimeResult visit_numberNode(numberNode node, context context)
             {
                 if (node.valueToken.type == TOKENTYPE.INT)
-                    return new runtimeResult().success(new integerNumber((int)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
-                return new runtimeResult().success(new floatNumber((float)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
+                    return new runtimeResult().success(new integer_number((int)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
+                return new runtimeResult().success(new float_number((float)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
             }
 
             private runtimeResult visit_stringNode(stringNode node, context context)
@@ -2355,7 +2355,7 @@ namespace ezrSquared.Main
 
             private runtimeResult visit_charListNode(charListNode node, context context)
             {
-                return new runtimeResult().success(new characterList(node.valueToken.value.ToString()).setPosition(node.startPos, node.endPos).setContext(context));
+                return new runtimeResult().success(new character_list(node.valueToken.value.ToString()).setPosition(node.startPos, node.endPos).setContext(context));
             }
 
             private runtimeResult visit_arrayNode(arrayNode node, context context)
@@ -2510,7 +2510,7 @@ namespace ezrSquared.Main
                 error? err = null;
                 item? res = null;
                 if (node.operatorToken.type == TOKENTYPE.MINUS)
-                    res = variable.multedBy(new integerNumber(-1), out err);
+                    res = variable.multedBy(new integer_number(-1), out err);
                 else if (node.operatorToken.matchString(TOKENTYPE.KEY, "invert") || node.operatorToken.matchString(TOKENTYPE.KEY, "v"))
                     res = variable.invert(out err);
 
@@ -2561,38 +2561,38 @@ namespace ezrSquared.Main
                     item start = result.register(visit(node.startValueNode, context));
                     if (result.shouldReturn()) return result;
 
-                    if (start is not integerNumber && start is not floatNumber)
-                        return result.failure(new runtimeError(start.startPos, start.endPos, RT_TYPE, "Count loop start must be an integerNumber or floatNumber", context));
+                    if (start is not integer_number && start is not float_number)
+                        return result.failure(new runtimeError(start.startPos, start.endPos, RT_TYPE, "Count loop start must be an integer_number or float_number", context));
 
-                    if (start is integerNumber)
-                        i = ((integerNumber)start).storedValue;
+                    if (start is integer_number)
+                        i = ((integer_number)start).storedValue;
                     else
-                        i = (int)((floatNumber)start).storedValue;
+                        i = (int)((float_number)start).storedValue;
                 }
 
                 item end = result.register(visit(node.endValueNode, context));
                 if (result.shouldReturn()) return result;
 
-                if (end is not integerNumber && end is not floatNumber)
-                    return result.failure(new runtimeError(end.startPos, end.endPos, RT_TYPE, "Count loop end must be an integerNumber or floatNumber", context));
+                if (end is not integer_number && end is not float_number)
+                    return result.failure(new runtimeError(end.startPos, end.endPos, RT_TYPE, "Count loop end must be an integer_number or float_number", context));
 
-                if (end is integerNumber)
-                    length = ((integerNumber)end).storedValue;
+                if (end is integer_number)
+                    length = ((integer_number)end).storedValue;
                 else
-                    length = (int)((floatNumber)end).storedValue;
+                    length = (int)((float_number)end).storedValue;
 
                 if (node.stepValueNode != null)
                 {
                     item step = result.register(visit(node.stepValueNode, context));
                     if (result.shouldReturn()) return result;
 
-                    if (step is not integerNumber && step is not floatNumber)
-                        return result.failure(new runtimeError(step.startPos, step.endPos, RT_TYPE, "Count loop step must be an integerNumber or floatNumber", context));
+                    if (step is not integer_number && step is not float_number)
+                        return result.failure(new runtimeError(step.startPos, step.endPos, RT_TYPE, "Count loop step must be an integer_number or float_number", context));
 
-                    if (step is integerNumber)
-                        step_ = ((integerNumber)step).storedValue;
+                    if (step is integer_number)
+                        step_ = ((integer_number)step).storedValue;
                     else
-                        step_ = (int)((floatNumber)step).storedValue;
+                        step_ = (int)((float_number)step).storedValue;
                 }
 
                 string? varName = null;
@@ -2602,7 +2602,7 @@ namespace ezrSquared.Main
                 for (int j = i; j < length; j += step_)
                 {
                     if (varName != null)
-                        context.symbolTable.set(varName, new integerNumber(j));
+                        context.symbolTable.set(varName, new integer_number(j));
 
                     item body = result.register(visit(node.bodyNode, context));
                     if (result.shouldReturn() && !result.loopShouldSkip && !result.loopShouldStop) return result;
@@ -2778,7 +2778,7 @@ namespace ezrSquared.Main
 
                 string file = node.nameToken.value.ToString();
 
-                List<string> plausibleFilepaths = new List<string>() { Path.Join(LIBPATH, file), Path.Join(Directory.GetCurrentDirectory(), file), file };
+                List<string> plausibleFilepaths = new List<string>() { Path.Join(Directory.GetCurrentDirectory(), file), file };
                 for (int i = 0; i < LOCALLIBPATHS.Count; i++)
                     plausibleFilepaths.Add(Path.Join(LOCALLIBPATHS[i], file));
 
@@ -2835,41 +2835,16 @@ namespace ezrSquared.Main
                         formattedFileName += name[i];
                 }
 
-                item value;
-                string? extension = Path.GetExtension(realFilepath);
-                if (extension == null) extension = "";
+                token[] tokens = new lexer(file, script).compileTokens(out error? error);
+                if (error != null)
+                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
 
-                if (extension == ".cs")
-                {
-                    Script<item> csScript = CSharpScript.Create<item>(script, ScriptOptions.Default.WithReferences(typeof(ezr).Assembly).WithImports("ezrSquared.Main", "ezrSquared.Nodes", "ezrSquared.Errors", "ezrSquared.Helpers", "ezrSquared.General", "ezrSquared.Values", "ezrSquared.Constants.constants"));
-                    csScript.Compile();
+                parseResult parseResult = new parser(tokens).parse();
+                if (parseResult.error != null)
+                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
 
-                    try
-                    {
-                        Task<ScriptState<item>> exeTask = csScript.RunAsync();
-                        if (exeTask.Result.ReturnValue == null)
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\nReturn value is null", context));
-
-                        value = exeTask.Result.ReturnValue.setPosition(node.startPos, node.endPos).setContext(context);
-                    }
-                    catch (Exception error)
-                    {
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.Message}", context));
-                    }
-                }
-                else
-                {
-                    token[] tokens = new lexer(file, script).compileTokens(out error? error);
-                    if (error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
-
-                    parseResult parseResult = new parser(tokens).parse();
-                    if (parseResult.error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
-
-                    value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
-                    if (result.shouldReturn()) return result;
-                }
+                item value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                if (result.shouldReturn()) return result;
 
                 context.symbolTable.set(formattedFileName, value);
                 return result.success(value);
@@ -2897,15 +2872,14 @@ namespace ezrSquared.Main
         private @string RTRUN = new(RT_RUN);
         private @string RTIO = new(RT_IO);
 
-        private builtinFunction funcShow = new("show", new string[1] { "message" });
-        private builtinFunction funcShowError = new("show_error", new string[2] { "tag", "message" });
-        private builtinFunction funcGet = new("get", new string[1] { "message" });
-        private builtinFunction funcClear = new("clear", new string[0]);
-        private builtinFunction funcHash = new("hash", new string[1] { "value" });
-        private builtinFunction funcTypeOf = new("type_of", new string[1] { "value" });
-        private builtinFunction funcRun = new("run", new string[1] { "file" });
+        private builtin_function funcShow = new("show", new string[1] { "message" });
+        private builtin_function funcShowError = new("show_error", new string[2] { "tag", "message" });
+        private builtin_function funcGet = new("get", new string[1] { "message" });
+        private builtin_function funcClear = new("clear", new string[0]);
+        private builtin_function funcHash = new("hash", new string[1] { "value" });
+        private builtin_function funcTypeOf = new("type_of", new string[1] { "value" });
+        private builtin_function funcRun = new("run", new string[1] { "file" });
 
-        public static string LIBPATH = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"\Libraries\");
         public static List<string> LOCALLIBPATHS = new List<string>();
 
         public ezr()
@@ -2934,6 +2908,10 @@ namespace ezrSquared.Main
             globalPredefinedSymbolTable.set("hash", funcHash);
             globalPredefinedSymbolTable.set("type_of", funcTypeOf);
             globalPredefinedSymbolTable.set("run", funcRun);
+
+            globalPredefinedSymbolTable.set("file", new @file());
+            globalPredefinedSymbolTable.set("folder", new folder());
+            globalPredefinedSymbolTable.set("path", new path());
 
             globalPredefinedContext.symbolTable = globalPredefinedSymbolTable;
         }

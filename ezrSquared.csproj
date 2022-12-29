@@ -12,22 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Libraries\Test.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Graphics\Icon.ico" />
-    <Content Include="Libraries\Test.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
   	<Folder Include="Builds\Installer\" />
   </ItemGroup>
-	
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.4.0" />
-  </ItemGroup>
-
 </Project>
