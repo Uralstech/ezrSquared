@@ -16,7 +16,7 @@ The documentation won't be out till the full, stable release
 Yeah! Check them out [here](https://github.com/Uralstech/ezrSquared/tree/master/Tests)
 
 ## When will ezr² release?
-idk lol - but till it fully releases, try the beta version! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
+idk lol - but till it fully releases, try the prerelease version! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
 
 ## The name feels familiar...
 ezr² is heavily inspired by [ezrlang](https://github.com/Uralstech/ezrlang), which is another one of my projects -
