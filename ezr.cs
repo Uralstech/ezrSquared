@@ -612,7 +612,7 @@ namespace ezrSquared.Main
                 position startPos = currentToken.startPos.copy();
                 token token = currentToken;
 
-                if ((new TOKENTYPE[] { TOKENTYPE.PLUS, TOKENTYPE.MINUS }).Contains(token.type))
+                if (token.type == TOKENTYPE.PLUS || token.type == TOKENTYPE.MINUS)
                 {
                     result.registerAdvance();
                     advance();
@@ -2511,11 +2511,12 @@ namespace ezrSquared.Main
                 item? res = null;
                 if (node.operatorToken.type == TOKENTYPE.MINUS)
                     res = variable.multedBy(new integer_number(-1), out err);
+                else if (node.operatorToken.type == TOKENTYPE.PLUS)
+                    res = variable.multedBy(new integer_number(1), out err);
                 else if (node.operatorToken.matchString(TOKENTYPE.KEY, "invert") || node.operatorToken.matchString(TOKENTYPE.KEY, "v"))
                     res = variable.invert(out err);
 
-                if (err != null)
-                    return result.failure(err);
+                if (err != null) return result.failure(err);
                 return result.success(res.setPosition(node.startPos, node.endPos));
             }
 
