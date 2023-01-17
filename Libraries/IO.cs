@@ -13,7 +13,7 @@ namespace ezrSquared.Libraries.IO
         public override runtimeResult execute(item[] args)
         {
             context internalContext = base.generateContext();
-            internalContext.symbolTable.set("exists", new predefined_function("file_exists", existsFile, new string[1] { "filepath" }));
+            internalContext.symbolTable.set("exists", new predefined_function("file_exists", fileExists, new string[1] { "filepath" }));
             internalContext.symbolTable.set("create", new predefined_function("file_create", createFile, new string[1] { "filepath" }));
             internalContext.symbolTable.set("delete", new predefined_function("file_delete", deleteFile, new string[1] { "filepath" }));
             internalContext.symbolTable.set("read", new predefined_function("file_read", readFile, new string[1] { "filepath" }));
@@ -24,7 +24,7 @@ namespace ezrSquared.Libraries.IO
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
         }
 
-        private runtimeResult existsFile(context context, position[] positions)
+        private runtimeResult fileExists(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -218,7 +218,7 @@ namespace ezrSquared.Libraries.IO
 
         public override string ToString() { return $"<builtin library {name}>"; }
         public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { if (obj is @file) return GetHashCode() == ((@file)obj).GetHashCode(); return false; }
+        public override bool Equals(object? obj) { return obj is @file; }
     }
 
     public class folder : baseFunction
@@ -228,20 +228,22 @@ namespace ezrSquared.Libraries.IO
         public override runtimeResult execute(item[] args)
         {
             context internalContext = base.generateContext();
-            internalContext.symbolTable.set("exists", new predefined_function("folder_exists", existsFolder, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("exists", new predefined_function("folder_exists", folderExists, new string[1] { "folderpath" }));
             internalContext.symbolTable.set("create", new predefined_function("folder_create", createFolder, new string[1] { "folderpath" }));
             internalContext.symbolTable.set("delete", new predefined_function("folder_delete", deleteFolder, new string[1] { "folderpath" }));
-            internalContext.symbolTable.set("subfolders_in", new predefined_function("folder_subfolders_in", subFolder, new string[1] { "folderpath" }));
-            internalContext.symbolTable.set("files_in", new predefined_function("folder_files_in", filesFolder, new string[1] { "folderpath" }));
-            internalContext.symbolTable.set("files_and_subfolders_in", new predefined_function("folder_files_and_subfolders_in", filesAndSubFolder, new string[1] { "folderpath" }));
-            internalContext.symbolTable.set("parent_of", new predefined_function("folder_parent_of", parentFolder, new string[1] { "folderpath" }));
-            internalContext.symbolTable.set("root_of", new predefined_function("folder_root_of", rootFolder, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("subfolders_in", new predefined_function("folder_subfolders_in", subFolders, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("files_in", new predefined_function("folder_files_in", filesInFolder, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("files_and_subfolders_in", new predefined_function("folder_files_and_subfolders_in", filesAndSubFolders, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("parent_of", new predefined_function("folder_parent_of", folderParent, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("root_of", new predefined_function("folder_root_of", folderRoot, new string[1] { "folderpath" }));
+            internalContext.symbolTable.set("current", new predefined_function("folder_current", currentFolder, new string[0]));
+            internalContext.symbolTable.set("set_current", new predefined_function("folder_set_current", setCurrentFolder, new string[1] { "folderpath" }));
             internalContext.symbolTable.set("move", new predefined_function("folder_move", moveFolder, new string[2] { "from_path", "to_path" }));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
         }
 
-        private runtimeResult existsFolder(context context, position[] positions)
+        private runtimeResult folderExists(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -299,7 +301,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new nothing());
         }
 
-        private runtimeResult subFolder(context context, position[] positions)
+        private runtimeResult subFolders(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -327,7 +329,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new array(subDirectoriesAsString));
         }
         
-        private runtimeResult filesFolder(context context, position[] positions)
+        private runtimeResult filesInFolder(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -355,7 +357,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new array(subFilesAsString));
         }
 
-        private runtimeResult filesAndSubFolder(context context, position[] positions)
+        private runtimeResult filesAndSubFolders(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -383,7 +385,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new array(subFilesAndDirectoriesAsString));
         }
 
-        private runtimeResult parentFolder(context context, position[] positions)
+        private runtimeResult folderParent(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -408,7 +410,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((parentInfo != null) ? new @string(parentInfo.Name) : new nothing());
         }
 
-        private runtimeResult rootFolder(context context, position[] positions)
+        private runtimeResult folderRoot(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -462,11 +464,52 @@ namespace ezrSquared.Libraries.IO
             return result.success(new nothing());
         }
 
+        private runtimeResult currentFolder(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            string filepath;
+            try
+            {
+                filepath = Directory.GetCurrentDirectory();
+            }
+            catch (IOException exception)
+            {
+                return result.failure(new runtimeError(positions[0], positions[1], RT_IO, $"Failed to access current working directory\n{exception.Message}", context));
+            }
+
+            return result.success(new @string(filepath));
+        }
+
+        private runtimeResult setCurrentFolder(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item path = context.symbolTable.get("folderpath");
+            if (path is not @string && path is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Folderpath must be a string or character_list", context));
+
+            string filepath = (path is @string) ? ((@string)path).storedValue.ToString() : string.Join("", ((character_list)path).storedValue);
+            if (!Directory.Exists(filepath))
+                return result.failure(new runtimeError(positions[0], positions[1], RT_IO, $"Folder \"{filepath}\" does not exist", context));
+
+            try
+            {
+                Directory.SetCurrentDirectory(filepath);
+            }
+            catch (IOException exception)
+            {
+                return result.failure(new runtimeError(positions[0], positions[1], RT_IO, $"Failed to set current working directory to \"{filepath}\"\n{exception.Message}", context));
+            }
+
+            return result.success(new nothing());
+        }
+
         public override item copy() { return new folder().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
         public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { if (obj is folder) return GetHashCode() == ((folder)obj).GetHashCode(); return false; }
+        public override bool Equals(object? obj) { return obj is folder; }
     }
 
     public class path : baseFunction
@@ -481,27 +524,27 @@ namespace ezrSquared.Libraries.IO
             internalContext.symbolTable.set("alternate_directory_separator", new @string(Path.AltDirectorySeparatorChar.ToString()));
             internalContext.symbolTable.set("invalid_filename_characters", new @string(string.Join("", Path.GetInvalidFileNameChars())));
             internalContext.symbolTable.set("invalid_path_characters", new @string(string.Join("", Path.GetInvalidPathChars())));
-            internalContext.symbolTable.set("exists", new predefined_function("path_exists", existsPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("join", new predefined_function("path_join", joinPath, new string[1] { "paths" }));
-            internalContext.symbolTable.set("combine", new predefined_function("path_combine", combinePath, new string[2] { "path_1", "path_2" }));
-            internalContext.symbolTable.set("has_extension", new predefined_function("path_has_extension", hasExtensionPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("get_extension", new predefined_function("path_get_extension", getExtensionPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("set_extension", new predefined_function("path_set_extension", setExtensionPath, new string[2] { "path", "extension" }));
-            internalContext.symbolTable.set("get_folder", new predefined_function("path_get_folder", getFolderPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("get_file", new predefined_function("path_get_file", getFilePath, new string[1] { "path" }));
-            internalContext.symbolTable.set("get_file_without_extension", new predefined_function("path_get_file_without_extension", getFileWithoutExtensionPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("get_whole", new predefined_function("path_get_whole", getFullPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("get_root", new predefined_function("path_get_root", getRootPath, new string[1] { "path" }));
+            internalContext.symbolTable.set("exists", new predefined_function("path_exists", pathExists, new string[1] { "path" }));
+            internalContext.symbolTable.set("join", new predefined_function("path_join", joinPaths, new string[1] { "paths" }));
+            internalContext.symbolTable.set("combine", new predefined_function("path_combine", combinePaths, new string[2] { "path_1", "path_2" }));
+            internalContext.symbolTable.set("has_extension", new predefined_function("path_has_extension", pathHasExtension, new string[1] { "path" }));
+            internalContext.symbolTable.set("get_extension", new predefined_function("path_get_extension", pathExtension, new string[1] { "path" }));
+            internalContext.symbolTable.set("set_extension", new predefined_function("path_set_extension", setPathExtension, new string[2] { "path", "extension" }));
+            internalContext.symbolTable.set("get_folder", new predefined_function("path_get_folder", folderNameOfPath, new string[1] { "path" }));
+            internalContext.symbolTable.set("get_file", new predefined_function("path_get_file", fileNameOfPath, new string[1] { "path" }));
+            internalContext.symbolTable.set("get_file_without_extension", new predefined_function("path_get_file_without_extension", fileNameOfPathWithoutExtension, new string[1] { "path" }));
+            internalContext.symbolTable.set("get_whole", new predefined_function("path_get_whole", fullPath, new string[1] { "path" }));
+            internalContext.symbolTable.set("get_root", new predefined_function("path_get_root", pathRoot, new string[1] { "path" }));
             internalContext.symbolTable.set("create_temp_file", new predefined_function("path_create_temp_file", createTempFilePath, new string[0]));
-            internalContext.symbolTable.set("temp", new predefined_function("path_temp", getTempPath, new string[0]));
+            internalContext.symbolTable.set("temp", new predefined_function("path_temp", tempPath, new string[0]));
             internalContext.symbolTable.set("relative_path", new predefined_function("path_relative_path", relativePath, new string[2] { "relative_to", "path" }));
-            internalContext.symbolTable.set("ends_in_folder_seperator", new predefined_function("path_ends_in_folder_seperator", endsInFolderSeperatorPath, new string[1] { "path" }));
-            internalContext.symbolTable.set("remove_last_folder_seperator", new predefined_function("path_remove_last_folder_seperator", removeLastFolderSeperatorPath, new string[1] { "path" }));
+            internalContext.symbolTable.set("ends_in_folder_seperator", new predefined_function("path_ends_in_folder_seperator", pathEndsInFolderSeperator, new string[1] { "path" }));
+            internalContext.symbolTable.set("remove_last_folder_seperator", new predefined_function("path_remove_last_folder_seperator", removeLastFolderSeperatorOfPath, new string[1] { "path" }));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
         }
 
-        private runtimeResult existsPath(context context, position[] positions)
+        private runtimeResult pathExists(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -513,7 +556,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new boolean(Path.Exists(filepath)));
         }
 
-        private runtimeResult joinPath(context context, position[] positions)
+        private runtimeResult joinPaths(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -533,7 +576,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new @string(Path.Join(filepaths)));
         }
 
-        private runtimeResult combinePath(context context, position[] positions)
+        private runtimeResult combinePaths(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -549,7 +592,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new @string(Path.Combine(filepath1, filepath2)));
         }
 
-        private runtimeResult hasExtensionPath(context context, position[] positions)
+        private runtimeResult pathHasExtension(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -561,7 +604,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new boolean(Path.HasExtension(filepath)));
         }
 
-        private runtimeResult getExtensionPath(context context, position[] positions)
+        private runtimeResult pathExtension(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -575,7 +618,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((extension != null) ? new @string(extension) : new nothing());
         }
 
-        private runtimeResult setExtensionPath(context context, position[] positions)
+        private runtimeResult setPathExtension(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -593,7 +636,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((newPath != null) ? new @string(newPath) : new nothing());
         }
 
-        private runtimeResult getFolderPath(context context, position[] positions)
+        private runtimeResult folderNameOfPath(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -616,7 +659,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((folder != null) ? new @string(folder) : new nothing());
         }
 
-        private runtimeResult getFilePath(context context, position[] positions)
+        private runtimeResult fileNameOfPath(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -639,7 +682,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((filename != null) ? new @string(filename) : new nothing());
         }
 
-        private runtimeResult getFileWithoutExtensionPath(context context, position[] positions)
+        private runtimeResult fileNameOfPathWithoutExtension(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -662,7 +705,7 @@ namespace ezrSquared.Libraries.IO
             return result.success((filename != null) ? new @string(filename) : new nothing());
         }
 
-        private runtimeResult getFullPath(context context, position[] positions)
+        private runtimeResult fullPath(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -685,7 +728,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new @string(filepath_));
         }
 
-        private runtimeResult getRootPath(context context, position[] positions)
+        private runtimeResult pathRoot(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -725,7 +768,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new @string(filepath));
         }
 
-        private runtimeResult getTempPath(context context, position[] positions)
+        private runtimeResult tempPath(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -759,7 +802,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new @string(Path.GetRelativePath(relativeTo_, path_)));
         }
 
-        private runtimeResult endsInFolderSeperatorPath(context context, position[] positions)
+        private runtimeResult pathEndsInFolderSeperator(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -771,7 +814,7 @@ namespace ezrSquared.Libraries.IO
             return result.success(new boolean(Path.EndsInDirectorySeparator(filepath)));
         }
 
-        private runtimeResult removeLastFolderSeperatorPath(context context, position[] positions)
+        private runtimeResult removeLastFolderSeperatorOfPath(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
 
@@ -787,6 +830,6 @@ namespace ezrSquared.Libraries.IO
 
         public override string ToString() { return $"<builtin library {name}>"; }
         public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { if (obj is path) return GetHashCode() == ((path)obj).GetHashCode(); return false; }
+        public override bool Equals(object? obj) { return obj is path; }
     }
 }

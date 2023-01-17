@@ -3,7 +3,6 @@ using ezrSquared.Errors;
 using ezrSquared.Values;
 using ezrSquared.General;
 using static ezrSquared.Constants.constants;
-using System.Text.RegularExpressions;
 
 namespace ezrSquared.Shell
 {
@@ -17,16 +16,14 @@ namespace ezrSquared.Shell
 
             ezr instance = new ezr();
             Console.WriteLine($"ezr² biShell version- ({VERSION}) release- [{VERSION_DATE}]");
-            Regex regex = new Regex("\\s");
 
             string[] commands = new string[] { "switch mode", "run code", "quit shell" };
             bool isScript = false;
             string script = string.Empty;
             int scriptLine = 1;
 
-
             context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
-            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedSymbolTable);
+            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedContext.symbolTable);
 
             while (true)
             {
@@ -38,7 +35,7 @@ namespace ezrSquared.Shell
                         Console.Write($"> ");
 
                     string? input = Console.ReadLine();
-                    if (input == null || regex.Replace(input, "") == "") continue;
+                    if (string.IsNullOrWhiteSpace(input)) continue;
 
                     if (commands.Contains(input))
                     {
@@ -70,13 +67,16 @@ namespace ezrSquared.Shell
                     filepath = string.Empty;
                 }
 
-                error? error = instance.run("<ezr² biShell>", script, runtimeContext, out item? result);
-                if (error != null) Console.WriteLine(error.asString());
-                else if (result != null)
+                if (!string.IsNullOrEmpty(script))
                 {
-                    item[] results = ((array)result).storedValue;
-                    if (results.Length == 1) Console.WriteLine(results[0].ToString());
-                    else Console.WriteLine(result.ToString());
+                    error? error = instance.run("<ezr² biShell>", script, runtimeContext, out item? result);
+                    if (error != null) Console.WriteLine(error.asString());
+                    else if (result != null)
+                    {
+                        item[] results = ((array)result).storedValue;
+                        if (results.Length == 1) Console.WriteLine(results[0].ToString());
+                        else Console.WriteLine(result.ToString());
+                    }
                 }
 
                 script = "";

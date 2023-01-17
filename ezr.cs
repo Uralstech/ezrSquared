@@ -7,6 +7,8 @@ using static ezrSquared.Constants.constants;
 using System.Reflection;
 
 using ezrSquared.Libraries.IO;
+using ezrSquared.Libraries.STD;
+using ezrSquared.Libraries.Random;
 
 namespace ezrSquared.Main
 {
@@ -63,6 +65,8 @@ namespace ezrSquared.Main
                         tokens.Add(compileString((char)currentChar, TOKENTYPE.STRING, out error));
                         if (error != null) return emptyTokenArray;
                     }
+                    else if (currentChar == ':')
+                        tokens.Add(compileColon());
                     else if (currentChar == '<')
                         tokens.Add(compileLessThan());
                     else if (currentChar == '>')
@@ -117,11 +121,6 @@ namespace ezrSquared.Main
                         tokens.Add(new token(TOKENTYPE.NOTEQUAL, pos));
                         advance();
                     }
-                    else if (currentChar == ':')
-                    {
-                        tokens.Add(new token(TOKENTYPE.COLON, pos));
-                        advance();
-                    }
                     else if (currentChar == ',')
                     {
                         tokens.Add(new token(TOKENTYPE.COMMA, pos));
@@ -162,6 +161,26 @@ namespace ezrSquared.Main
                         tokens.Add(new token(TOKENTYPE.RCURLY, pos));
                         advance();
                     }
+                    else if (currentChar == '&')
+                    {
+                        tokens.Add(new token(TOKENTYPE.BITAND, pos));
+                        advance();
+                    }
+                    else if (currentChar == '|')
+                    {
+                        tokens.Add(new token(TOKENTYPE.BITOR, pos));
+                        advance();
+                    }
+                    else if (currentChar == '\\')
+                    {
+                        tokens.Add(new token(TOKENTYPE.BITXOR, pos));
+                        advance();
+                    }
+                    else if (currentChar == '~')
+                    {
+                        tokens.Add(new token(TOKENTYPE.BITNOT, pos));
+                        advance();
+                    }
                     else
                     {
                         position startPos = pos.copy();
@@ -184,6 +203,70 @@ namespace ezrSquared.Main
                     advance();
             }
 
+            private token compileColon()
+            {
+                position startPos = pos.copy();
+                advance();
+
+                if (currentChar == '+')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNPLUS, startPos, pos);
+                }
+                else if (currentChar == '-')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNMINUS, startPos, pos);
+                }
+                else if (currentChar == '*')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNMUL, startPos, pos);
+                }
+                else if (currentChar == '/')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNDIV, startPos, pos);
+                }
+                else if (currentChar == '%')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNMOD, startPos, pos);
+                }
+                else if (currentChar == '^')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNPOW, startPos, pos);
+                }
+                else if (currentChar == '&')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNBITAND, startPos, pos);
+                }
+                else if (currentChar == '|')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNBITOR, startPos, pos);
+                }
+                else if (currentChar == '\\')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNBITXOR, startPos, pos);
+                }
+                else if (currentChar == '<')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNBITLSHIFT, startPos, pos);
+                }
+                else if (currentChar == '>')
+                {
+                    advance();
+                    return new token(TOKENTYPE.ASSIGNBITRSHIFT, startPos, pos);
+                }
+
+                return new token(TOKENTYPE.COLON, startPos, pos);
+            }
+
             private token compileLessThan()
             {
                 position startPos = pos.copy();
@@ -193,6 +276,11 @@ namespace ezrSquared.Main
                 {
                     advance();
                     return new token(TOKENTYPE.LESSTHANOREQUAL, startPos, pos);
+                }
+                else if (currentChar == '<')
+                {
+                    advance();
+                    return new token(TOKENTYPE.BITLSHIFT, startPos, pos);
                 }
 
                 return new token(TOKENTYPE.LESSTHAN, startPos, pos);
@@ -207,6 +295,11 @@ namespace ezrSquared.Main
                 {
                     advance();
                     return new token(TOKENTYPE.GREATERTHANOREQUAL, startPos, pos);
+                }
+                else if (currentChar == '>')
+                {
+                    advance();
+                    return new token(TOKENTYPE.BITRSHIFT, startPos, pos);
                 }
 
                 return new token(TOKENTYPE.GREATERTHAN, startPos, pos);
@@ -321,7 +414,7 @@ namespace ezrSquared.Main
                 if (periodCount == 0)
                 {
                     try { return new token(TOKENTYPE.INT, (int)Convert.ToInt32(numberString), startPos, pos); }
-                    catch (OverflowException) { error = new overflowError("IntegerNumber either too large or too small", startPos, pos);  return null; }
+                    catch (OverflowException) { error = new overflowError("Integer either too large or too small", startPos, pos);  return null; }
                 }
 
                 return new token(TOKENTYPE.FLOAT, (float)Convert.ToDouble(numberString), startPos, pos);
@@ -366,9 +459,11 @@ namespace ezrSquared.Main
             {
                 parseResult result = statements();
                 if (result.error == null && currentToken.type != TOKENTYPE.ENDOFFILE)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+', '-' or '~'", currentToken.startPos, currentToken.endPos));
                 return result;
             }
+
+            private bool isAssignmentTokenType(TOKENTYPE type) { return type == TOKENTYPE.ASSIGNPLUS || type == TOKENTYPE.ASSIGNMINUS || type == TOKENTYPE.ASSIGNMUL || type == TOKENTYPE.ASSIGNDIV || type == TOKENTYPE.ASSIGNMOD || type == TOKENTYPE.ASSIGNPOW || type == TOKENTYPE.ASSIGNBITAND || type == TOKENTYPE.ASSIGNBITOR || type == TOKENTYPE.ASSIGNBITXOR || type == TOKENTYPE.ASSIGNBITLSHIFT || type == TOKENTYPE.ASSIGNBITRSHIFT; }
 
             private int skipNewlines(parseResult result)
             {
@@ -434,8 +529,12 @@ namespace ezrSquared.Main
 
                     node? expression_ = result.tryRegister(this.expression());
                     if (expression_ == null)
+                    {
                         reverse(result.reverseCount);
-                    return result.success(new returnNode(expression_, startPos, currentToken.startPos.copy()));
+                        return result.success(new returnNode(expression_, startPos, currentToken.startPos.copy()));
+                    }
+                    else
+                        return result.success(new returnNode(expression_, startPos, currentToken.endPos.copy()));
                 }
                 else if (currentToken.matchString(TOKENTYPE.KEY, "skip"))
                 {
@@ -454,7 +553,7 @@ namespace ezrSquared.Main
 
                 node expression = result.register(this.expression());
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', 'return', 'skip', 'stop', '!', '(', '[', '{', '+', '-' or '~'", currentToken.startPos, currentToken.endPos));
                 return result.success(expression);
             }
 
@@ -488,17 +587,50 @@ namespace ezrSquared.Main
 
                             if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
                                 return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-
                             token varName = currentToken;
                             result.registerAdvance();
                             advance();
+
+                            node accessNode = new variableAccessNode(varName, isGlobal, varName.startPos.copy(), varName.endPos.copy());
+                            bool isSimple = true;
+                            if (currentToken.type == TOKENTYPE.PERIOD)
+                            {
+                                isSimple = false;
+
+                                while (currentToken.type == TOKENTYPE.PERIOD)
+                                {
+                                    token operatorToken_ = currentToken;
+                                    result.registerAdvance();
+                                    advance();
+
+                                    if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                                    token right = currentToken;
+                                    result.registerAdvance();
+                                    advance();
+
+                                    accessNode = new binaryOperationNode(accessNode, new variableAccessNode(right, false, right.startPos.copy(), right.endPos.copy()), operatorToken_, accessNode.startPos.copy(), right.endPos.copy());
+                                }
+                            }
+
+                            token? operatorToken = null;
+                            if (isAssignmentTokenType(currentToken.type))
+                            {
+                                operatorToken = currentToken;
+                                result.registerAdvance();
+                                advance();
+                            }
 
                             node expression = result.register(this.expression());
                             if (result.error != null) return result;
 
                             if (!wasUsingQSyntax)
                                 usingQSyntax = false;
-                            return result.success(new variableAssignNode(varName, expression, isGlobal, startPos, currentToken.endPos.copy()));
+
+                            if (isSimple)
+                                return result.success(new simpleVariableAssignNode(varName, operatorToken, expression, isGlobal, startPos, currentToken.endPos.copy()));
+                            else
+                                return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, false, startPos, currentToken.endPos.copy()));
                         }
                         else if (isGlobal)
                         {
@@ -527,27 +659,53 @@ namespace ezrSquared.Main
 
                     if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
                         return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-
                     token varName = currentToken;
                     result.registerAdvance();
                     advance();
 
-                    if (currentToken.type != TOKENTYPE.COLON)
-                        return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
+                    node accessNode = new variableAccessNode(varName, isGlobal, varName.startPos.copy(), varName.endPos.copy());
+                    bool isSimple = true;
+                    if (currentToken.type == TOKENTYPE.PERIOD)
+                    {
+                        isSimple = false;
+
+                        while (currentToken.type == TOKENTYPE.PERIOD)
+                        {
+                            token operatorToken_ = currentToken;
+                            result.registerAdvance();
+                            advance();
+
+                            if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                                return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                            token right = currentToken;
+                            result.registerAdvance();
+                            advance();
+
+                            accessNode = new binaryOperationNode(accessNode, new variableAccessNode(right, false, right.startPos.copy(), right.endPos.copy()), operatorToken_, accessNode.startPos.copy(), right.endPos.copy());
+                            varName = right;
+                        }
+                    }
+
+                    if (currentToken.type != TOKENTYPE.COLON && !isAssignmentTokenType(currentToken.type))
+                        return result.failure(new invalidGrammarError("Expected ':', ':+', ':-', ':*', ':/', ':%', ':^', ':&', ':|', ':\\', ':<' or ':>'", currentToken.startPos, currentToken.endPos));
+                    token operatorToken = currentToken;
                     result.registerAdvance();
                     advance();
 
                     node expression = result.register(this.expression());
                     if (result.error != null) return result;
 
-                    return result.success(new variableAssignNode(varName, expression, isGlobal, startPos, currentToken.endPos.copy()));
+                    if (isSimple)
+                        return result.success(new simpleVariableAssignNode(varName, operatorToken, expression, isGlobal, startPos, currentToken.endPos.copy()));
+                    else
+                        return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, false, startPos, currentToken.endPos.copy()));
                 }
                 else if (isGlobal)
                     reverse(result.advanceCount);
 
                 node node = result.register(binaryOperation(compExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.KEY, "and"), new TypeValuePair(TOKENTYPE.KEY, "or" ) }));
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or '~'", currentToken.startPos, currentToken.endPos));
                 return result.success(node);
             }
 
@@ -596,11 +754,19 @@ namespace ezrSquared.Main
                     return result.success(new unaryOperationNode(node_, operatorToken, startPos, currentToken.endPos.copy()));
                 }
 
-                node node = result.register(binaryOperation(arithExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.ISEQUAL), new TypeValuePair(TOKENTYPE.NOTEQUAL), new TypeValuePair(TOKENTYPE.LESSTHAN), new TypeValuePair(TOKENTYPE.GREATERTHAN), new TypeValuePair(TOKENTYPE.LESSTHANOREQUAL), new TypeValuePair(TOKENTYPE.GREATERTHANOREQUAL) }));
+                node node = result.register(binaryOperation(bitOrExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.ISEQUAL), new TypeValuePair(TOKENTYPE.NOTEQUAL), new TypeValuePair(TOKENTYPE.LESSTHAN), new TypeValuePair(TOKENTYPE.GREATERTHAN), new TypeValuePair(TOKENTYPE.LESSTHANOREQUAL), new TypeValuePair(TOKENTYPE.GREATERTHANOREQUAL) }));
                 if (result.error != null)
-                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', '!', '(', '[', '{', '+' or '-'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', '!', '(', '[', '{', '+', '-' or '~'", currentToken.startPos, currentToken.endPos));
                 return result.success(node);
             }
+
+            private parseResult bitOrExpression() { return binaryOperation(bitXOrExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITOR) }); }
+
+            private parseResult bitXOrExpression() { return binaryOperation(bitAndExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITXOR) }); }
+
+            private parseResult bitAndExpression() { return binaryOperation(bitShiftExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITAND) }); }
+            
+            private parseResult bitShiftExpression() { return binaryOperation(arithExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITLSHIFT), new TypeValuePair(TOKENTYPE.BITRSHIFT) }); }
 
             private parseResult arithExpression() { return binaryOperation(term, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.PLUS), new TypeValuePair(TOKENTYPE.MINUS) }); }
 
@@ -612,7 +778,7 @@ namespace ezrSquared.Main
                 position startPos = currentToken.startPos.copy();
                 token token = currentToken;
 
-                if (token.type == TOKENTYPE.PLUS || token.type == TOKENTYPE.MINUS)
+                if (token.type == TOKENTYPE.PLUS || token.type == TOKENTYPE.MINUS || token.type == TOKENTYPE.BITNOT)
                 {
                     result.registerAdvance();
                     advance();
@@ -655,7 +821,7 @@ namespace ezrSquared.Main
                     {
                         argNodes.Add(result.register(expression()));
                         if (result.error != null)
-                            return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~' or ')'", currentToken.startPos, currentToken.endPos));
 
                         while (currentToken.type == TOKENTYPE.COMMA)
                         {
@@ -805,6 +971,12 @@ namespace ezrSquared.Main
                     if (result.error != null) return result;
                     return result.success(functionExpression);
                 }
+                else if (token.matchString(TOKENTYPE.KEY, "special"))
+                {
+                    node specialExpression = result.register(this.specialExpression());
+                    if (result.error != null) return result;
+                    return result.success(specialExpression);
+                }
                 else if (token.matchString(TOKENTYPE.KEY, "object"))
                 {
                     node objectExpression = result.register(this.objectExpression());
@@ -818,7 +990,7 @@ namespace ezrSquared.Main
                     return result.success(includeExpression);
                 }
 
-                return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', '!', '(', '[' or '{'", currentToken.startPos, currentToken.endPos));
+                return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', '!', '(', '[' or '{'", currentToken.startPos, currentToken.endPos));
             }
 
             private parseResult arrayExpression()
@@ -842,7 +1014,7 @@ namespace ezrSquared.Main
                     skipNewlines(result);
                     node firstElement = result.register(expression());
                     if (result.error != null)
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ')'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~' or ')'", currentToken.startPos, currentToken.endPos));
 
                     List<node> nodeList = new List<node> { firstElement };
                     bool moreElements = true;
@@ -868,7 +1040,7 @@ namespace ezrSquared.Main
                     {
                         if (moreElements)
                             return result.failure(new invalidGrammarError("Expected ',' or ')'", currentToken.startPos, currentToken.endPos));
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', or ')'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~', or ')'", currentToken.startPos, currentToken.endPos));
                     }
 
                     elementNodes = nodeList.ToArray();
@@ -900,7 +1072,7 @@ namespace ezrSquared.Main
                     skipNewlines(result);
                     node element = result.register(expression());
                     if (result.error != null)
-                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-' or ']'", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~' or ']'", currentToken.startPos, currentToken.endPos));
 
                     List<node> nodeList = new List<node> { element };
                     skipNewlines(result);
@@ -1492,6 +1664,47 @@ namespace ezrSquared.Main
                 return result.success(new functionDefinitionNode(varName, argNames.ToArray(), bodyNode, false, startPos, currentToken.endPos.copy()));
             }
 
+            private parseResult specialExpression()
+            {
+                parseResult result = new parseResult();
+                position startPos = currentToken.startPos.copy();
+
+                if (!currentToken.matchString(TOKENTYPE.KEY, "special"))
+                    return result.failure(new invalidGrammarError("Expected 'special'", currentToken.startPos, currentToken.endPos));
+                result.registerAdvance();
+                advance();
+
+                if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                    return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                token varName = currentToken;
+                result.registerAdvance();
+                advance();
+
+                if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
+                    return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
+                result.registerAdvance();
+                advance();
+
+                node bodyNode;
+                if (currentToken.type == TOKENTYPE.NEWLINE)
+                {
+                    bodyNode = result.register(statements());
+                    if (result.error != null) return result;
+
+                    if (!currentToken.matchString(TOKENTYPE.KEY, "end"))
+                        return result.failure(new invalidGrammarError("Expected 'end'", currentToken.startPos, currentToken.endPos));
+                    result.registerAdvance();
+                    advance();
+
+                    return result.success(new specialDefinitionNode(varName, bodyNode, true, startPos, currentToken.startPos.copy()));
+                }
+
+                bodyNode = result.register(expression());
+                if (result.error != null) return result;
+
+                return result.success(new specialDefinitionNode(varName, bodyNode, false, startPos, currentToken.endPos.copy()));
+            }
+
             private parseResult objectExpression()
             {
                 parseResult result = new parseResult();
@@ -1502,11 +1715,31 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
+                token? inheritFrom = null;
+                if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
+                {
+                    inheritFrom = currentToken;
+                    result.registerAdvance();
+                    advance();
+                }
+
+                token varName;
                 if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
-                    return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-                token varName = currentToken;
-                result.registerAdvance();
-                advance();
+                {
+                    if (inheritFrom == null)
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                    else
+                    {
+                        varName = inheritFrom;
+                        inheritFrom = null;
+                    }
+                }
+                else
+                {
+                    varName = currentToken;
+                    result.registerAdvance();
+                    advance();
+                }
 
                 List<token> argNames = new List<token>();
                 if (currentToken.matchString(TOKENTYPE.KEY, "with"))
@@ -1535,9 +1768,11 @@ namespace ezrSquared.Main
 
                 if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
                 {
+                    if (inheritFrom == null && argNames.Count == 0)
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER], 'with' or 'do'", currentToken.startPos, currentToken.endPos));
                     if (argNames.Count == 0)
                         return result.failure(new invalidGrammarError("Expected 'with' or 'do'", currentToken.startPos, currentToken.endPos));
-                    return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected ',' or 'do'", currentToken.startPos, currentToken.endPos));
                 }
                 result.registerAdvance();
                 advance();
@@ -1553,12 +1788,12 @@ namespace ezrSquared.Main
                     result.registerAdvance();
                     advance();
 
-                    return result.success(new objectDefinitionNode(varName, argNames.ToArray(), bodyNode, startPos, currentToken.startPos.copy()));
+                    return result.success(new objectDefinitionNode(varName, inheritFrom, argNames.ToArray(), bodyNode, startPos, currentToken.startPos.copy()));
                 }
 
                 bodyNode = result.register(expression());
                 if (result.error != null) return result;
-                return result.success(new objectDefinitionNode(varName, argNames.ToArray(), bodyNode, startPos, currentToken.endPos.copy()));
+                return result.success(new objectDefinitionNode(varName, inheritFrom, argNames.ToArray(), bodyNode, startPos, currentToken.endPos.copy()));
             }
 
             private parseResult includeExpression()
@@ -1660,6 +1895,12 @@ namespace ezrSquared.Main
                     if (result.error != null) return result;
                     return result.success(functionExpression);
                 }
+                else if (token.matchString(TOKENTYPE.QEY, "sd"))
+                {
+                    node specialExpression = result.register(quickSpecialExpression());
+                    if (result.error != null) return result;
+                    return result.success(specialExpression);
+                }
                 else if (token.matchString(TOKENTYPE.QEY, "od"))
                 {
                     node objectExpression = result.register(quickObjectExpression());
@@ -1673,7 +1914,7 @@ namespace ezrSquared.Main
                     return result.success(includeExpression);
                 }
 
-                return result.failure(new invalidGrammarError("Expected 'g', 'd', 'v', 'f', 'c', 'w', 't' or 'i'", currentToken.startPos, currentToken.endPos));
+                return result.failure(new invalidGrammarError("Expected 'g', 'd', 'v', 'f', 'c', 'w', 't', 'fd', 'sd', 'od' or 'i'", currentToken.startPos, currentToken.endPos));
             }
 
             private parseResult quickIfExpression()
@@ -1801,27 +2042,23 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
+                node startOrEnd = result.register(expression());
+                if (result.error != null) return result;
+
                 node? start = null;
-                if (currentToken.type == TOKENTYPE.MINUS)
+                node end;
+
+                if (currentToken.type == TOKENTYPE.ARROW)
                 {
                     result.registerAdvance();
                     advance();
 
-                    start = result.register(expression());
+                    end = result.register(expression());
                     if (result.error != null) return result;
+                    start = startOrEnd;
                 }
-
-                if (currentToken.type != TOKENTYPE.ARROW)
-                {
-                    if (start != null)
-                        return result.failure(new invalidGrammarError("Expected '->'", currentToken.startPos, currentToken.endPos));
-                    return result.failure(new invalidGrammarError("Expected '-' or '->'", currentToken.startPos, currentToken.endPos));
-                }
-                result.registerAdvance();
-                advance();
-
-                node end = result.register(expression());
-                if (result.error != null) return result;
+                else
+                    end = startOrEnd;
 
                 node? step = null;
                 if (currentToken.matchString(TOKENTYPE.QEY, "t"))
@@ -1848,6 +2085,8 @@ namespace ezrSquared.Main
 
                 if (currentToken.type != TOKENTYPE.COLON)
                 {
+                    if (start == null && step == null && variableName == null)
+                        return result.failure(new invalidGrammarError("Expected '->', 't', 'n' or ':'", currentToken.startPos, currentToken.endPos));
                     if (step == null && variableName == null)
                         return result.failure(new invalidGrammarError("Expected 't', 'n' or ':'", currentToken.startPos, currentToken.endPos));
                     else if (variableName == null)
@@ -2078,6 +2317,7 @@ namespace ezrSquared.Main
 
                 return result.success(new tryNode(bodyNode, catches.ToArray(), false, startPos, currentToken.endPos.copy()));
             }
+
             private parseResult quickFunctionExpression()
             {
                 parseResult result = new parseResult();
@@ -2148,7 +2388,48 @@ namespace ezrSquared.Main
 
                 bodyNode = result.register(expression());
                 if (result.error != null) return result;
-                return result.success(new functionDefinitionNode(varName, argNames.ToArray(), bodyNode, false, startPos, currentToken.startPos.copy()));
+                return result.success(new functionDefinitionNode(varName, argNames.ToArray(), bodyNode, false, startPos, currentToken.endPos.copy()));
+            }
+
+            private parseResult quickSpecialExpression()
+            {
+                parseResult result = new parseResult();
+                position startPos = currentToken.startPos.copy();
+
+                if (!currentToken.matchString(TOKENTYPE.QEY, "sd"))
+                    return result.failure(new invalidGrammarError("Expected 'sd'", currentToken.startPos, currentToken.endPos));
+                result.registerAdvance();
+                advance();
+
+                if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                    return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                token varName = currentToken;
+                result.registerAdvance();
+                advance();
+
+                if (currentToken.type != TOKENTYPE.COLON)
+                    return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
+                result.registerAdvance();
+                advance();
+
+                node bodyNode;
+                if (currentToken.type == TOKENTYPE.NEWLINE)
+                {
+                    bodyNode = result.register(statements());
+                    if (result.error != null) return result;
+
+                    if (!currentToken.matchString(TOKENTYPE.QEY, "s"))
+                        return result.failure(new invalidGrammarError("Expected 's'", currentToken.startPos, currentToken.endPos));
+                    result.registerAdvance();
+                    advance();
+
+                    return result.success(new specialDefinitionNode(varName, bodyNode, true, startPos, currentToken.startPos.copy()));
+                }
+
+                bodyNode = result.register(expression());
+                if (result.error != null) return result;
+
+                return result.success(new specialDefinitionNode(varName, bodyNode, false, startPos, currentToken.endPos.copy()));
             }
 
             private parseResult quickObjectExpression()
@@ -2161,11 +2442,31 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
+                token? inheritFrom = null;
+                if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
+                {
+                    inheritFrom = currentToken;
+                    result.registerAdvance();
+                    advance();
+                }
+
+                token varName;
                 if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
-                    return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-                token varName = currentToken;
-                result.registerAdvance();
-                advance();
+                {
+                    if (inheritFrom == null)
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                    else
+                    {
+                        varName = inheritFrom;
+                        inheritFrom = null;
+                    }
+                }
+                else
+                {
+                    varName = currentToken;
+                    result.registerAdvance();
+                    advance();
+                }
 
                 List<token> argNames = new List<token>();
                 if (currentToken.matchString(TOKENTYPE.QEY, "n"))
@@ -2194,9 +2495,11 @@ namespace ezrSquared.Main
 
                 if (currentToken.type != TOKENTYPE.COLON)
                 {
+                    if (inheritFrom == null && argNames.Count == 0)
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER], 'n' or ':'", currentToken.startPos, currentToken.endPos));
                     if (argNames.Count == 0)
                         return result.failure(new invalidGrammarError("Expected 'n' or ':'", currentToken.startPos, currentToken.endPos));
-                    return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
+                    return result.failure(new invalidGrammarError("Expected ',' or ':'", currentToken.startPos, currentToken.endPos));
                 }
                 result.registerAdvance();
                 advance();
@@ -2212,12 +2515,12 @@ namespace ezrSquared.Main
                     result.registerAdvance();
                     advance();
 
-                    return result.success(new objectDefinitionNode(varName, argNames.ToArray(), bodyNode, startPos, currentToken.startPos.copy()));
+                    return result.success(new objectDefinitionNode(varName, inheritFrom, argNames.ToArray(), bodyNode, startPos, currentToken.startPos.copy()));
                 }
 
                 bodyNode = result.register(expression());
                 if (result.error != null) return result;
-                return result.success(new objectDefinitionNode(varName, argNames.ToArray(), bodyNode, startPos, currentToken.endPos.copy()));
+                return result.success(new objectDefinitionNode(varName, inheritFrom, argNames.ToArray(), bodyNode, startPos, currentToken.endPos.copy()));
             }
 
             private parseResult quickIncludeExpression()
@@ -2344,8 +2647,8 @@ namespace ezrSquared.Main
             private runtimeResult visit_numberNode(numberNode node, context context)
             {
                 if (node.valueToken.type == TOKENTYPE.INT)
-                    return new runtimeResult().success(new integer_number((int)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
-                return new runtimeResult().success(new float_number((float)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
+                    return new runtimeResult().success(new integer((int)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
+                return new runtimeResult().success(new @float((float)node.valueToken.value).setPosition(node.startPos, node.endPos).setContext(context));
             }
 
             private runtimeResult visit_stringNode(stringNode node, context context)
@@ -2389,7 +2692,7 @@ namespace ezrSquared.Main
             private runtimeResult visit_dictionaryNode(dictionaryNode node, context context)
             {
                 runtimeResult result = new runtimeResult();
-                Dictionary<item, item> dictionary_ = new Dictionary<item, item>();
+                ItemDictionary dictionary_ = new ItemDictionary();
 
                 for (int i = 0; i < node.nodePairs.Length; i++)
                 {
@@ -2399,7 +2702,8 @@ namespace ezrSquared.Main
                     item value = result.register(visit(node.nodePairs[i][1], context));
                     if (result.shouldReturn()) return result;
 
-                    dictionary_.TryAdd(key, value);
+                    dictionary_.Add(key, value, out error? error);
+                    if (error != null) return result.failure(error);
                 }
 
                 return result.success(new dictionary(dictionary_).setPosition(node.startPos, node.endPos).setContext(context));
@@ -2410,32 +2714,141 @@ namespace ezrSquared.Main
                 runtimeResult result = new runtimeResult();
                 string varName = node.valueToken.value.ToString();
 
-                item? variable = context.symbolTable.get(varName);
+                item? variable;
                 if (node.isGlobal)
+                {
                     variable = globalPredefinedContext.symbolTable.get(varName);
 
+                    if (variable == null)
+                    {
+                        context parentContext = context;
+                        while (parentContext.parent != null && !parentContext.parent.locked)
+                            parentContext = parentContext.parent;
+                        variable = parentContext.symbolTable.get(varName);
+                    }
+                }
+                else
+                    variable = context.symbolTable.get(varName);
+
                 if (variable == null)
-                    return result.failure(new runtimeError(node.valueToken.startPos, node.valueToken.endPos, RT_UNDEFINED, $"'{varName}' is not defined", context));
+                    return result.failure(new runtimeError(node.valueToken.startPos, node.valueToken.endPos, RT_UNDEFINED, $"\"{varName}\" is not defined", context));
                 return result.success(variable.copy().setPosition(node.startPos, node.endPos).setContext(context));
             }
 
-            private runtimeResult visit_variableAssignNode(variableAssignNode node, context context_)
+            private runtimeResult visit_simpleVariableAssignNode(simpleVariableAssignNode node, context context)
             {
                 runtimeResult result = new runtimeResult();
                 string varName = node.nameToken.value.ToString();
-                item variable = result.register(visit(node.valueNode, context_));
+
+                item variable = result.register(visit(node.valueNode, context));
                 if (result.shouldReturn()) return result;
+
+                if (node.operatorToken != null && node.operatorToken.type != TOKENTYPE.COLON)
+                {
+                    item? oldVariableValue = context.symbolTable.get(varName);
+                    if (oldVariableValue == null)
+                        return result.failure(new runtimeError(node.nameToken.startPos, node.nameToken.endPos, RT_UNDEFINED, $"\"{varName}\" is not defined", context));
+
+                    error? err = null;
+                    item? newVariable = null;
+                    if (node.operatorToken.type == TOKENTYPE.ASSIGNPLUS)
+                        newVariable = oldVariableValue.addedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMINUS)
+                        newVariable = oldVariableValue.subbedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMUL)
+                        newVariable = oldVariableValue.multedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNDIV)
+                        newVariable = oldVariableValue.divedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMOD)
+                        newVariable = oldVariableValue.modedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNPOW)
+                        newVariable = oldVariableValue.powedBy(variable, out err);
+
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITAND)
+                        newVariable = oldVariableValue.bitwiseAndedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITOR)
+                        newVariable = oldVariableValue.bitwiseOrdTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITXOR)
+                        newVariable = oldVariableValue.bitwiseXOrdTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITLSHIFT)
+                        newVariable = oldVariableValue.bitwiseLeftShiftedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITRSHIFT)
+                        newVariable = oldVariableValue.bitwiseRightShiftedTo(variable, out err);
+
+                    if (err != null) return result.failure(err);
+                    variable = newVariable;
+                }
 
                 if (node.isGlobal)
                 {
-                    context parentContext = context_;
+                    context parentContext = context;
                     while (parentContext.parent != null && !parentContext.parent.locked)
                         parentContext = parentContext.parent;
-
                     parentContext.symbolTable.set(varName, variable);
                 }
                 else
-                    context_.symbolTable.set(varName, variable);
+                    context.symbolTable.set(varName, variable);
+                return result.success(variable);
+            }
+
+            private runtimeResult visit_objectVariableAssignNode(objectVariableAssignNode node, context context)
+            {
+                runtimeResult result = new runtimeResult();
+                string varName = node.varName.value.ToString();
+
+                item variable = result.register(visit(node.valueNode, context));
+                if (result.shouldReturn()) return result;
+
+                binaryOperationNode binOpNode = (binaryOperationNode)node.accessNode;
+                item object_ = result.register(visit(binOpNode.leftNode, context));
+                if (result.shouldReturn()) return result;
+
+                if (object_ is value)
+                    object_ = result.register(object_.execute(new item[0]));
+                if (result.shouldReturn()) return result;
+
+                if (node.operatorToken != null && node.operatorToken.type != TOKENTYPE.COLON)
+                {
+                    item? oldVariableValue = result.register(object_.get(binOpNode.rightNode));
+                    if (result.shouldReturn()) return result;
+
+                    error? err = null;
+                    item? newVariable = null;
+                    if (node.operatorToken.type == TOKENTYPE.ASSIGNPLUS)
+                        newVariable = oldVariableValue.addedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMINUS)
+                        newVariable = oldVariableValue.subbedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMUL)
+                        newVariable = oldVariableValue.multedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNDIV)
+                        newVariable = oldVariableValue.divedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNMOD)
+                        newVariable = oldVariableValue.modedBy(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNPOW)
+                        newVariable = oldVariableValue.powedBy(variable, out err);
+
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITAND)
+                        newVariable = oldVariableValue.bitwiseAndedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITOR)
+                        newVariable = oldVariableValue.bitwiseOrdTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITXOR)
+                        newVariable = oldVariableValue.bitwiseXOrdTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITLSHIFT)
+                        newVariable = oldVariableValue.bitwiseLeftShiftedTo(variable, out err);
+                    else if (node.operatorToken.type == TOKENTYPE.ASSIGNBITRSHIFT)
+                        newVariable = oldVariableValue.bitwiseRightShiftedTo(variable, out err);
+
+                    if (err != null) return result.failure(err);
+                    variable = newVariable;
+                }
+
+                if (node.isGlobal)
+                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, "This type of variable assignment does not support globalization", context));
+                else
+                {
+                    result.register(object_.set(varName, variable));
+                    if (result.shouldReturn()) return result;
+                }
                 return result.success(variable);
             }
 
@@ -2452,7 +2865,7 @@ namespace ezrSquared.Main
                         left = result.register(left.execute(new item[0]));
                     if (result.shouldReturn()) return result;
 
-                    item returnValue = result.register(left.retrieve(node.rightNode));
+                    item returnValue = result.register(left.get(node.rightNode));
                     if (result.shouldReturn()) return result;
 
                     return result.success(returnValue.copy().setPosition(node.startPos, node.endPos).setContext(context));
@@ -2463,7 +2876,18 @@ namespace ezrSquared.Main
 
                 error? err = null;
                 item? res = null;
-                if (node.operatorToken.type == TOKENTYPE.PLUS)
+                if (node.operatorToken.type == TOKENTYPE.BITOR)
+                    res = left.bitwiseOrdTo(right, out err);
+                else if (node.operatorToken.type == TOKENTYPE.BITXOR)
+                    res = left.bitwiseXOrdTo(right, out err);
+                else if (node.operatorToken.type == TOKENTYPE.BITAND)
+                    res = left.bitwiseAndedTo(right, out err);
+                else if (node.operatorToken.type == TOKENTYPE.BITLSHIFT)
+                    res = left.bitwiseLeftShiftedTo(right, out err);
+                else if (node.operatorToken.type == TOKENTYPE.BITRSHIFT)
+                    res = left.bitwiseRightShiftedTo(right, out err);
+
+                else if (node.operatorToken.type == TOKENTYPE.PLUS)
                     res = left.addedTo(right, out err);
                 else if (node.operatorToken.type == TOKENTYPE.MINUS)
                     res = left.subbedBy(right, out err);
@@ -2496,8 +2920,7 @@ namespace ezrSquared.Main
                 else if (node.operatorToken.matchString(TOKENTYPE.KEY, "in"))
                     res = left.checkIn(right, out err);
 
-                if (err != null)
-                    return result.failure(err);
+                if (err != null) return result.failure(err);
                 return result.success(res.setPosition(node.startPos, node.endPos));
             }
 
@@ -2509,10 +2932,14 @@ namespace ezrSquared.Main
 
                 error? err = null;
                 item? res = null;
-                if (node.operatorToken.type == TOKENTYPE.MINUS)
-                    res = variable.multedBy(new integer_number(-1), out err);
+                if (node.operatorToken.type == TOKENTYPE.BITNOT)
+                    res = variable.bitwiseNotted(out err);
+
+                else if (node.operatorToken.type == TOKENTYPE.MINUS)
+                    res = variable.multedBy(new integer(-1), out err);
                 else if (node.operatorToken.type == TOKENTYPE.PLUS)
-                    res = variable.multedBy(new integer_number(1), out err);
+                    res = variable.multedBy(new integer(1), out err);
+
                 else if (node.operatorToken.matchString(TOKENTYPE.KEY, "invert") || node.operatorToken.matchString(TOKENTYPE.KEY, "v"))
                     res = variable.invert(out err);
 
@@ -2529,7 +2956,10 @@ namespace ezrSquared.Main
                     item condition = result.register(visit(node.cases[i][0], context));
                     if (result.shouldReturn()) return result;
 
-                    if (condition.isTrue())
+                    bool boolValue = condition.isTrue(out error? error);
+                    if (error != null) return result.failure(error);
+
+                    if (boolValue)
                     {
                         item value = result.register(visit(node.cases[i][1], context));
                         if (result.shouldReturn()) return result;
@@ -2553,57 +2983,62 @@ namespace ezrSquared.Main
             {
                 runtimeResult result = new runtimeResult();
                 List<item> elements = new List<item>();
-                int i = 0;
-                int length = 0;
-                int step_ = 1;
+                dynamic i = 0;
+                dynamic length = 0;
+                dynamic step_ = 1;
 
                 if (node.startValueNode != null)
                 {
                     item start = result.register(visit(node.startValueNode, context));
                     if (result.shouldReturn()) return result;
 
-                    if (start is not integer_number && start is not float_number)
-                        return result.failure(new runtimeError(start.startPos, start.endPos, RT_TYPE, "Count loop start must be an integer_number or float_number", context));
+                    if (start is not integer && start is not @float)
+                        return result.failure(new runtimeError(start.startPos, start.endPos, RT_TYPE, "Count loop start must be an integer or float", context));
 
-                    if (start is integer_number)
-                        i = ((integer_number)start).storedValue;
+                    if (start is integer)
+                        i = ((integer)start).storedValue;
                     else
-                        i = (int)((float_number)start).storedValue;
+                        i = ((@float)start).storedValue;
                 }
 
                 item end = result.register(visit(node.endValueNode, context));
                 if (result.shouldReturn()) return result;
 
-                if (end is not integer_number && end is not float_number)
-                    return result.failure(new runtimeError(end.startPos, end.endPos, RT_TYPE, "Count loop end must be an integer_number or float_number", context));
+                if (end is not integer && end is not @float)
+                    return result.failure(new runtimeError(end.startPos, end.endPos, RT_TYPE, "Count loop end must be an integer or float", context));
 
-                if (end is integer_number)
-                    length = ((integer_number)end).storedValue;
+                if (end is integer)
+                    length = ((integer)end).storedValue;
                 else
-                    length = (int)((float_number)end).storedValue;
+                    length = ((@float)end).storedValue;
 
                 if (node.stepValueNode != null)
                 {
                     item step = result.register(visit(node.stepValueNode, context));
                     if (result.shouldReturn()) return result;
 
-                    if (step is not integer_number && step is not float_number)
-                        return result.failure(new runtimeError(step.startPos, step.endPos, RT_TYPE, "Count loop step must be an integer_number or float_number", context));
+                    if (step is not integer && step is not @float)
+                        return result.failure(new runtimeError(step.startPos, step.endPos, RT_TYPE, "Count loop step must be an integer or float", context));
 
-                    if (step is integer_number)
-                        step_ = ((integer_number)step).storedValue;
+                    if (step is integer)
+                        step_ = ((integer)step).storedValue;
                     else
-                        step_ = (int)((float_number)step).storedValue;
+                        step_ = ((@float)step).storedValue;
                 }
 
                 string? varName = null;
                 if (node.variableNameToken != null)
                     varName = node.variableNameToken.value.ToString();
 
-                for (int j = i; j < length; j += step_)
+                for (float j = i; j < length; j += step_)
                 {
                     if (varName != null)
-                        context.symbolTable.set(varName, new integer_number(j));
+                    {
+                        if (step_ is float)
+                            context.symbolTable.set(varName, new @float(j));
+                        else if (step_ is int)
+                            context.symbolTable.set(varName, new integer((int)j));
+                    }
 
                     item body = result.register(visit(node.bodyNode, context));
                     if (result.shouldReturn() && !result.loopShouldSkip && !result.loopShouldStop) return result;
@@ -2626,7 +3061,10 @@ namespace ezrSquared.Main
                 {
                     item condition = result.register(visit(node.conditionNode, context));
                     if (result.shouldReturn()) return result;
-                    if (!condition.isTrue()) break;
+
+                    bool boolValue = condition.isTrue(out error? error);
+                    if (error != null) return result.failure(error);
+                    if (!boolValue) break;
 
                     item body = result.register(visit(node.bodyNode, context));
                     if (result.shouldReturn() && !result.loopShouldSkip && !result.loopShouldStop) return result;
@@ -2674,7 +3112,7 @@ namespace ezrSquared.Main
                                 {
                                     item? tag_ = context.symbolTable.get(catchTagToken.value.ToString());
                                     if (tag_ == null)
-                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"'{catchTagToken.value}' is not defined", context));
+                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"\"{catchTagToken.value}\" is not defined", context));
                                     else if (tag_ is not @string)
                                         return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"Error tag must be a string", context));
                                     catchTag = ((@string)tag_).storedValue;
@@ -2724,6 +3162,20 @@ namespace ezrSquared.Main
                 return result.success(function);
             }
 
+            private runtimeResult visit_specialDefinitionNode(specialDefinitionNode node, context context)
+            {
+                runtimeResult result = new runtimeResult();
+
+                string name = node.nameToken.value.ToString();
+                if (!SPECIALS.Keys.Contains(name))
+                    return result.failure(new runtimeError(node.nameToken.startPos, node.nameToken.endPos, RT_UNDEFINED, $"Undefined special function", context));
+
+                item special = new special(name, node.bodyNode, SPECIALS[name], node.shouldReturnNull).setPosition(node.startPos, node.endPos).setContext(context);
+                context.symbolTable.set(name, special);
+                
+                return result.success(special);
+            }
+
             private runtimeResult visit_objectDefinitionNode(objectDefinitionNode node, context context)
             {
                 runtimeResult result = new runtimeResult();
@@ -2733,7 +3185,25 @@ namespace ezrSquared.Main
                 for (int i = 0; i < node.argNameTokens.Length; i++)
                     argNames[i] = node.argNameTokens[i].value.ToString();
 
-                item @object = new @class(name, node.bodyNode, argNames).setPosition(node.startPos, node.endPos).setContext(context);
+                @class? inheritFrom = null;
+                if (node.inheritanceToken != null)
+                {
+                    item? parent = context.symbolTable.get(node.inheritanceToken.value.ToString());
+                    
+                    if (parent == null)
+                        return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_UNDEFINED, $"\"{node.inheritanceToken.value}\" is not defined", context));
+                    else if (parent is not @class)
+                        return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_TYPE, $"\"{node.inheritanceToken.value}\" is not a class", context));
+                    inheritFrom = (@class)parent;
+
+                    for (int i = 0; i < inheritFrom.argNames.Length; i++)
+                    {
+                        if (!argNames.Contains(inheritFrom.argNames[i]))
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_TYPE, $"Class definition does not contain parent argument \"{inheritFrom.argNames[i]}\"", context));
+                    }
+                }
+
+                item @object = new @class(name, inheritFrom, node.bodyNode, argNames).setPosition(node.startPos, node.endPos).setContext(context);
                 context.symbolTable.set(name, @object);
                 return result.success(@object);
             }
@@ -2779,32 +3249,24 @@ namespace ezrSquared.Main
 
                 string file = node.nameToken.value.ToString();
 
-                List<string> plausibleFilepaths = new List<string>() { Path.Join(Directory.GetCurrentDirectory(), file), file };
-                for (int i = 0; i < LOCALLIBPATHS.Count; i++)
-                    plausibleFilepaths.Add(Path.Join(LOCALLIBPATHS[i], file));
-
                 string? realFilepath = null;
-                for (int i = 0; i < plausibleFilepaths.Count; i++)
+                if (File.Exists(file))
+                    realFilepath = file;
+                else
                 {
-                    if (File.Exists(plausibleFilepaths[i]))
+                    for (int i = 0; i < LOCALLIBPATHS.Count; i++)
                     {
-                        realFilepath = plausibleFilepaths[i];
-                        break;
+                        string path = Path.Join(LOCALLIBPATHS[i], file);
+                        if (File.Exists(path))
+                        {
+                            realFilepath = path;
+                            break;
+                        }
                     }
                 }
 
                 if (realFilepath == null)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Script '{file}' was not found", context));
-
-                string script;
-                try
-                {
-                    script = string.Join('\n', File.ReadAllLines(realFilepath));
-                }
-                catch (IOException exception)
-                {
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to load script \"{file}\"\n{exception.Message}", context));
-                }
+                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Script \"{file}\" was not found", context));
 
                 string name;
                 if (node.nicknameToken != null)
@@ -2815,7 +3277,7 @@ namespace ezrSquared.Main
                     {
                         item? nickname = context.symbolTable.get(node.nicknameToken.value.ToString());
                         if (nickname == null)
-                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"'{node.nicknameToken.value}' is not defined", context));
+                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"\"{node.nicknameToken.value}\" is not defined", context));
                         else if (nickname is not @string)
                             return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"Nickname must be a string", context));
                         name = ((@string)nickname).storedValue;
@@ -2836,85 +3298,118 @@ namespace ezrSquared.Main
                         formattedFileName += name[i];
                 }
 
-                token[] tokens = new lexer(file, script).compileTokens(out error? error);
-                if (error != null)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
+                string? extension = Path.GetExtension(file);
 
-                parseResult parseResult = new parser(tokens).parse();
-                if (parseResult.error != null)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
+                item value;
+                if (extension == ".dll")
+                {
+                    Assembly DLL;
+                    try
+                    {
+                        DLL = Assembly.LoadFile(file);
+                    }
+                    catch (Exception exception)
+                    {
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to load script \"{file}\"\n{exception.Message}", context));
+                    }
 
-                item value = result.register(new @class(formattedFileName, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
-                if (result.shouldReturn()) return result;
+                    try
+                    {
+                        Type? mainLibClass = DLL.GetType("Main");
+                        if (mainLibClass == null)
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find main library class in script \"{file}\"", context));
+
+                        dynamic? val = Activator.CreateInstance(mainLibClass);
+
+                        if (val is item)
+                        {
+                            value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                            if (result.shouldReturn()) return result;
+                        }
+                        else
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find main library class in script \"{file}\"", context));
+                    }
+                    catch (Exception exception)
+                    {
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to finish executing script \"{file}\"\n{exception.Message}", context));
+                    }
+                }
+                else
+                {
+                    string script;
+                    try
+                    {
+                        script = string.Join('\n', File.ReadAllLines(realFilepath));
+                    }
+                    catch (Exception exception)
+                    {
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to load script \"{file}\"\n{exception.Message}", context));
+                    }
+
+                    token[] tokens = new lexer(file, script).compileTokens(out error? error);
+                    if (error != null)
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
+
+                    parseResult parseResult = new parser(tokens).parse();
+                    if (parseResult.error != null)
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
+
+                    value = result.register(new @class(formattedFileName, null, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                    if (result.shouldReturn()) return result;
+
+                }
 
                 context.symbolTable.set(formattedFileName, value);
-                return result.success(value);
+                return result.success(new nothing().setPosition(node.startPos, node.endPos).setContext(context));
             }
         }
 
 
         public static context globalPredefinedContext = new context("<GLC>", null, null, true);
-        public static symbolTable globalPredefinedSymbolTable = new symbolTable();
-
-        private boolean TRUE = new(true);
-        private boolean FALSE = new(false);
-        private nothing NOTHING = new();
-
-        private @string EZRVERSION = new(VERSION);
-
-        private @string RTDEF = new(RT_DEFAULT);
-        private @string RTIOP = new(RT_ILLEGALOP);
-        private @string RTUDF = new(RT_UNDEFINED);
-        private @string RTKEY = new(RT_KEY);
-        private @string RTIDX = new(RT_INDEX);
-        private @string RTARG = new(RT_ARGS);
-        private @string RTTYP = new(RT_TYPE);
-        private @string RTMTH = new(RT_MATH);
-        private @string RTRUN = new(RT_RUN);
-        private @string RTIO = new(RT_IO);
-
-        private builtin_function funcShow = new("show", new string[1] { "message" });
-        private builtin_function funcShowError = new("show_error", new string[2] { "tag", "message" });
-        private builtin_function funcGet = new("get", new string[1] { "message" });
-        private builtin_function funcClear = new("clear", new string[0]);
-        private builtin_function funcHash = new("hash", new string[1] { "value" });
-        private builtin_function funcTypeOf = new("type_of", new string[1] { "value" });
-        private builtin_function funcRun = new("run", new string[1] { "file" });
 
         public static List<string> LOCALLIBPATHS = new List<string>();
 
         public ezr()
         {
-            globalPredefinedSymbolTable.set("nothing", NOTHING);
-            globalPredefinedSymbolTable.set("true", TRUE);
-            globalPredefinedSymbolTable.set("false", FALSE);
+            symbolTable predefinedSymbolTable = new symbolTable();
+            predefinedSymbolTable.set("nothing", new nothing());
+            predefinedSymbolTable.set("true", new boolean(true));
+            predefinedSymbolTable.set("false", new boolean(false));
 
-            globalPredefinedSymbolTable.set("version__", EZRVERSION);
+            predefinedSymbolTable.set("version__", new @string(VERSION));
 
-            globalPredefinedSymbolTable.set("err_any", RTDEF);
-            globalPredefinedSymbolTable.set("err_illop", RTIOP);
-            globalPredefinedSymbolTable.set("err_undef", RTUDF);
-            globalPredefinedSymbolTable.set("err_key", RTKEY);
-            globalPredefinedSymbolTable.set("err_index", RTIDX);
-            globalPredefinedSymbolTable.set("err_args", RTARG);
-            globalPredefinedSymbolTable.set("err_type", RTTYP);
-            globalPredefinedSymbolTable.set("err_math", RTMTH);
-            globalPredefinedSymbolTable.set("err_run", RTRUN);
-            globalPredefinedSymbolTable.set("err_io", RTIO);
+            predefinedSymbolTable.set("err_any", new @string(RT_DEFAULT));
+            predefinedSymbolTable.set("err_illop", new @string(RT_ILLEGALOP));
+            predefinedSymbolTable.set("err_undef", new @string(RT_UNDEFINED));
+            predefinedSymbolTable.set("err_key", new @string(RT_KEY));
+            predefinedSymbolTable.set("err_index", new @string(RT_INDEX));
+            predefinedSymbolTable.set("err_args", new @string(RT_ARGS));
+            predefinedSymbolTable.set("err_type", new @string(RT_TYPE));
+            predefinedSymbolTable.set("err_math", new @string(RT_MATH));
+            predefinedSymbolTable.set("err_run", new @string(RT_RUN));
+            predefinedSymbolTable.set("err_io", new @string(RT_IO));
 
-            globalPredefinedSymbolTable.set("show", funcShow);
-            globalPredefinedSymbolTable.set("show_error", funcShowError);
-            globalPredefinedSymbolTable.set("get", funcGet);
-            globalPredefinedSymbolTable.set("clear", funcClear);
-            globalPredefinedSymbolTable.set("hash", funcHash);
-            globalPredefinedSymbolTable.set("type_of", funcTypeOf);
-            globalPredefinedSymbolTable.set("run", funcRun);
+            predefinedSymbolTable.set("show", new builtin_function("show", new string[1] { "message" }));
+            predefinedSymbolTable.set("show_error", new builtin_function("show_error", new string[2] { "tag", "message" }));
+            predefinedSymbolTable.set("get", new builtin_function("get", new string[1] { "message" }));
+            predefinedSymbolTable.set("clear", new builtin_function("clear", new string[0]));
+            predefinedSymbolTable.set("hash", new builtin_function("hash", new string[1] { "value" }));
+            predefinedSymbolTable.set("type_of", new builtin_function("type_of", new string[1] { "value" }));
+            predefinedSymbolTable.set("run", new builtin_function("run", new string[1] { "file" }));
 
-            globalPredefinedSymbolTable.set("file", new @file());
-            globalPredefinedSymbolTable.set("folder", new folder());
-            globalPredefinedSymbolTable.set("path", new path());
+            position pos = new position(0, 0, 0, "<main>", "");
+            predefinedSymbolTable.set("file", new @file().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+            predefinedSymbolTable.set("folder", new folder().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+            predefinedSymbolTable.set("path", new path().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
 
-            globalPredefinedContext.symbolTable = globalPredefinedSymbolTable;
+            predefinedSymbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+            predefinedSymbolTable.set("float", new float_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+            predefinedSymbolTable.set("string", new string_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+            predefinedSymbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+
+            predefinedSymbolTable.set("random", new random().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
+
+            globalPredefinedContext.symbolTable = predefinedSymbolTable;
         }
 
         public error? run(string file, string input, context runtimeContext, out item? result)

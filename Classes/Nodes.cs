@@ -2,7 +2,7 @@
 
 namespace ezrSquared.Nodes
 {
-    public class node
+    public abstract class node
     {
         public position startPos;
         public position endPos;
@@ -14,7 +14,7 @@ namespace ezrSquared.Nodes
         }
     }
 
-    public class valueNode : node
+    public abstract class valueNode : node
     {
         public token valueToken;
 
@@ -22,7 +22,7 @@ namespace ezrSquared.Nodes
         { this.valueToken = valueToken; }
     }
 
-    public class arraylikeNode : node
+    public abstract class arraylikeNode : node
     {
         public node[] elementNodes;
 
@@ -30,17 +30,33 @@ namespace ezrSquared.Nodes
         { this.elementNodes = elementNodes; }
     }
 
-    public class containerNode : node
+    public abstract class containerNode : node
     {
         public token? nameToken;
         public token[] argNameTokens;
         public node bodyNode;
+        public bool shouldReturnNull;
 
-        public containerNode(token? nameToken, token[] argNameTokens, node bodyNode, position startPos, position endPos) : base(startPos, endPos)
+        public containerNode(token? nameToken, token[] argNameTokens, node bodyNode, bool shouldReturnNull, position startPos, position endPos) : base(startPos, endPos)
         {
             this.nameToken = nameToken;
             this.argNameTokens = argNameTokens;
             this.bodyNode = bodyNode;
+            this.shouldReturnNull = shouldReturnNull;
+        }
+    }
+
+    public abstract class variableAssignmentNode : node
+    {
+        public token? operatorToken;
+        public node valueNode;
+        public bool isGlobal;
+
+        public variableAssignmentNode(token? operatorToken, node valueNode, bool isGlobal, position startPos, position endPos) : base(startPos, endPos)
+        {
+            this.operatorToken = operatorToken;
+            this.valueNode = valueNode;
+            this.isGlobal = isGlobal;
         }
     }
 
@@ -84,18 +100,18 @@ namespace ezrSquared.Nodes
         { this.isGlobal = isGlobal; }
     }
 
-    public class variableAssignNode : node
+    public class simpleVariableAssignNode : variableAssignmentNode
     {
         public token nameToken;
-        public node valueNode;
-        public bool isGlobal;
+        public simpleVariableAssignNode(token nameToken, token? operatorToken, node valueNode, bool isGlobal, position startPos, position endPos) : base(operatorToken, valueNode, isGlobal, startPos, endPos) { this.nameToken = nameToken; }
+    }
 
-        public variableAssignNode(token nameToken, node valueNode, bool isGlobal, position startPos, position endPos) : base(startPos, endPos)
-        {
-            this.nameToken = nameToken;
-            this.valueNode = valueNode;
-            this.isGlobal = isGlobal;
-        }
+    public class objectVariableAssignNode : variableAssignmentNode
+    {
+        public node accessNode;
+        public token varName;
+
+        public objectVariableAssignNode(node accessNode, token varName, token? operatorToken, node valueNode, bool isGlobal, position startPos, position endPos) : base(operatorToken, valueNode, isGlobal, startPos, endPos) { this.accessNode = accessNode; this.varName = varName; }
     }
 
     public class binaryOperationNode : node
@@ -188,15 +204,20 @@ namespace ezrSquared.Nodes
 
     public class functionDefinitionNode : containerNode
     {
-        public bool shouldReturnNull;
+        public functionDefinitionNode(token? nameToken, token[] argNameTokens, node bodyNode, bool shouldReturnNull, position startPos, position endPos) : base(nameToken, argNameTokens, bodyNode, shouldReturnNull, startPos, endPos) { }
+    }
 
-        public functionDefinitionNode(token? nameToken, token[] argNameTokens, node bodyNode, bool shouldReturnNull, position startPos, position endPos) : base(nameToken, argNameTokens, bodyNode, startPos, endPos)
-        { this.shouldReturnNull = shouldReturnNull; }
+    public class specialDefinitionNode : containerNode
+    {
+        public specialDefinitionNode(token nameToken, node bodyNode, bool shouldReturnNull, position startPos, position endPos) : base(nameToken, new token[0], bodyNode, shouldReturnNull, startPos, endPos) { }
     }
 
     public class objectDefinitionNode : containerNode
     {
-        public objectDefinitionNode(token nameToken, token[] argNameTokens, node bodyNode, position startPos, position endPos) : base(nameToken, argNameTokens, bodyNode, startPos, endPos) { }
+        public token? inheritanceToken;
+
+        public objectDefinitionNode(token nameToken, token? inheritFrom, token[] argNameTokens, node bodyNode, position startPos, position endPos) : base(nameToken, argNameTokens, bodyNode, true, startPos, endPos)
+        { this.inheritanceToken = inheritFrom; }
     }
 
     public class callNode : node

@@ -2,13 +2,115 @@
 using ezrSquared.General;
 using ezrSquared.Nodes;
 using ezrSquared.Helpers;
+using ezrSquared.Main;
 using static ezrSquared.Constants.constants;
 using static ezrSquared.Main.ezr;
-using ezrSquared.Main;
 using System.Reflection;
 
 namespace ezrSquared.Values
 {
+    public class ItemDictionary : LinkedList<KeyValuePair<item, item>>
+    {
+        public int Count => _values.Length;
+
+        private LinkedList<KeyValuePair<item, item>>[] _values;
+        private int capacity;
+        private int raise;
+
+        public ItemDictionary()
+        {
+            raise = 4;
+            _values = new LinkedList<KeyValuePair<item, item>>[16];
+        }
+
+        public void Add(item key, item val, out error? error)
+        {
+            var hash = GetKeyHashCode(key, out error);
+            if (error != null) return;
+
+            if (_values[hash] == null)
+                _values[hash] = new LinkedList<KeyValuePair<item, item>>();
+
+            var keyPresent = _values[hash].Any(p => p.Key.Equals(key));
+            var newValue = new KeyValuePair<item, item>(key, val);
+
+            if (keyPresent)
+            {
+                _values[hash] = new LinkedList<KeyValuePair<item, item>>();
+                _values[hash].AddLast(newValue);
+            }
+            else
+            {
+                _values[hash].AddLast(newValue);
+
+                capacity++;
+                if (Count <= capacity)
+                    ResizeCollection();
+            }
+        }
+
+        private void ResizeCollection()
+        {
+            raise++;
+            LinkedList<KeyValuePair<item, item>>[] newArray = new LinkedList<KeyValuePair<item, item>>[(int)MathF.Pow(2, raise)];
+            Array.Copy(_values, newArray, _values.Length);
+
+            _values = newArray;
+        }
+
+        public void Remove(item key, out error? error)
+        {
+            var hash = GetKeyHashCode(key, out error);
+            if (error != null) return;
+
+            var keyPresent = _values[hash].Any(p => p.Key.Equals(key));
+            if (keyPresent)
+                _values[hash] = new LinkedList<KeyValuePair<item, item>>();
+        }
+
+        public bool ContainsKey(item key, out error? error)
+        {
+            var hash = GetKeyHashCode(key, out error);
+            if (error != null) return false;
+
+            return _values[hash] == null ? false : _values[hash].Any(p => p.Key.Equals(key));
+        }
+
+        public item? GetValue(item key, out error? error)
+        {
+            var hash = GetKeyHashCode(key, out error);
+            if (error != null) return null;
+
+            return _values[hash] == null ? null : _values[hash].First(m => m.Key.Equals(key)).Value;
+        }
+
+        public IEnumerator<KeyValuePair<item, item>> GetEnumerator()
+        {
+            return (from collections in _values
+                    where collections != null
+                    from item in collections
+                    select item).GetEnumerator();
+        }
+
+        public KeyValuePair<item, item>[] GetArray()
+        {
+            return (from collections in _values
+                    where collections != null
+                    from item in collections
+                    select item).ToArray();
+        }
+
+        public int GetKeyHashCode(item key, out error? error)
+        {
+            error = null;
+
+            var hash = key.GetHashCode(out error);
+            if (error != null) return 0;
+
+            return (Math.Abs(hash)) % _values.Length;
+        }
+    }
+
     public abstract class item
     {
         public position? startPos;
@@ -45,13 +147,27 @@ namespace ezrSquared.Values
         public virtual item? compareAnd(item other, out error? error)
         {
             error = null;
-            return new boolean(isTrue() && other.isTrue());
+
+            bool boolValue = isTrue(out error);
+            if (error != null) return null;
+
+            bool otherBoolValue = other.isTrue(out error);
+            if (error != null) return null;
+
+            return new boolean(boolValue && otherBoolValue);
         }
 
         public virtual item? compareOr(item other, out error? error)
         {
             error = null;
-            return new boolean(isTrue() || other.isTrue());
+
+            bool boolValue = isTrue(out error);
+            if (error != null) return null;
+
+            bool otherBoolValue = other.isTrue(out error);
+            if (error != null) return null;
+
+            return new boolean(boolValue || otherBoolValue);
         }
 
         public virtual item? checkIn(item other, out error? error)
@@ -65,7 +181,43 @@ namespace ezrSquared.Values
             error = illegalOperation();
             return null;
         }
-        public virtual bool isTrue() { return false; }
+        public virtual bool isTrue(out error? error) { error = null; return false; }
+        
+        public virtual item? bitwiseOrdTo(item other, out error? error)
+        {
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public virtual item? bitwiseXOrdTo(item other, out error? error)
+        {
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public virtual item? bitwiseAndedTo(item other, out error? error)
+        {
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public virtual item? bitwiseLeftShiftedTo(item other, out error? error)
+        {
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public virtual item? bitwiseRightShiftedTo(item other, out error? error)
+        {
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public virtual item? bitwiseNotted(out error? error)
+        {
+            error = illegalOperation();
+            return null;
+        }
 
         public virtual item? addedTo(item other, out error? error)
         {
@@ -134,20 +286,21 @@ namespace ezrSquared.Values
         }
 
         public virtual runtimeResult execute(item[] args) { return new runtimeResult().failure(illegalOperation()); }
-        public virtual runtimeResult retrieve(node node) { return new runtimeResult().failure(illegalOperation()); }
+        public virtual runtimeResult get(node node) { return new runtimeResult().failure(illegalOperation()); }
+        public virtual runtimeResult set(string name, item variable) { return new runtimeResult().failure(illegalOperation()); }
 
-        public virtual item copy() { throw new Exception($"No copy method defined for '{GetType().Name}'!"); }
+        public virtual item copy() { throw new Exception($"No copy method defined for \"{GetType().Name}\"!"); }
 
         public error illegalOperation(item? other = null)
         {
             if (other != null)
-                return new runtimeError(this.startPos, other.endPos, RT_ILLEGALOP, $"Illegal operation for types '{this.GetType().Name}' and '{other.GetType().Name}'", this.context);
-            return new runtimeError(this.startPos, this.endPos, RT_ILLEGALOP, $"Illegal operation for type '{this.GetType().Name}'", this.context);
+                return new runtimeError(this.startPos, other.endPos, RT_ILLEGALOP, $"Illegal operation for types \"{this.GetType().Name}\" and \"{other.GetType().Name}\"", this.context);
+            return new runtimeError(this.startPos, this.endPos, RT_ILLEGALOP, $"Illegal operation for type \"{this.GetType().Name}\"", this.context);
         }
 
-        public override string ToString() { throw new Exception($"No ToString method defined for '{GetType().Name}'!"); }
-        public override bool Equals(object? obj) { throw new Exception($"No Equals method defined for '{GetType().Name}'!"); }
-        public override int GetHashCode() { throw new Exception($"No GetHashCode method defined for '{GetType().Name}'!"); }
+        public override string ToString() { throw new Exception($"No ToString method defined for \"{GetType().Name}\"!"); }
+        public override bool Equals(object? obj) { throw new Exception($"No Equals method defined for \"{GetType().Name}\"!"); }
+        public virtual int GetHashCode(out error? error) { throw new Exception($"No GetHashCode method defined for \"{GetType().Name}\"!"); }
     }
 
     public abstract class value : item
@@ -175,7 +328,7 @@ namespace ezrSquared.Values
             return new runtimeResult().success(this);
         }
 
-        public override runtimeResult retrieve(node node)
+        public override runtimeResult get(node node)
         {
             runtimeResult result = new runtimeResult();
             if (internalContext != null)
@@ -185,12 +338,12 @@ namespace ezrSquared.Values
                 return result.success(value);
             }
 
-            return result.failure(new runtimeError(node.startPos, node.endPos, RT_ILLEGALOP, "'retrieve' method called on uninitialized object", context));
+            return result.failure(new runtimeError(node.startPos, node.endPos, RT_ILLEGALOP, "\"retrieve' method called on uninitialized object", context));
         }
 
         public override string ToString() { return storedValue.ToString(); }
         public override bool Equals(object? obj) { if (GetType() == obj.GetType()) return storedValue == ((value)obj).storedValue; return false; }
-        public override int GetHashCode() { return storedValue.GetHashCode(); }
+        public override int GetHashCode(out error? error) { error = null; return storedValue.GetHashCode(); }
     }
 
     public class boolean : value
@@ -215,9 +368,9 @@ namespace ezrSquared.Values
 
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
-        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer_number(isTrue() ? 1 : 0)); }
+        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer((bool)storedValue ? 1 : 0)); }
 
-        public override bool isTrue() { return (bool)storedValue; }
+        public override bool isTrue(out error? error) { error = null; return (bool)storedValue; }
         public override item copy() { return new boolean(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return base.ToString().ToLower(); }
@@ -240,26 +393,91 @@ namespace ezrSquared.Values
 
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
-        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer_number(0)); }
+        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer(0)); }
         private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(false)); }
 
         public override item copy() { return new nothing().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return "nothing"; }
-        public override int GetHashCode() { return 0; }
+        public override int GetHashCode(out error? error) { error = null; return 0; }
     }
-
-    public class integer_number : value
+    
+    public class integer : value
     {
-        public integer_number(int value) : base(value) { }
+        public integer(int value) : base(value) { }
 
+        public override item? bitwiseOrdTo(item other, out error? error)
+        {
+            error = null;
+            if (other is integer)
+                return new integer(storedValue | ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue | (int)((@float)other).storedValue).setContext(context);
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? bitwiseXOrdTo(item other, out error? error)
+        {
+            error = null;
+            if (other is integer)
+                return new integer(storedValue ^ ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue ^ (int)((@float)other).storedValue).setContext(context);
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? bitwiseAndedTo(item other, out error? error)
+        {
+            error = null;
+            if (other is integer)
+                return new integer(storedValue & ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue & (int)((@float)other).storedValue).setContext(context);
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? bitwiseLeftShiftedTo(item other, out error? error)
+        {
+            error = null;
+            if (other is integer)
+                return new integer(storedValue << ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue << (int)((@float)other).storedValue).setContext(context);
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? bitwiseRightShiftedTo(item other, out error? error)
+        {
+            error = null;
+            if (other is integer)
+                return new integer(storedValue >> ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue >> (int)((@float)other).storedValue).setContext(context);
+
+            error = illegalOperation(other);
+            return null;
+        }
+
+        public override item? bitwiseNotted(out error? error)
+        {
+            error = null;
+            return new integer(~storedValue).setContext(context);
+        }
         public override item? addedTo(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new integer_number(storedValue + ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new integer_number(storedValue + (int)((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue + ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue + (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -268,10 +486,10 @@ namespace ezrSquared.Values
         public override item? subbedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new integer_number(storedValue - ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new integer_number(storedValue - (int)((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue - ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue - (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -280,10 +498,10 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new integer_number(storedValue * ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new integer_number(storedValue * (int)((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue * ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new integer(storedValue * (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -292,27 +510,27 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
                     return null;
                 }
 
-                return new integer_number(storedValue / otherValue).setContext(context);
+                return new integer(storedValue / otherValue).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0f)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
                     return null;
                 }
 
-                return new integer_number(storedValue / (int)otherValue).setContext(context);
+                return new integer(storedValue / (int)otherValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -322,27 +540,27 @@ namespace ezrSquared.Values
         public override item? modedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                integer_number other_ = (integer_number)other;
+                integer other_ = (integer)other;
                 if (other_.storedValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Modulo by zero", context);
                     return null;
                 }
 
-                return new integer_number(storedValue % other_.storedValue).setContext(context);
+                return new integer(storedValue % other_.storedValue).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float_number other_ = (float_number)other;
+                @float other_ = (@float)other;
                 if (other_.storedValue == 0f)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Modulo by zero", context);
                     return null;
                 }
 
-                return new integer_number(storedValue % (int)other_.storedValue).setContext(context);
+                return new integer(storedValue % (int)other_.storedValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -352,10 +570,10 @@ namespace ezrSquared.Values
         public override item? powedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new integer_number((int)MathF.Pow(storedValue, ((integer_number)other).storedValue)).setContext(context);
-            else if (other is float_number)
-                return new integer_number((int)MathF.Pow(storedValue, (int)((float_number)other).storedValue)).setContext(context);
+            if (other is integer)
+                return new integer((int)MathF.Pow(storedValue, ((integer)other).storedValue)).setContext(context);
+            else if (other is @float)
+                return new integer((int)MathF.Pow(storedValue, (int)((@float)other).storedValue)).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -364,10 +582,10 @@ namespace ezrSquared.Values
         public override item? compareLessThan(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue < ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue < ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue < ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue < ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -376,10 +594,10 @@ namespace ezrSquared.Values
         public override item? compareGreaterThan(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue > ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue > ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue > ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue > ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -388,10 +606,10 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue <= ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue <= ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue <= ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue <= ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -400,10 +618,10 @@ namespace ezrSquared.Values
         public override item? compareGreaterThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue >= ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue >= ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue >= ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue >= ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -412,12 +630,13 @@ namespace ezrSquared.Values
         public override item? invert(out error? error)
         {
             error = null;
-            return new integer_number((storedValue == 0) ? 1 : 0).setContext(context);
+            return new integer((storedValue == 0) ? 1 : 0).setContext(context);
         }
         public override runtimeResult execute(item[] args)
         {
             base.execute(args);
 
+            internalContext.symbolTable.set("abs", new predefined_function("integer_abs", abs, new string[0]));
             internalContext.symbolTable.set("as_string", new predefined_function("integer_as_string", asString, new string[0]));
             internalContext.symbolTable.set("as_character_list", new predefined_function("integer_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_float", new predefined_function("integer_as_float", asFloat, new string[0]));
@@ -425,26 +644,35 @@ namespace ezrSquared.Values
             return new runtimeResult().success(this);
         }
 
+
+        private runtimeResult abs(context context, position[] positions) { return new runtimeResult().success(new integer(int.Abs(storedValue))); }
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
-        private runtimeResult asFloat(context context, position[] positions) { return new runtimeResult().success(new float_number((float)storedValue)); }
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asFloat(context context, position[] positions) { return new runtimeResult().success(new @float((float)storedValue)); }
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
 
-        public override bool isTrue() { return storedValue != 0; }
-        public override item copy() { return new integer_number(storedValue).setPosition(startPos, endPos).setContext(context); }
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
+        public override bool isTrue(out error? error) { error = null; return storedValue != 0; }
+        public override item copy() { return new integer(storedValue).setPosition(startPos, endPos).setContext(context); }
     }
 
-    public class float_number : value
+    public class @float : value
     {
-        public float_number(float value) : base(value) { }
+        public @float(float value) : base(value) { }
 
         public override item? addedTo(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new float_number(storedValue + ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new float_number(storedValue + ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new @float(storedValue + ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue + ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -453,10 +681,10 @@ namespace ezrSquared.Values
         public override item? subbedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new float_number(storedValue - ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new float_number(storedValue - ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new @float(storedValue - ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue - ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -465,10 +693,10 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new float_number(storedValue * ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new float_number(storedValue * ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new @float(storedValue * ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue * ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -477,27 +705,27 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
                     return null;
                 }
 
-                return new float_number(storedValue / otherValue).setContext(context);
+                return new @float(storedValue / otherValue).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0f)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
                     return null;
                 }
 
-                return new float_number(storedValue / otherValue).setContext(context);
+                return new @float(storedValue / otherValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -507,27 +735,27 @@ namespace ezrSquared.Values
         public override item? modedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Modulo by zero", context);
                     return null;
                 }
 
-                return new float_number(storedValue % otherValue).setContext(context);
+                return new @float(storedValue % otherValue).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0f)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Modulo by zero", context);
                     return null;
                 }
 
-                return new float_number(storedValue % otherValue).setContext(context);
+                return new @float(storedValue % otherValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -537,10 +765,10 @@ namespace ezrSquared.Values
         public override item? powedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new float_number(MathF.Pow(storedValue, ((integer_number)other).storedValue)).setContext(context);
-            else if (other is float_number)
-                return new float_number(MathF.Pow(storedValue, ((float_number)other).storedValue)).setContext(context);
+            if (other is integer)
+                return new @float(MathF.Pow(storedValue, ((integer)other).storedValue)).setContext(context);
+            else if (other is @float)
+                return new @float(MathF.Pow(storedValue, ((@float)other).storedValue)).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -549,10 +777,10 @@ namespace ezrSquared.Values
         public override item? compareLessThan(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue < ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue < ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue < ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue < ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -561,10 +789,10 @@ namespace ezrSquared.Values
         public override item? compareGreaterThan(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue > ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue > ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue > ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue > ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -573,10 +801,10 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue <= ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue <= ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue <= ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue <= ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -585,10 +813,10 @@ namespace ezrSquared.Values
         public override item? compareGreaterThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
-                return new boolean(storedValue >= ((integer_number)other).storedValue).setContext(context);
-            else if (other is float_number)
-                return new boolean(storedValue >= ((float_number)other).storedValue).setContext(context);
+            if (other is integer)
+                return new boolean(storedValue >= ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new boolean(storedValue >= ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -597,13 +825,14 @@ namespace ezrSquared.Values
         public override item? invert(out error? error)
         {
             error = null;
-            return new float_number((storedValue == 0f) ? 1f : 0f).setContext(context);
+            return new @float((storedValue == 0f) ? 1f : 0f).setContext(context);
         }
 
         public override runtimeResult execute(item[] args)
         {
             base.execute(args);
 
+            internalContext.symbolTable.set("abs", new predefined_function("float_abs", abs, new string[0]));
             internalContext.symbolTable.set("as_string", new predefined_function("float_as_string", asString, new string[0]));
             internalContext.symbolTable.set("as_character_list", new predefined_function("float_as_character_list", asCharList, new string[0]));
             internalContext.symbolTable.set("as_integer", new predefined_function("float_as_integer", asInteger, new string[0]));
@@ -612,27 +841,36 @@ namespace ezrSquared.Values
             return new runtimeResult().success(this);
         }
 
+        private runtimeResult abs(context context, position[] positions) { return new runtimeResult().success(new @float(float.Abs(storedValue))); }
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
-        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer_number((int)storedValue)); }
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer((int)storedValue)); }
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
         private runtimeResult roundTo(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
             item digit = context.symbolTable.get("digit");
-            if (digit is not integer_number)
-                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Digit must be an integer_number", context));
+            if (digit is not integer)
+                return result.failure(new runtimeError(startPos, endPos, RT_TYPE, "Digit must be an integer", context));
 
-            return new runtimeResult().success(new float_number(MathF.Round((float)storedValue, (int)((integer_number)digit).storedValue)));
+            return new runtimeResult().success(new @float(MathF.Round((float)storedValue, (int)((integer)digit).storedValue)));
         }
 
-        public override bool isTrue() { return storedValue != 0f; }
-        public override item copy() { return new float_number(storedValue).setPosition(startPos, endPos).setContext(context); }
+        public override bool isTrue(out error? error) { error = null; return storedValue != 0f; }
+        public override item copy() { return new @float(storedValue).setPosition(startPos, endPos).setContext(context); }
     }
 
     public class @string : value
     {
-        public @string(string value) : base(string.IsNullOrEmpty(value) ? "" : value) { }
+        public @string(string value) : base(value) { }
 
         public override item? addedTo(item other, out error? error)
         {
@@ -649,17 +887,17 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
                 string result = "";
-                for (int i = 0; i < ((integer_number)other).storedValue; i++)
+                for (int i = 0; i < ((integer)other).storedValue; i++)
                     result += storedValue;
                 return new @string(result).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
                 string result = "";
-                for (int i = 0; i < ((float_number)other).storedValue; i++)
+                for (int i = 0; i < ((@float)other).storedValue; i++)
                     result += storedValue;
                 return new @string(result).setContext(context);
             }
@@ -671,9 +909,9 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -688,9 +926,9 @@ namespace ezrSquared.Values
                 string result = storedValue.Substring(0, storedValue.Length / otherValue);
                 return new @string(result).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -713,9 +951,9 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
@@ -748,7 +986,7 @@ namespace ezrSquared.Values
         {
             base.execute(args);
 
-            internalContext.symbolTable.set("length", new integer_number(storedValue.ToString().Length));
+            internalContext.symbolTable.set("length", new integer(storedValue.ToString().Length));
             internalContext.symbolTable.set("slice", new predefined_function("string_slice", stringSlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("insert", new predefined_function("string_insert", stringInsert, new string[2] { "index", "substring" }));
             internalContext.symbolTable.set("replace", new predefined_function("string_replace", stringReplace, new string[2] { "old", "new" }));
@@ -759,7 +997,12 @@ namespace ezrSquared.Values
             internalContext.symbolTable.set("try_as_integer", new predefined_function("string_try_as_integer", tryAsInteger, new string[0] { }));
             internalContext.symbolTable.set("try_as_float", new predefined_function("string_try_as_float", tryAsFloat, new string[0] { }));
             internalContext.symbolTable.set("as_boolean", new predefined_function("string_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("try_as_boolean", new predefined_function("string_try_as_boolean", tryAsBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_boolean_value", new predefined_function("string_as_boolean_value", asBooleanValue, new string[0] { }));
             internalContext.symbolTable.set("as_character_list", new predefined_function("string_character_list", asCharList, new string[0] { }));
+            internalContext.symbolTable.set("is_null_or_empty", new predefined_function("string_is_null_or_empty", isNullOrEmpty, new string[0] { }));
+            internalContext.symbolTable.set("is_null_or_spaces", new predefined_function("string_is_null_or_spaces", isNullOrSpaces, new string[0] { }));
+
             return new runtimeResult().success(this);
         }
 
@@ -769,13 +1012,13 @@ namespace ezrSquared.Values
             item start = context.symbolTable.get("start");
             item end = context.symbolTable.get("end");
 
-            if (start is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer_number", context));
-            else if (end is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer_number", context));
+            if (start is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer", context));
+            else if (end is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer", context));
 
-            int startAsInt = (int)((integer_number)start).storedValue;
-            int endAsInt = (int)((integer_number)end).storedValue;
+            int startAsInt = (int)((integer)start).storedValue;
+            int endAsInt = (int)((integer)end).storedValue;
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start cannot be less than zero", context));
@@ -793,12 +1036,12 @@ namespace ezrSquared.Values
             item start = context.symbolTable.get("index");
             item substring = context.symbolTable.get("substring");
 
-            if (start is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (start is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
             else if (substring is not @string)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Substring must be a string", context));
 
-            int startAsInt = (int)((integer_number)start).storedValue;
+            int startAsInt = (int)((integer)start).storedValue;
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -860,23 +1103,23 @@ namespace ezrSquared.Values
         {
             runtimeResult result = new runtimeResult();
             if (int.TryParse(storedValue.ToString(), out int integer))
-                return result.success(new integer_number(integer));
-            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to integer_number", context));
+                return result.success(new integer(integer));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to integer", context));
         }
 
         private runtimeResult asFloat(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
             if (float.TryParse(storedValue.ToString(), out float float_))
-                return result.success(new float_number(float_));
-            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to float_number", context));
+                return result.success(new @float(float_));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to float", context));
         }
 
         private runtimeResult tryAsInteger(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
             if (int.TryParse(storedValue.ToString(), out int integer))
-                return result.success(new integer_number(integer));
+                return result.success(new integer(integer));
             return result.success(new nothing());
         }
 
@@ -884,14 +1127,40 @@ namespace ezrSquared.Values
         {
             runtimeResult result = new runtimeResult();
             if (float.TryParse(storedValue.ToString(), out float float_))
-                return result.success(new float_number(float_));
+                return result.success(new @float(float_));
+            return result.success(new nothing());
+        }
+
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (bool.TryParse(storedValue.ToString(), out bool bool_))
+                return result.success(new boolean(bool_));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to boolean", context));
+        }
+
+        private runtimeResult tryAsBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (bool.TryParse(storedValue.ToString(), out bool bool_))
+                return result.success(new boolean(bool_));
             return result.success(new nothing());
         }
 
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(storedValue)); }
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBooleanValue(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
 
-        public override bool isTrue() { return storedValue.Length > 0; }
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
+        private runtimeResult isNullOrEmpty(context context, position[] positions) { return new runtimeResult().success(new boolean(string.IsNullOrEmpty(storedValue))); }
+        private runtimeResult isNullOrSpaces(context context, position[] positions) { return new runtimeResult().success(new boolean(string.IsNullOrWhiteSpace(storedValue))); }
+
+        public override bool isTrue(out error? error) { error = null; return storedValue.Length > 0; }
         public override item copy() { return new @string(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"\"{storedValue}\""; }
@@ -924,9 +1193,9 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList multiplication by negative value", context);
@@ -939,9 +1208,9 @@ namespace ezrSquared.Values
                     storedValue.CopyTo(multedValues, storedValue.Count * i);
                 return new character_list(multedValues.ToList()).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "CharacterList multiplication by negative value", context);
@@ -962,9 +1231,9 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -982,9 +1251,9 @@ namespace ezrSquared.Values
 
                 return new character_list(divedValues.ToList()).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1010,9 +1279,9 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
@@ -1045,7 +1314,7 @@ namespace ezrSquared.Values
         {
             base.execute(args);
 
-            internalContext.symbolTable.set("length", new integer_number(((List<char>)storedValue).Count));
+            internalContext.symbolTable.set("length", new integer(((List<char>)storedValue).Count));
             internalContext.symbolTable.set("slice", new predefined_function("character_list_slice", charListSlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("insert", new predefined_function("character_list_insert", charListInsert, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("set", new predefined_function("character_list_set", charListSet, new string[2] { "index", "value" }));
@@ -1056,7 +1325,11 @@ namespace ezrSquared.Values
             internalContext.symbolTable.set("try_as_integer", new predefined_function("character_list_try_as_integer", tryAsInteger, new string[0] { }));
             internalContext.symbolTable.set("try_as_float", new predefined_function("character_list_try_as_float", tryAsFloat, new string[0] { }));
             internalContext.symbolTable.set("as_boolean", new predefined_function("character_list_as_boolean", asBoolean, new string[0] { }));
+            internalContext.symbolTable.set("try_as_boolean", new predefined_function("character_list_try_as_boolean", tryAsBoolean, new string[0] { }));
+            internalContext.symbolTable.set("as_boolean_value", new predefined_function("character_list_as_boolean_value", asBooleanValue, new string[0] { }));
             internalContext.symbolTable.set("as_string", new predefined_function("character_list_as_string", asString, new string[0] { }));
+            internalContext.symbolTable.set("is_null_or_empty", new predefined_function("character_list_is_null_or_empty", isNullOrEmpty, new string[0] { }));
+            internalContext.symbolTable.set("is_null_or_spaces", new predefined_function("character_list_is_null_or_spaces", isNullOrSpaces, new string[0] { }));
             return new runtimeResult().success(this);
         }
 
@@ -1066,13 +1339,13 @@ namespace ezrSquared.Values
             item start = context.symbolTable.get("start");
             item end = context.symbolTable.get("end");
 
-            if (start is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer_number", context));
-            else if (end is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer_number", context));
+            if (start is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer", context));
+            else if (end is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer", context));
 
-            int startAsInt = (int)((integer_number)start).storedValue;
-            int endAsInt = (int)((integer_number)end).storedValue + 1;
+            int startAsInt = (int)((integer)start).storedValue;
+            int endAsInt = (int)((integer)end).storedValue + 1;
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start cannot be less than zero", context));
@@ -1090,10 +1363,10 @@ namespace ezrSquared.Values
             item index = context.symbolTable.get("index");
             item value = context.symbolTable.get("value");
 
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1117,10 +1390,10 @@ namespace ezrSquared.Values
             item index = context.symbolTable.get("index");
             item value = context.symbolTable.get("value");
             
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1163,10 +1436,10 @@ namespace ezrSquared.Values
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
 
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1181,23 +1454,23 @@ namespace ezrSquared.Values
         {
             runtimeResult result = new runtimeResult();
             if (int.TryParse(string.Join("", storedValue), out int integer))
-                return result.success(new integer_number(integer));
-            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to integer_number", context));
+                return result.success(new integer(integer));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to integer", context));
         }
 
         private runtimeResult asFloat(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
             if (float.TryParse(string.Join("", storedValue), out float float_))
-                return result.success(new float_number(float_));
-            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to float_number", context));
+                return result.success(new @float(float_));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to float", context));
         }
 
         private runtimeResult tryAsInteger(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
             if (int.TryParse(string.Join("", storedValue), out int integer))
-                return result.success(new integer_number(integer));
+                return result.success(new integer(integer));
             return result.success(new nothing());
         }
 
@@ -1205,14 +1478,40 @@ namespace ezrSquared.Values
         {
             runtimeResult result = new runtimeResult();
             if (float.TryParse(string.Join("", storedValue), out float float_))
-                return result.success(new float_number(float_));
+                return result.success(new @float(float_));
+            return result.success(new nothing());
+        }
+
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (bool.TryParse(string.Join("", storedValue), out bool bool_))
+                return result.success(new boolean(bool_));
+            return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Could not convert string to boolean", context));
+        }
+
+        private runtimeResult tryAsBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (bool.TryParse(string.Join("", storedValue), out bool bool_))
+                return result.success(new boolean(bool_));
             return result.success(new nothing());
         }
 
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(string.Join("", storedValue))); }
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBooleanValue(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
 
-        public override bool isTrue() { return storedValue.Count > 0; }
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
+        private runtimeResult isNullOrEmpty(context context, position[] positions) { return new runtimeResult().success(new boolean(string.IsNullOrEmpty(string.Join("", storedValue)))); }
+        private runtimeResult isNullOrSpaces(context context, position[] positions) { return new runtimeResult().success(new boolean(string.IsNullOrWhiteSpace(string.Join("", storedValue)))); }
+
+        public override bool isTrue(out error? error) { error = null; return storedValue.Count > 0; }
         public override item copy() { return new character_list(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"'{string.Join("", storedValue)}'"; }
@@ -1233,9 +1532,9 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Array multiplication by negative value", context);
@@ -1248,9 +1547,9 @@ namespace ezrSquared.Values
                     storedValue.CopyTo(multedValues, storedValue.Length * i);
                 return new array(multedValues).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Array multiplication by negative value", context);
@@ -1271,9 +1570,9 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1291,9 +1590,9 @@ namespace ezrSquared.Values
 
                 return new array(divedValues).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1319,9 +1618,9 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
@@ -1344,7 +1643,7 @@ namespace ezrSquared.Values
         {
             base.execute(args);
 
-            internalContext.symbolTable.set("length", new integer_number(((item[])storedValue).Length));
+            internalContext.symbolTable.set("length", new integer(((item[])storedValue).Length));
             internalContext.symbolTable.set("slice", new predefined_function("array_slice", arraySlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("as_boolean", new predefined_function("array_as_boolean", asBoolean, new string[0] { }));
             internalContext.symbolTable.set("as_string", new predefined_function("array_as_string", asString, new string[0] { }));
@@ -1358,13 +1657,13 @@ namespace ezrSquared.Values
             item start = context.symbolTable.get("start");
             item end = context.symbolTable.get("end");
 
-            if (start is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer_number", context));
-            else if (end is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer_number", context));
+            if (start is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer", context));
+            else if (end is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer", context));
 
-            int startAsInt = (int)((integer_number)start).storedValue;
-            int endAsInt = (int)((integer_number)end).storedValue + 1;
+            int startAsInt = (int)((integer)start).storedValue;
+            int endAsInt = (int)((integer)end).storedValue + 1;
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start cannot be less than zero", context));
@@ -1376,11 +1675,19 @@ namespace ezrSquared.Values
             return result.success(new array(((item[])storedValue)[startAsInt..endAsInt]));
         }
 
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
 
-        public override bool isTrue() { return storedValue.Length > 0; }
+        public override bool isTrue(out error? error) { error = null; return storedValue.Length > 0; }
         public override item copy() { return new array(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString()
@@ -1391,8 +1698,9 @@ namespace ezrSquared.Values
             return $"({string.Join(", ", elementStrings)})";
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode(out error? error)
         {
+            error = null;
             int hashCode = 0;
             for (int i = 0; i < storedValue.Length; i++)
                 hashCode ^= storedValue[i].GetHashCode() << (int)MathF.Pow(2, i);
@@ -1431,9 +1739,9 @@ namespace ezrSquared.Values
         public override item? subbedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
@@ -1457,9 +1765,9 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "List multiplication by negative value", context);
@@ -1472,9 +1780,9 @@ namespace ezrSquared.Values
                     storedValue.CopyTo(multedValues, storedValue.Count * i);
                 return new list(multedValues).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "List multiplication by negative value", context);
@@ -1495,9 +1803,9 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1515,9 +1823,9 @@ namespace ezrSquared.Values
 
                 return new list(divedValues).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1543,9 +1851,9 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue < 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
@@ -1568,7 +1876,7 @@ namespace ezrSquared.Values
         {
             base.execute(args);
 
-            internalContext.symbolTable.set("length", new integer_number(((List<item>)storedValue).Count));
+            internalContext.symbolTable.set("length", new integer(((List<item>)storedValue).Count));
             internalContext.symbolTable.set("slice", new predefined_function("list_slice", listSlice, new string[2] { "start", "end" }));
             internalContext.symbolTable.set("insert", new predefined_function("list_insert", listInsert, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("set", new predefined_function("list_set", listSet, new string[2] { "index", "value" }));
@@ -1586,13 +1894,13 @@ namespace ezrSquared.Values
             item start = context.symbolTable.get("start");
             item end = context.symbolTable.get("end");
 
-            if (start is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer_number", context));
-            else if (end is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer_number", context));
+            if (start is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start must be an integer", context));
+            else if (end is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "End must be an integer", context));
 
-            int startAsInt = (int)((integer_number)start).storedValue;
-            int endAsInt = (int)((integer_number)end).storedValue + 1;
+            int startAsInt = (int)((integer)start).storedValue;
+            int endAsInt = (int)((integer)end).storedValue + 1;
 
             if (startAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Start cannot be less than zero", context));
@@ -1610,10 +1918,10 @@ namespace ezrSquared.Values
             item index = context.symbolTable.get("index");
             item value = context.symbolTable.get("value");
 
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1630,10 +1938,10 @@ namespace ezrSquared.Values
             item index = context.symbolTable.get("index");
             item value = context.symbolTable.get("value");
 
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1661,10 +1969,10 @@ namespace ezrSquared.Values
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
 
-            if (index is not integer_number)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer_number", context));
+            if (index is not integer)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 
-            int indexAsInt = (int)((integer_number)index).storedValue;
+            int indexAsInt = (int)((integer)index).storedValue;
 
             if (indexAsInt < 0)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
@@ -1675,11 +1983,19 @@ namespace ezrSquared.Values
             return result.success(new nothing());
         }
 
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
 
-        public override bool isTrue() { return storedValue.Count > 0; }
+        public override bool isTrue(out error? error) { error = null; return storedValue.Count > 0; }
         public override item copy() { return new list(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString()
@@ -1689,8 +2005,9 @@ namespace ezrSquared.Values
                 elementStrings[i] = storedValue[i].ToString();
             return $"[{string.Join(", ", elementStrings)}]";
         }
-        public override int GetHashCode()
+        public override int GetHashCode(out error? error)
         {
+            error = null;
             int hashCode = 0;
             for (int i = 0; i < storedValue.Count; i++)
                 hashCode ^= storedValue[i].GetHashCode() << (int)MathF.Pow(2, i);
@@ -1701,20 +2018,18 @@ namespace ezrSquared.Values
 
     public class dictionary : value
     {
-        public dictionary(Dictionary<item, item> dictionary) : base(dictionary) { }
+        public dictionary(ItemDictionary dictionary) : base(dictionary) { }
 
         public override item? addedTo(item other, out error? error)
         {
             error = null;
             if (other is dictionary)
             {
-                KeyValuePair<item, item>[] otherValue = ((Dictionary<item, item>)((dictionary)other).storedValue).AsEnumerable().ToArray();
+                KeyValuePair<item, item>[] otherValue = ((ItemDictionary)((dictionary)other).storedValue).GetArray();
                 for (int i = 0; i < otherValue.Length; i++)
                 {
-                    if (storedValue.ContainsKey(otherValue[i].Key))
-                        storedValue[otherValue[i].Key] = otherValue[i].Value;
-                    else
-                        storedValue.Add(otherValue[i].Key, otherValue[i].Value);
+                    storedValue.Add(otherValue[i].Key, otherValue[i].Value, out error);
+                    if (error != null) return null;
                 }
 
                 return new nothing().setContext(context);
@@ -1727,9 +2042,13 @@ namespace ezrSquared.Values
         public override item? subbedBy(item other, out error? error)
         {
             error = null;
-            if (storedValue.ContainsKey(other))
+
+            bool containsKey = storedValue.ContainsKey(other, out error);
+            if (error != null) return null;
+
+            if (containsKey)
             {
-                storedValue.Remove(other);
+                storedValue.Remove(other, out error);
                 return new nothing().setContext(context);
             }
 
@@ -1740,9 +2059,9 @@ namespace ezrSquared.Values
         public override item? divedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer_number)
+            if (other is integer)
             {
-                int otherValue = ((integer_number)other).storedValue;
+                int otherValue = ((integer)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1754,17 +2073,20 @@ namespace ezrSquared.Values
                     return null;
                 }
 
-                KeyValuePair<item, item>[] pairs = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
-                Dictionary<item, item> newDict = new Dictionary<item, item>();
+                KeyValuePair<item, item>[] pairs = ((ItemDictionary)storedValue).GetArray();
+                ItemDictionary newDict = new ItemDictionary();
 
-                for (int i = 0; i < storedValue.Count / otherValue; i++)
-                    newDict.Add(pairs[i].Key, pairs[i].Value);
+                for (int i = 0; i < pairs.Length / otherValue; i++)
+                {
+                    newDict.Add(pairs[i].Key, pairs[i].Value, out error);
+                    if (error != null) return null;
+                }
 
                 return new dictionary(newDict).setContext(context);
             }
-            else if (other is float_number)
+            else if (other is @float)
             {
-                float otherValue = ((float_number)other).storedValue;
+                float otherValue = ((@float)other).storedValue;
                 if (otherValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
@@ -1776,11 +2098,14 @@ namespace ezrSquared.Values
                     return null;
                 }
 
-                KeyValuePair<item, item>[] pairs = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
-                Dictionary<item, item> newDict = new Dictionary<item, item>();
+                KeyValuePair<item, item>[] pairs = ((ItemDictionary)storedValue).GetArray();
+                ItemDictionary newDict = new ItemDictionary();
 
-                for (int i = 0; i < storedValue.Count / otherValue; i++)
-                    newDict.Add(pairs[i].Key, pairs[i].Value);
+                for (int i = 0; i < pairs.Length / otherValue; i++)
+                {
+                    newDict.Add(pairs[i].Key, pairs[i].Value, out error);
+                    if (error != null) return null;
+                }
 
                 return new dictionary(newDict).setContext(context);
             }
@@ -1792,7 +2117,11 @@ namespace ezrSquared.Values
         public override item? compareLessThanOrEqual(item other, out error? error)
         {
             error = null;
-            if (storedValue.TryGetValue(other, out item value))
+
+            item? value = storedValue.GetValue(other, out error);
+            if (error != null) return null;
+
+            if (value != null)
                 return value.setContext(context);
             else
             {
@@ -1804,7 +2133,7 @@ namespace ezrSquared.Values
         {
             base.execute(args);
 
-            KeyValuePair<item, item>[] pairs = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
+            KeyValuePair<item, item>[] pairs = ((ItemDictionary)storedValue).GetArray();
             item[] keys = new item[pairs.Length];
             item[] values = new item[pairs.Length];
             item[] keyValuePairs = new item[pairs.Length];
@@ -1816,7 +2145,7 @@ namespace ezrSquared.Values
                 keyValuePairs[i] = new array(new item[2] { pairs[i].Key, pairs[i].Value }).setPosition(startPos, endPos).setContext(context);
             }
 
-            internalContext.symbolTable.set("length", new integer_number(storedValue.Count));
+            internalContext.symbolTable.set("length", new integer(pairs.Length));
             internalContext.symbolTable.set("keys", new array(keys));
             internalContext.symbolTable.set("values", new array(values));
             internalContext.symbolTable.set("pairs", new array(keyValuePairs));
@@ -1826,28 +2155,46 @@ namespace ezrSquared.Values
             return new runtimeResult().success(this);
         }
 
-        private runtimeResult asBoolean(context context, position[] positions) { return new runtimeResult().success(new boolean(isTrue())); }
+        private runtimeResult asBoolean(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            bool boolValue = isTrue(out error? error);
+            if (error != null) return result.failure(error);
+            return result.success(new boolean(boolValue));
+        }
+
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
 
-        public override bool isTrue() { return storedValue.Count > 0; }
+        public override bool isTrue(out error? error) { error = null; return storedValue.Count > 0; }
         public override item copy() { return new dictionary(storedValue).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString()
         {
-            string[] elementStrings = new string[storedValue.Count];
-            KeyValuePair<item, item>[] values = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
+            KeyValuePair<item, item>[] values = ((ItemDictionary)storedValue).GetArray();
+            string[] elementStrings = new string[values.Length];
+
             for (int i = 0; i < values.Length; i++)
                 elementStrings[i] = $"{values[i].Key} : {values[i].Value}";
             return '{' + string.Join(", ", elementStrings) + '}';
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode(out error? error)
         {
+            error = null;
             int hashCode = 0;
-            KeyValuePair<item, item>[] pairs = ((Dictionary<item, item>)storedValue).AsEnumerable().ToArray();
+            KeyValuePair<item, item>[] pairs = ((ItemDictionary)storedValue).GetArray();
             for (int i = 0; i < pairs.Length; i++)
-                hashCode ^= (pairs[i].Key.GetHashCode() << 2) ^ (pairs[i].Value.GetHashCode() << 4);
+            {
+                int keyHash = pairs[i].Key.GetHashCode(out error);
+                if (error != null) return 0;
+
+                int valueHash = pairs[i].Value.GetHashCode(out error);
+                if (error != null) return 0;
+
+                hashCode ^= (keyHash << 2) ^ (valueHash << 4);
+            }
             return hashCode;
         }
         public override bool Equals(object? obj) { if (obj is item) return ((item)obj).GetHashCode() == GetHashCode(); return false; }
@@ -1856,8 +2203,8 @@ namespace ezrSquared.Values
     public abstract class baseFunction : item
     {
         public string name;
-        public baseFunction(string? name) : base()
-        { this.name = (name != null) ? name : "<anonymous>"; }
+        public baseFunction(string name) : base()
+        { this.name = name; }
 
         public context generateContext()
         {
@@ -1870,9 +2217,9 @@ namespace ezrSquared.Values
         {
             runtimeResult result = new runtimeResult();
             if (args.Length > argNames.Length)
-                return result.failure(new runtimeError(startPos, endPos, RT_ARGS, $"{args.Length - argNames.Length} too many arguments passed into '{name}'", context));
+                return result.failure(new runtimeError(startPos, endPos, RT_ARGS, $"{args.Length - argNames.Length} too many arguments passed into \"{name}\"", context));
             else if (args.Length < argNames.Length)
-                return result.failure(new runtimeError(startPos, endPos, RT_ARGS, $"{argNames.Length - args.Length} too few arguments passed into '{name}'", context));
+                return result.failure(new runtimeError(startPos, endPos, RT_ARGS, $"{argNames.Length - args.Length} too few arguments passed into \"{name}\"", context));
 
             return result.success(new nothing());
         }
@@ -1898,7 +2245,9 @@ namespace ezrSquared.Values
             return result.success(returnValue);
         }
 
-        public override bool isTrue() { return true; }
+        public override bool isTrue(out error? error) { error = null; return true; }
+
+        public override int GetHashCode(out error? error) { error = null; return ToString().GetHashCode(); }
     }
 
     public class predefined_function : baseFunction
@@ -1906,7 +2255,7 @@ namespace ezrSquared.Values
         private string[] argNames;
         private Func<context, position[], runtimeResult> function;
 
-        public predefined_function(string? name, Func<context, position[], runtimeResult> function, string[] argNames) : base(name)
+        public predefined_function(string name, Func<context, position[], runtimeResult> function, string[] argNames) : base(name)
         {
             this.function = function;
             this.argNames = argNames;
@@ -1927,13 +2276,14 @@ namespace ezrSquared.Values
 
         public override item copy() { return new predefined_function(name, function, argNames).setPosition(startPos, endPos).setContext(context); }
 
+        public override bool Equals(object? obj) { if (obj is predefined_function) return GetHashCode() == ((predefined_function)obj).GetHashCode(); return false; }
         public override string ToString() { return $"<predefined function <{name}>>"; }
     }
 
     public class builtin_function : baseFunction
     {
         private string[] argNames;
-        public builtin_function(string? name, string[] argNames) : base(name)
+        public builtin_function(string name, string[] argNames) : base(name)
         { this.argNames = argNames; }
 
         public override runtimeResult execute(item[] args)
@@ -2011,7 +2361,12 @@ namespace ezrSquared.Values
 
         private runtimeResult _hash(context context)
         {
-            return new runtimeResult().success(new integer_number(context.symbolTable.get("value").GetHashCode()));
+            runtimeResult result = new runtimeResult();
+
+            int hash = context.symbolTable.get("value").GetHashCode(out error? error);
+            if (error != null) return result.failure(error);
+
+            return result.success(new integer(hash));
         }
 
         private runtimeResult _type_of(context context)
@@ -2041,7 +2396,7 @@ namespace ezrSquared.Values
             }
 
             context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
-            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedSymbolTable);
+            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedContext.symbolTable);
 
             error? error = new Main.ezr().run(Path.GetFileName(path), script, runtimeContext, out item? _);
             if (error != null)
@@ -2051,6 +2406,7 @@ namespace ezrSquared.Values
 
         public override item copy() { return new builtin_function(name, argNames).setPosition(startPos, endPos).setContext(context); }
 
+        public override bool Equals(object? obj) { if (obj is builtin_function) return GetHashCode() == ((builtin_function)obj).GetHashCode(); return false; }
         public override string ToString() { return $"<builtin function <{name}>>"; }
     }
 
@@ -2061,7 +2417,7 @@ namespace ezrSquared.Values
         private bool shouldReturnNull;
         private interpreter interpreter;
 
-        public function(string? name, node bodyNode, string[] argNames, bool shouldReturnNull) : base(name)
+        public function(string? name, node bodyNode, string[] argNames, bool shouldReturnNull) : base((name != null) ? name : "<anonymous>")
         {
             this.bodyNode = bodyNode;
             this.argNames = argNames;
@@ -2090,21 +2446,59 @@ namespace ezrSquared.Values
         public override item copy() { return new function(name, bodyNode, argNames, shouldReturnNull).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<function {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
         public override bool Equals(object? obj) { if (obj is function) return GetHashCode() == ((function)obj).GetHashCode(); return false; }
+    }
+
+    public class special : baseFunction
+    {
+        private node bodyNode;
+        private string[] argNames;
+        private bool shouldReturnNull;
+        private interpreter interpreter;
+
+        public special(string name, node bodyNode, string[] argNames, bool shouldReturnNull) : base(name)
+        {
+            this.bodyNode = bodyNode;
+            this.argNames = argNames;
+            this.shouldReturnNull = shouldReturnNull;
+            this.interpreter = new interpreter();
+        }
+
+        public override runtimeResult? execute(item[] args)
+        {
+            runtimeResult result = new runtimeResult();
+            context newContext = generateContext();
+
+            result.register(checkAndPopulateArgs(argNames, args, newContext));
+            if (result.shouldReturn()) return result;
+
+            item? value = result.register(interpreter.visit(bodyNode, newContext));
+            if (result.shouldReturn() && result.functionReturnValue == null) return result;
+
+            if (!shouldReturnNull && value != null)
+                return result.success(value);
+            else if (result.functionReturnValue != null)
+                return result.success(result.functionReturnValue);
+            return result.success(new nothing());
+        }
+
+        public override item copy() { return new special(name, bodyNode, argNames, shouldReturnNull).setPosition(startPos, endPos).setContext(context); }
+
+        public override string ToString() { return $"<special function {name}>"; }
+        public override bool Equals(object? obj) { if (obj is special) return GetHashCode() == ((special)obj).GetHashCode(); return false; }
     }
 
     public class @class : baseFunction
     {
+        public string[] argNames { get; private set; }
         private node bodyNode;
-        private string[] argNames;
-        private interpreter interpreter;
+        private @class? parent;
 
-        public @class(string name, node bodyNode, string[] argNames) : base(name)
+        public @class(string name, @class? inherit, node bodyNode, string[] argNames) : base(name)
         {
             this.bodyNode = bodyNode;
             this.argNames = argNames;
-            this.interpreter = new interpreter();
+            this.parent = inherit;
         }
 
         public override runtimeResult execute(item[] args)
@@ -2115,22 +2509,34 @@ namespace ezrSquared.Values
             result.register(checkAndPopulateArgs(argNames, args, internalContext));
             if (result.shouldReturn()) return result;
 
-            result.register(interpreter.visit(bodyNode, internalContext));
+            if (parent != null)
+            {
+                item[] parentArgs = new item[parent.argNames.Length];
+                for (int i = 0; i < parentArgs.Length; i++)
+                    parentArgs[i] = args[Array.IndexOf(argNames, parent.argNames[i])];
+
+                item parentObject = result.register(parent.execute(parentArgs));
+                if (result.shouldReturn()) return result;
+
+                internalContext.symbolTable.set("parent", parentObject);
+            }
+
+            @object object_ = (@object)new @object(name, internalContext).setPosition(startPos, endPos).setContext(context);
+            result.register(object_.initialize(bodyNode));
             if (result.shouldReturn()) return result;
 
-            return result.success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
+            return result.success(object_);
         }
 
-        public override item copy() { return new @class(name, bodyNode, argNames).setPosition(startPos, endPos).setContext(context); }
+        public override item copy() { return new @class(name, parent, bodyNode, argNames).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<class {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
         public override bool Equals(object? obj) { if (obj is @class) return GetHashCode() == ((@class)obj).GetHashCode(); return false; }
     }
 
     public class @object : baseFunction
     {
-        private context internalContext;
+        public context internalContext { get; private set; }
         private interpreter interpreter;
 
         public @object(string name, context internalContext) : base(name)
@@ -2139,7 +2545,268 @@ namespace ezrSquared.Values
             this.interpreter = new interpreter();
         }
 
-        public override runtimeResult retrieve(node node)
+        public runtimeResult initialize(node body)
+        {
+            runtimeResult result = new runtimeResult();
+            internalContext.symbolTable.set("this", this);
+
+            result.register(interpreter.visit(body, internalContext));
+            if (result.shouldReturn()) return result;
+
+            return result.success(new nothing());
+        }
+
+        private item? getOutput(item func, item[] args, out error? error)
+        {
+            error = null;
+
+            runtimeResult result = new runtimeResult();
+            item output = result.register(func.execute(args));
+            if (result.shouldReturn() && result.error == null) return new nothing().setContext(context);
+
+            if (result.error != null)
+            {
+                error = result.error;
+                return null;
+            }
+            return output;
+        }
+
+        public override item? compareEqual(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_equal");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareEqual(other, out error);
+        }
+
+        public override item? compareNotEqual(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_not_equal");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareNotEqual(other, out error);
+        }
+
+        public override item? compareAnd(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_and");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareAnd(other, out error);
+        }
+
+        public override item? compareOr(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_or");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareOr(other, out error);
+        }
+
+        public override item? checkIn(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("check_in");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.checkIn(other, out error);
+        }
+
+        public override item? bitwiseOrdTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_or");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.bitwiseOrdTo(other, out error);
+        }
+
+        public override item? bitwiseXOrdTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_xor");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.bitwiseXOrdTo(other, out error);
+        }
+
+        public override item? bitwiseAndedTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_and");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.bitwiseAndedTo(other, out error);
+        }
+
+        public override item? bitwiseLeftShiftedTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_left_shift");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.bitwiseLeftShiftedTo(other, out error);
+        }
+
+        public override item? bitwiseRightShiftedTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_right_shift");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.bitwiseRightShiftedTo(other, out error);
+        }
+
+        public override item? bitwiseNotted(out error? error)
+        {
+            item? func = internalContext.symbolTable.get("bitwise_not");
+            if (func != null && func is special)
+                return getOutput(func, new item[0], out error);
+
+            return base.bitwiseNotted(out error);
+        }
+
+        public override item? addedTo(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("addition");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.addedTo(other, out error);
+        }
+
+        public override item? subbedBy(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("subtraction");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.subbedBy(other, out error);
+        }
+
+        public override item? multedBy(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("multiplication");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.multedBy(other, out error);
+        }
+
+        public override item? divedBy(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("division");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.divedBy(other, out error);
+        }
+
+        public override item? modedBy(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("modulo");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.modedBy(other, out error);
+        }
+
+        public override item? powedBy(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("power");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.powedBy(other, out error);
+        }
+
+        public override item? compareLessThan(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_less_than");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareLessThan(other, out error);
+        }
+
+        public override item? compareGreaterThan(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_greater_than");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareGreaterThan(other, out error);
+        }
+
+        public override item? compareLessThanOrEqual(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_less_than_or_equal");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareLessThanOrEqual(other, out error);
+        }
+
+        public override item? compareGreaterThanOrEqual(item other, out error? error)
+        {
+            item? func = internalContext.symbolTable.get("compare_greater_than_or_equal");
+            if (func != null && func is special)
+                return getOutput(func, new item[] { other }, out error);
+
+            return base.compareGreaterThanOrEqual(other, out error);
+        }
+
+        public override item? invert(out error? error)
+        {
+            item? func = internalContext.symbolTable.get("invert");
+            if (func != null && func is special)
+                return getOutput(func, new item[0], out error);
+
+            return base.invert(out error);
+        }
+
+        public override bool isTrue(out error? error)
+        {
+            item? func = internalContext.symbolTable.get("is_true");
+            if (func != null && func is special)
+            {
+                item? output = getOutput(func, new item[0], out error);
+                if (error != null) return false;
+
+                if (output != null)
+                    return output.isTrue(out error);
+            }
+
+            return base.isTrue(out error);
+        }
+
+        public override int GetHashCode(out error? error)
+        {
+            error = null;
+            item? func = internalContext.symbolTable.get("hash");
+            if (func != null && func is special)
+            {
+                item? output = getOutput(func, new item[0], out error);
+                if (error != null || output == null) return base.GetHashCode(out error);
+
+                if (output is not integer)
+                {
+                    error = new runtimeError(startPos, endPos, RT_TYPE, "Return type of special function \"hash\" must be an integer", context);
+                    return 0;
+                }
+
+                return ((integer)output).storedValue;
+            }
+
+            return base.GetHashCode(out error);
+        }
+
+        public override runtimeResult get(node node)
         {
             runtimeResult result = new runtimeResult();
 
@@ -2148,10 +2815,15 @@ namespace ezrSquared.Values
             return result.success(value);
         }
 
+        public override runtimeResult set(string name, item variable)
+        {
+            internalContext.symbolTable.set(name, variable.copy());
+            return new runtimeResult().success(variable);
+        }
+
         public override item copy() { return new @object(name, internalContext).setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<object {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
         public override bool Equals(object? obj) { if (obj is @object) return GetHashCode() == ((@object)obj).GetHashCode(); return false; }
     }
 }
