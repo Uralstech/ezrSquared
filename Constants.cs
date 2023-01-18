@@ -2,7 +2,7 @@
 {
     public static class constants
     {
-        public const string VERSION = "prerelease-1.1.0.0.1";
+        public const string VERSION = "prerelease-1.1.0.0.2";
         public const string VERSION_DATE = "18.01.2023";
 
         public const string LETTERS_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
@@ -41,6 +41,7 @@
             { "invert", new string[0] },
             { "check_in", new string[1] { "other" } },
 
+            { "equals", new string[1] { "other" } },
             { "is_true", new string[0] },
             { "hash", new string[0] },
         };

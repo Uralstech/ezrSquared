@@ -1579,7 +1579,7 @@ namespace ezrSquared.Values
             int hashCode = 0;
             for (int i = 0; i < storedValue.Length; i++)
             {
-                hashCode ^= storedValue[i].GetItemHashCode(out error) << (int)MathF.Pow(2, i);
+                hashCode = (((hashCode << 5) + hashCode) ^ storedValue[i].GetItemHashCode(out error));
                 if (error != null) return 0;
             }
 
@@ -1869,7 +1869,7 @@ namespace ezrSquared.Values
             int hashCode = 0;
             for (int i = 0; i < storedValue.Count; i++)
             {
-                hashCode ^= storedValue[i].GetItemHashCode(out error) << (int)MathF.Pow(2, i);
+                hashCode = (((hashCode << 5) + hashCode) ^ storedValue[i].GetItemHashCode(out error));
                 if (error != null) return 0;
             }
 
@@ -2044,7 +2044,8 @@ namespace ezrSquared.Values
                 int valueHash = pairs[i].Value.GetItemHashCode(out error);
                 if (error != null) return 0;
 
-                hashCode ^= (keyHash << 2) ^ (valueHash << 4);
+                int hash1 = ((keyHash << 5) + keyHash) ^ valueHash;
+                hashCode = ((hashCode << 5) + hashCode) ^ hash1;
             }
             return hashCode;
         }
@@ -2236,7 +2237,15 @@ namespace ezrSquared.Values
 
         private runtimeResult _type_of(context context)
         {
-            return new runtimeResult().success(new @string(context.symbolTable.get("value").GetType().Name));
+            item value = context.symbolTable.get("value");
+
+            string type;
+            if (value is @object)
+                type = ((@object)value).name;
+            else
+                type = value.GetType().Name;
+
+            return new runtimeResult().success(new @string(type));
         }
 
         private runtimeResult _run(context context)
@@ -2642,9 +2651,7 @@ namespace ezrSquared.Values
             {
                 item? output = getOutput(func, new item[0], out error);
                 if (error != null) return false;
-
-                if (output != null)
-                    return output.isTrue(out error);
+                return output.isTrue(out error);
             }
 
             return base.isTrue(out error);
@@ -2657,7 +2664,7 @@ namespace ezrSquared.Values
             if (func != null && func is special)
             {
                 item? output = getOutput(func, new item[0], out error);
-                if (error != null || output == null) return base.GetItemHashCode(out error);
+                if (error != null) return 0;
 
                 if (output is not integer)
                 {
@@ -2692,7 +2699,15 @@ namespace ezrSquared.Values
         public override bool ItemEquals(item obj, out error? error)
         {
             error = null;
-            if (obj is @object)
+
+            item? func = internalContext.symbolTable.get("equals");
+            if (func != null && func is special)
+            {
+                item? output = getOutput(func, new item[0], out error);
+                if (error != null) return false;
+                return output.isTrue(out error);
+            }
+            else if (obj is @object)
             {
                 int hash = GetItemHashCode(out error);
                 if (error != null) return false;

@@ -38,6 +38,12 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.2** - [18-01-23]
+    * Fixed dictionary, array and list hashing
+    * Added new `equals` special function - used for key comparison in dictionaries
+        and as backup if `compare_equal` and/or `compare_not_equal` are/is not defined
+    * `type_of` function now returns name of input if input is an object
+
 * **prerelease-1.1.0.0.1** - [18-01-23]
     * Fixed bugs in and improved all comparative, bitwise and math operators
 
@@ -130,6 +136,5 @@ And the differences:
     * Initial release!
 
 ### TODO
-* **Fixing dictionary, array and list hashing**
 * **More libraries**
 * **More testing**
