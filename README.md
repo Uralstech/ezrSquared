@@ -41,7 +41,7 @@ And the differences:
 * **prerelease-1.1.0.0.2** - [18-01-23]
     * Fixed dictionary, array and list hashing
     * Added new `equals` special function - used for key comparison in dictionaries
-        and as backup if `compare_equal` and/or `compare_not_equal` are/is not defined
+        and as backup if `compare_equal` and / or `compare_not_equal` are / is not defined
     * `type_of` function now returns name of input if input is an object
 
 * **prerelease-1.1.0.0.1** - [18-01-23]
