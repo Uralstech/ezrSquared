@@ -128,3 +128,8 @@ And the differences:
 
 * **beta-1.0.0.0.0** - [22-12-22]
     * Initial release!
+
+### TODO
+* **Fixing dictionary, array and list hashing**
+* **More libraries**
+* **More testing**

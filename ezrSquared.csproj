@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-  	<Folder Include="Builds\Installer\" />
+  	<Folder Include="Installer\bin\" />
   </ItemGroup>
 </Project>
