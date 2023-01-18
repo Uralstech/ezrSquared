@@ -45,7 +45,6 @@ namespace ezrSquared.Libraries.Random
         public override item copy() { return new random().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is random; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is random; }
     }
 }

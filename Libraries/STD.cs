@@ -22,8 +22,7 @@ namespace ezrSquared.Libraries.STD
         public override item copy() { return new integer_class().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is integer_class; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is integer_class; }
     }
 
     public class float_class : baseFunction
@@ -51,8 +50,7 @@ namespace ezrSquared.Libraries.STD
         public override item copy() { return new float_class().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is float_class; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is float_class; }
     }
 
     public class string_class : baseFunction
@@ -91,8 +89,7 @@ namespace ezrSquared.Libraries.STD
         public override item copy() { return new string_class().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is string_class; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is string_class; }
     }
 
     public class character_list_class : baseFunction
@@ -131,7 +128,6 @@ namespace ezrSquared.Libraries.STD
         public override item copy() { return new character_list_class().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is character_list_class; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is character_list_class; }
     }
 }

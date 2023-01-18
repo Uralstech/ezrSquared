@@ -38,6 +38,9 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.1** - [18-01-23]
+    * Fixed bugs in and improved all comparative, bitwise and math operators
+
 * **prerelease-1.1.0.0.0** - [17-01-23]
     * Builtin `Random` library
     * Small builtin `STD` library

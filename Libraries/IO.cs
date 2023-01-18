@@ -217,8 +217,7 @@ namespace ezrSquared.Libraries.IO
         public override item copy() { return new @file().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is @file; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is @file; }
     }
 
     public class folder : baseFunction
@@ -508,8 +507,7 @@ namespace ezrSquared.Libraries.IO
         public override item copy() { return new folder().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is folder; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is folder; }
     }
 
     public class path : baseFunction
@@ -829,7 +827,6 @@ namespace ezrSquared.Libraries.IO
         public override item copy() { return new path().setPosition(startPos, endPos).setContext(context); }
 
         public override string ToString() { return $"<builtin library {name}>"; }
-        public override int GetHashCode() { return ToString().GetHashCode(); }
-        public override bool Equals(object? obj) { return obj is path; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is path; }
     }
 }
