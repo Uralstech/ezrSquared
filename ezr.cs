@@ -411,13 +411,9 @@ namespace ezrSquared.Main
                     }
                 }
 
-                if (periodCount == 0)
-                {
-                    try { return new token(TOKENTYPE.INT, (int)Convert.ToInt32(numberString), startPos, pos); }
-                    catch (OverflowException) { error = new overflowError("Integer either too large or too small", startPos, pos);  return null; }
-                }
-
-                return new token(TOKENTYPE.FLOAT, (float)Convert.ToDouble(numberString), startPos, pos);
+                if (periodCount == 0 && int.TryParse(numberString, out int int_))
+                    return new token(TOKENTYPE.INT, int_, startPos, pos);
+                return new token(TOKENTYPE.FLOAT, float.Parse(numberString), startPos, pos);
             }
         }
 

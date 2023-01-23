@@ -38,8 +38,14 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.4** - [23-01-23]
+    * Fixed bug in function `as_integer` in float which crashed ezr² if the value was too large or too small
+    * If a number is too large or too small for an integer, lexer now tags it as a float
+    * Added new 'overflow' error tag
+
 * **prerelease-1.1.0.0.3** - [23-01-23]
     * Improved count and quick count loops
+    * Changed how comparative, bitwise and math operators work for integers
 
 * **prerelease-1.1.0.0.2** - [18-01-23]
     * Fixed dictionary, array and list hashing

@@ -2,7 +2,7 @@
 {
     public static class constants
     {
-        public const string VERSION = "prerelease-1.1.0.0.3";
+        public const string VERSION = "prerelease-1.1.0.0.4";
         public const string VERSION_DATE = "23.01.2023";
 
         public const string LETTERS_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
@@ -47,6 +47,7 @@
         };
 
         public const string RT_DEFAULT = "any";
+        public const string RT_OVERFLOW = "overflow";
         public const string RT_ILLEGALOP = "operation-error";
         public const string RT_UNDEFINED = "undefined-error";
         public const string RT_KEY = "key-error";

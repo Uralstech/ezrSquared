@@ -813,7 +813,13 @@ namespace ezrSquared.Values
         private runtimeResult abs(context context, position[] positions) { return new runtimeResult().success(new @float(float.Abs(storedValue))); }
         private runtimeResult asString(context context, position[] positions) { return new runtimeResult().success(new @string(ToString())); }
         private runtimeResult asCharList(context context, position[] positions) { return new runtimeResult().success(new character_list(ToString())); }
-        private runtimeResult asInteger(context context, position[] positions) { return new runtimeResult().success(new integer(storedValue)); }
+        private runtimeResult asInteger(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (storedValue < int.MinValue || storedValue > int.MaxValue)
+                return result.failure(new runtimeError(startPos, endPos, RT_OVERFLOW, "Value either too large or too small to be converted to an integer", context));
+            return result.success(new integer(storedValue));
+        }
         private runtimeResult asBoolean(context context, position[] positions)
         {
             runtimeResult result = new runtimeResult();
