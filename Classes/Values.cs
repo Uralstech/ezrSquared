@@ -222,7 +222,7 @@ namespace ezrSquared.Values
             return null;
         }
         public virtual bool isTrue(out error? error) { error = null; return false; }
-        
+
         public virtual item? bitwiseOrdTo(item other, out error? error)
         {
             error = illegalOperation(other);
@@ -441,19 +441,16 @@ namespace ezrSquared.Values
         public override string ToString() { return "nothing"; }
         public override int GetItemHashCode(out error? error) { error = null; return 0; }
     }
-    
+
     public class integer : value
     {
         public integer(int value) : base(value) { }
-        public integer(float value) : base((int)value) { }
 
         public override item? bitwiseOrdTo(item other, out error? error)
         {
             error = null;
             if (other is integer)
                 return new integer(storedValue | ((integer)other).storedValue).setContext(context);
-            else if (other is @float)
-                return new integer(storedValue | (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -464,8 +461,6 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer)
                 return new integer(storedValue ^ ((integer)other).storedValue).setContext(context);
-            else if (other is @float)
-                return new integer(storedValue ^ (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -476,8 +471,6 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer)
                 return new integer(storedValue & ((integer)other).storedValue).setContext(context);
-            else if (other is @float)
-                return new integer(storedValue & (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -488,8 +481,6 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer)
                 return new integer(storedValue << ((integer)other).storedValue).setContext(context);
-            else if (other is @float)
-                return new integer(storedValue << (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -500,8 +491,6 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer)
                 return new integer(storedValue >> ((integer)other).storedValue).setContext(context);
-            else if (other is @float)
-                return new integer(storedValue >> (int)((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -516,8 +505,10 @@ namespace ezrSquared.Values
         public override item? addedTo(item other, out error? error)
         {
             error = null;
-            if (other is integer || other is @float)
-                return new integer(storedValue + ((value)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue + ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue + ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -526,8 +517,10 @@ namespace ezrSquared.Values
         public override item? subbedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer || other is @float)
-                return new integer(storedValue - ((value)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue - ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue - ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -536,8 +529,10 @@ namespace ezrSquared.Values
         public override item? multedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer || other is @float)
-                return new integer(storedValue * ((value)other).storedValue).setContext(context);
+            if (other is integer)
+                return new integer(storedValue * ((integer)other).storedValue).setContext(context);
+            else if (other is @float)
+                return new @float(storedValue * ((@float)other).storedValue).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -548,14 +543,16 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer || other is @float)
             {
-                value other_ = (value)other;
-                if (other_.storedValue == 0)
+                value otherValue = (value)other;
+                if (otherValue.storedValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Division by zero", context);
                     return null;
                 }
 
-                return new integer(storedValue / other_.storedValue).setContext(context);
+                if (other is @float)
+                    return new @float(storedValue / otherValue.storedValue).setContext(context);
+                return new integer(storedValue / otherValue.storedValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -567,14 +564,16 @@ namespace ezrSquared.Values
             error = null;
             if (other is integer || other is @float)
             {
-                value other_ = (value)other;
-                if (other_.storedValue == 0)
+                value otherValue = (value)other;
+                if (otherValue.storedValue == 0)
                 {
                     error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Modulo by zero", context);
                     return null;
                 }
 
-                return new integer(storedValue % other_.storedValue).setContext(context);
+                if (other is @float)
+                    return new @float(storedValue % otherValue.storedValue).setContext(context);
+                return new integer(storedValue % otherValue.storedValue).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -584,8 +583,10 @@ namespace ezrSquared.Values
         public override item? powedBy(item other, out error? error)
         {
             error = null;
-            if (other is integer || other is @float)
-                return new integer((int)MathF.Pow(storedValue, ((value)other).storedValue)).setContext(context);
+            if (other is integer)
+                return new integer((int)MathF.Pow(storedValue, ((integer)other).storedValue)).setContext(context);
+            else if (other is @float)
+                return new @float(MathF.Pow(storedValue, ((@float)other).storedValue)).setContext(context);
 
             error = illegalOperation(other);
             return null;
@@ -1111,7 +1112,7 @@ namespace ezrSquared.Values
         public override string ToString() { return $"\"{storedValue}\""; }
         public string ToPureString() { return storedValue; }
     }
-    
+
     public class character_list : value
     {
         public character_list(string value) : base(value.ToCharArray().ToList()) { }
@@ -1299,7 +1300,7 @@ namespace ezrSquared.Values
             runtimeResult result = new runtimeResult();
             item index = context.symbolTable.get("index");
             item value = context.symbolTable.get("value");
-            
+
             if (index is not integer)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
 

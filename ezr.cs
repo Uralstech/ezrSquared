@@ -1453,7 +1453,9 @@ namespace ezrSquared.Main
                     bodyNode = result.register(statements());
                     if (result.error != null) return result;
 
-                    List<int> emptyCatches_ = new List<int>();
+                    int emptyCatches_ = 0;
+                    int emptyCatchIndex_ = -1;
+
                     while (currentToken.matchString(TOKENTYPE.KEY, "error"))
                     {
                         result.registerAdvance();
@@ -1503,15 +1505,19 @@ namespace ezrSquared.Main
                         if (result.error != null) return result;
 
                         if (error == null)
-                            emptyCatches_.Add(catches.Count);
+                        {
+                            emptyCatches_++;
+                            emptyCatchIndex_ = catches.Count;
+                        }
+
                         catches.Add(new object?[3] { error, varName, body });
                     }
 
-                    if (emptyCatches_.Count > 0)
+                    if (emptyCatches_ > 0)
                     {
-                        if (emptyCatches_.Count > 1)
+                        if (emptyCatches_ > 1)
                             return result.failure(new invalidGrammarError("There cannot be more than one empty 'error' statements", startPos, currentToken.endPos));
-                        if (emptyCatches_[0] != catches.Count - 1)
+                        if (emptyCatchIndex_ != catches.Count - 1)
                             return result.failure(new invalidGrammarError("Empty 'error' statements should always be declared last", startPos, currentToken.endPos));
                     }
 
@@ -1526,7 +1532,9 @@ namespace ezrSquared.Main
                 bodyNode = result.register(statement());
                 if (result.error != null) return result;
 
-                List<int> emptyCatches = new List<int>();
+                int emptyCatches = 0;
+                int emptyCatchIndex = -1;
+
                 while (currentToken.matchString(TOKENTYPE.KEY, "error"))
                 {
                     result.registerAdvance();
@@ -1576,15 +1584,19 @@ namespace ezrSquared.Main
                     if (result.error != null) return result;
 
                     if (error == null)
-                        emptyCatches.Add(catches.Count);
+                    {
+                        emptyCatches++;
+                        emptyCatchIndex = catches.Count;
+                    }
+
                     catches.Add(new object?[3] { error, varName, expression });
                 }
 
-                if (emptyCatches.Count > 0)
+                if (emptyCatches > 0)
                 {
-                    if (emptyCatches.Count > 1)
+                    if (emptyCatches > 1)
                         return result.failure(new invalidGrammarError("There cannot be more than one empty 'error' statements", startPos, currentToken.endPos));
-                    if (emptyCatches[0] != catches.Count - 1)
+                    if (emptyCatchIndex != catches.Count - 1)
                         return result.failure(new invalidGrammarError("Empty 'error' statements should always be declared last", startPos, currentToken.endPos));
                 }
 
@@ -2180,7 +2192,8 @@ namespace ezrSquared.Main
                     bodyNode = result.register(statements());
                     if (result.error != null) return result;
 
-                    List<int> emptyCatches_ = new List<int>();
+                    int emptyCatches_ = 0;
+                    int emptyCatchIndex_ = -1;
                     while (currentToken.matchString(TOKENTYPE.QEY, "e"))
                     {
                         result.registerAdvance();
@@ -2230,15 +2243,19 @@ namespace ezrSquared.Main
                         if (result.error != null) return result;
 
                         if (error == null)
-                            emptyCatches_.Add(catches.Count);
+                        {
+                            emptyCatches_++;
+                            emptyCatchIndex_ = catches.Count;
+                        }
+
                         catches.Add(new object?[3] { error, varName, body });
                     }
 
-                    if (emptyCatches_.Count > 0)
+                    if (emptyCatches_ > 0)
                     {
-                        if (emptyCatches_.Count > 1)
+                        if (emptyCatches_ > 1)
                             return result.failure(new invalidGrammarError("There cannot be more than one empty 'error' statements", startPos, currentToken.endPos));
-                        if (emptyCatches_[0] != catches.Count - 1)
+                        if (emptyCatchIndex_ != catches.Count - 1)
                             return result.failure(new invalidGrammarError("Empty 'error' statements should always be declared last", startPos, currentToken.endPos));
                     }
 
@@ -2253,7 +2270,8 @@ namespace ezrSquared.Main
                 bodyNode = result.register(statement());
                 if (result.error != null) return result;
 
-                List<int> emptyCatches = new List<int>();
+                int emptyCatches = 0;
+                int emptyCatchIndex = -1;
                 while (currentToken.matchString(TOKENTYPE.QEY, "e"))
                 {
                     result.registerAdvance();
@@ -2303,15 +2321,19 @@ namespace ezrSquared.Main
                     if (result.error != null) return result;
 
                     if (error == null)
-                        emptyCatches.Add(catches.Count);
+                    {
+                        emptyCatches++;
+                        emptyCatchIndex = catches.Count;
+                    }
+
                     catches.Add(new object?[3] { error, varName, expression });
                 }
 
-                if (emptyCatches.Count > 0)
+                if (emptyCatches > 0)
                 {
-                    if (emptyCatches.Count > 1)
+                    if (emptyCatches > 1)
                         return result.failure(new invalidGrammarError("There cannot be more than one empty 'error' statements", startPos, currentToken.endPos));
-                    if (emptyCatches[0] != catches.Count - 1)
+                    if (emptyCatchIndex != catches.Count - 1)
                         return result.failure(new invalidGrammarError("Empty 'error' statements should always be declared last", startPos, currentToken.endPos));
                 }
 
@@ -3030,14 +3052,14 @@ namespace ezrSquared.Main
                 if (node.variableNameToken != null)
                     varName = node.variableNameToken.value.ToString();
 
-                for (float j = i; j < length; j += step_)
+                for (var j = i; j < length; j += step_)
                 {
                     if (varName != null)
                     {
                         if (step_ is float)
                             context.symbolTable.set(varName, new @float(j));
                         else if (step_ is int)
-                            context.symbolTable.set(varName, new integer((int)j));
+                                context.symbolTable.set(varName, new integer((int)j));
                     }
 
                     item body = result.register(visit(node.bodyNode, context));

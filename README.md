@@ -38,6 +38,9 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.3** - [23-01-23]
+    * Improved count and quick count loops
+
 * **prerelease-1.1.0.0.2** - [18-01-23]
     * Fixed dictionary, array and list hashing
     * Added new `equals` special function - used for key comparison in dictionaries
@@ -90,8 +93,6 @@ And the differences:
         `is_null_or_spaces` - check if object is null or full of whitspaces and
         `as_boolean_value` - return boolean value of object
     * Other internal changes - check the commits
-    * Change for how updates will be handled - 
-        from now on, updates will be fewer and further in between, but (hopefully) bigger
 
 * **prerelease-1.0.0.0.1** - [30-12-22]
     * Fixed bug with unary operations - using the `+` operator would crash ezr²
