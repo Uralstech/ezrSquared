@@ -2,7 +2,6 @@
 using ezrSquared.General;
 using ezrSquared.Nodes;
 using ezrSquared.Helpers;
-using ezrSquared.Main;
 using static ezrSquared.Constants.constants;
 using static ezrSquared.Main.ezr;
 using System.Reflection;
@@ -2276,10 +2275,10 @@ namespace ezrSquared.Values
                 return result.failure(new runtimeError(startPos, endPos, RT_IO, $"Failed to load script \"{path}\"\n{exception.Message}", context));
             }
 
-            context runtimeContext = new context("<main>", ezr.globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
-            runtimeContext.symbolTable = new symbolTable(ezr.globalPredefinedContext.symbolTable);
+            context runtimeContext = new context("<main>", globalPredefinedContext, new position(0, 0, 0, "<main>", ""), false);
+            runtimeContext.symbolTable = new symbolTable(globalPredefinedContext.symbolTable);
 
-            error? error = new Main.ezr().run(Path.GetFileName(path), script, runtimeContext, out item? _);
+            error? error = run(Path.GetFileName(path), script, runtimeContext, out item? _);
             if (error != null)
                 return result.failure(new runtimeError(startPos, endPos, RT_RUN, $"Failed to execute script \"{path}\"\n\n{error.asString()}", context));
             return result.success(new nothing());

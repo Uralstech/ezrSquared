@@ -38,6 +38,9 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.5** - [24-01-23]
+    * Improved globalPredefinedContext implementation
+
 * **prerelease-1.1.0.0.4** - [23-01-23]
     * Fixed bug in function `as_integer` in float which crashed ezr² if the value was too large or too small
     * If a number is too large or too small for an integer, lexer now tags it as a float

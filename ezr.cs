@@ -761,7 +761,7 @@ namespace ezrSquared.Main
             private parseResult bitXOrExpression() { return binaryOperation(bitAndExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITXOR) }); }
 
             private parseResult bitAndExpression() { return binaryOperation(bitShiftExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITAND) }); }
-            
+
             private parseResult bitShiftExpression() { return binaryOperation(arithExpression, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.BITLSHIFT), new TypeValuePair(TOKENTYPE.BITRSHIFT) }); }
 
             private parseResult arithExpression() { return binaryOperation(term, new TypeValuePair[] { new TypeValuePair(TOKENTYPE.PLUS), new TypeValuePair(TOKENTYPE.MINUS) }); }
@@ -781,7 +781,7 @@ namespace ezrSquared.Main
 
                     node node = result.register(factor());
                     if (result.error != null) return result;
-                    
+
                     return result.success(new unaryOperationNode(node, token, startPos, currentToken.endPos.copy()));
                 }
 
@@ -1569,7 +1569,7 @@ namespace ezrSquared.Main
                     {
                         if (error == null && varName == null)
                             return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
-                        else if (varName == null)    
+                        else if (varName == null)
                             return result.failure(new invalidGrammarError("Expected 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                         return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
                     }
@@ -2716,7 +2716,7 @@ namespace ezrSquared.Main
                 {
                     item key = result.register(visit(node.nodePairs[i][0], context));
                     if (result.shouldReturn()) return result;
-                    
+
                     item value = result.register(visit(node.nodePairs[i][1], context));
                     if (result.shouldReturn()) return result;
 
@@ -3055,7 +3055,7 @@ namespace ezrSquared.Main
                         if (step_ is float)
                             context.symbolTable.set(varName, new @float(j));
                         else if (step_ is int)
-                                context.symbolTable.set(varName, new integer((int)j));
+                            context.symbolTable.set(varName, new integer((int)j));
                     }
 
                     item body = result.register(visit(node.bodyNode, context));
@@ -3190,7 +3190,7 @@ namespace ezrSquared.Main
 
                 item special = new special(name, node.bodyNode, SPECIALS[name], node.shouldReturnNull).setPosition(node.startPos, node.endPos).setContext(context);
                 context.symbolTable.set(name, special);
-                
+
                 return result.success(special);
             }
 
@@ -3207,7 +3207,7 @@ namespace ezrSquared.Main
                 if (node.inheritanceToken != null)
                 {
                     item? parent = context.symbolTable.get(node.inheritanceToken.value.ToString());
-                    
+
                     if (parent == null)
                         return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_UNDEFINED, $"\"{node.inheritanceToken.value}\" is not defined", context));
                     else if (parent is not @class)
@@ -3382,55 +3382,61 @@ namespace ezrSquared.Main
             }
         }
 
+        private static context _globalPredefinedContext = new context("<GLC>", null, null, true);
+        public static context globalPredefinedContext
+        {
+            get
+            {
+                if (_globalPredefinedContext.symbolTable == null)
+                {
+                    symbolTable predefinedSymbolTable = new symbolTable();
+                    predefinedSymbolTable.set("nothing", new nothing());
+                    predefinedSymbolTable.set("true", new boolean(true));
+                    predefinedSymbolTable.set("false", new boolean(false));
 
-        public static context globalPredefinedContext = new context("<GLC>", null, null, true);
+                    predefinedSymbolTable.set("version__", new @string(VERSION));
+
+                    predefinedSymbolTable.set("err_any", new @string(RT_DEFAULT));
+                    predefinedSymbolTable.set("err_illop", new @string(RT_ILLEGALOP));
+                    predefinedSymbolTable.set("err_undef", new @string(RT_UNDEFINED));
+                    predefinedSymbolTable.set("err_key", new @string(RT_KEY));
+                    predefinedSymbolTable.set("err_index", new @string(RT_INDEX));
+                    predefinedSymbolTable.set("err_args", new @string(RT_ARGS));
+                    predefinedSymbolTable.set("err_type", new @string(RT_TYPE));
+                    predefinedSymbolTable.set("err_math", new @string(RT_MATH));
+                    predefinedSymbolTable.set("err_run", new @string(RT_RUN));
+                    predefinedSymbolTable.set("err_io", new @string(RT_IO));
+
+                    predefinedSymbolTable.set("show", new builtin_function("show", new string[1] { "message" }));
+                    predefinedSymbolTable.set("show_error", new builtin_function("show_error", new string[2] { "tag", "message" }));
+                    predefinedSymbolTable.set("get", new builtin_function("get", new string[1] { "message" }));
+                    predefinedSymbolTable.set("clear", new builtin_function("clear", new string[0]));
+                    predefinedSymbolTable.set("hash", new builtin_function("hash", new string[1] { "value" }));
+                    predefinedSymbolTable.set("type_of", new builtin_function("type_of", new string[1] { "value" }));
+                    predefinedSymbolTable.set("run", new builtin_function("run", new string[1] { "file" }));
+
+                    position pos = new position(0, 0, 0, "<main>", "");
+                    predefinedSymbolTable.set("file", new @file().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+                    predefinedSymbolTable.set("folder", new folder().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+                    predefinedSymbolTable.set("path", new path().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+                    predefinedSymbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+                    predefinedSymbolTable.set("float", new float_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+                    predefinedSymbolTable.set("string", new string_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+                    predefinedSymbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+                    predefinedSymbolTable.set("random", new random().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+                    _globalPredefinedContext.symbolTable = predefinedSymbolTable;
+                }
+
+                return _globalPredefinedContext;
+            }
+        }
 
         public static List<string> LOCALLIBPATHS = new List<string>();
 
-        public ezr()
-        {
-            symbolTable predefinedSymbolTable = new symbolTable();
-            predefinedSymbolTable.set("nothing", new nothing());
-            predefinedSymbolTable.set("true", new boolean(true));
-            predefinedSymbolTable.set("false", new boolean(false));
-
-            predefinedSymbolTable.set("version__", new @string(VERSION));
-
-            predefinedSymbolTable.set("err_any", new @string(RT_DEFAULT));
-            predefinedSymbolTable.set("err_illop", new @string(RT_ILLEGALOP));
-            predefinedSymbolTable.set("err_undef", new @string(RT_UNDEFINED));
-            predefinedSymbolTable.set("err_key", new @string(RT_KEY));
-            predefinedSymbolTable.set("err_index", new @string(RT_INDEX));
-            predefinedSymbolTable.set("err_args", new @string(RT_ARGS));
-            predefinedSymbolTable.set("err_type", new @string(RT_TYPE));
-            predefinedSymbolTable.set("err_math", new @string(RT_MATH));
-            predefinedSymbolTable.set("err_run", new @string(RT_RUN));
-            predefinedSymbolTable.set("err_io", new @string(RT_IO));
-
-            predefinedSymbolTable.set("show", new builtin_function("show", new string[1] { "message" }));
-            predefinedSymbolTable.set("show_error", new builtin_function("show_error", new string[2] { "tag", "message" }));
-            predefinedSymbolTable.set("get", new builtin_function("get", new string[1] { "message" }));
-            predefinedSymbolTable.set("clear", new builtin_function("clear", new string[0]));
-            predefinedSymbolTable.set("hash", new builtin_function("hash", new string[1] { "value" }));
-            predefinedSymbolTable.set("type_of", new builtin_function("type_of", new string[1] { "value" }));
-            predefinedSymbolTable.set("run", new builtin_function("run", new string[1] { "file" }));
-
-            position pos = new position(0, 0, 0, "<main>", "");
-            predefinedSymbolTable.set("file", new @file().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-            predefinedSymbolTable.set("folder", new folder().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-            predefinedSymbolTable.set("path", new path().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-
-            predefinedSymbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-            predefinedSymbolTable.set("float", new float_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-            predefinedSymbolTable.set("string", new string_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-            predefinedSymbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-
-            predefinedSymbolTable.set("random", new random().setPosition(pos, pos).setContext(globalPredefinedContext).execute(new item[0]).value);
-
-            globalPredefinedContext.symbolTable = predefinedSymbolTable;
-        }
-
-        public error? run(string file, string input, context runtimeContext, out item? result)
+        public static error? run(string file, string input, context runtimeContext, out item? result)
         {
             result = null;
             string fullFilePath = Path.GetDirectoryName(Path.GetFullPath(file));
