@@ -4,7 +4,11 @@ using ezrSquared.Nodes;
 using ezrSquared.Helpers;
 using static ezrSquared.Constants.constants;
 using static ezrSquared.Main.ezr;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using System.IO;
+using System;
 
 namespace ezrSquared.Values
 {
@@ -1432,6 +1436,8 @@ namespace ezrSquared.Values
 
         public override string ToString() { return $"'{string.Join("", storedValue)}'"; }
         public string ToPureString() { return string.Join("", storedValue); }
+        public override bool ItemEquals(item obj, out error? error) { error = null; if (GetType() == obj.GetType()) return ToPureString() == ((character_list)obj).ToPureString(); return false; }
+        public override int GetItemHashCode(out error? error) { error = null; return ToPureString().GetHashCode(); }
     }
 
     public class array : value

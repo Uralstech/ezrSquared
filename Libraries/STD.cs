@@ -3,6 +3,7 @@ using ezrSquared.Helpers;
 using ezrSquared.Errors;
 using ezrSquared.General;
 using static ezrSquared.Constants.constants;
+using System;
 
 namespace ezrSquared.Libraries.STD
 {

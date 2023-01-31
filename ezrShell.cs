@@ -3,6 +3,7 @@ using ezrSquared.Errors;
 using ezrSquared.Values;
 using ezrSquared.General;
 using static ezrSquared.Constants.constants;
+using System;
 
 namespace ezrSquared.Shell
 {
@@ -16,7 +17,6 @@ namespace ezrSquared.Shell
 
             Console.WriteLine($"ezr² biShell version- ({VERSION}) release- [{VERSION_DATE}]");
 
-            string[] commands = new string[] { "switch mode", "run code", "quit shell" };
             bool isScript = false;
             string script = string.Empty;
             int scriptLine = 1;
@@ -36,20 +36,17 @@ namespace ezrSquared.Shell
                     string? input = Console.ReadLine();
                     if (string.IsNullOrWhiteSpace(input)) continue;
 
-                    if (commands.Contains(input))
+                    if (input == "switch mode")
                     {
-                        if (input == "switch mode")
-                        {
-                            isScript = !isScript;
-                            scriptLine = 1;
-                            script = "";
-                            continue;
-                        }
-                        else if (input == "run code")
-                            isScript = false;
-                        else if (input == "quit shell")
-                            break;
+                        isScript = !isScript;
+                        scriptLine = 1;
+                        script = "";
+                        continue;
                     }
+                    else if (input == "run code")
+                        isScript = false;
+                    else if (input == "quit shell")
+                        break;
                     else
                         script += input;
 

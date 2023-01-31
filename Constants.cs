@@ -1,17 +1,19 @@
-﻿namespace ezrSquared.Constants
+﻿using System.Collections.Generic;
+
+namespace ezrSquared.Constants
 {
     public static class constants
     {
-        public const string VERSION = "prerelease-1.1.0.0.5";
-        public const string VERSION_DATE = "24.01.2023";
+        public const string VERSION = "prerelease-1.1.0.0.6";
+        public const string VERSION_DATE = "31.01.2023";
+
+        public static readonly string[] KEYWORDS = { "item", "and", "or", "invert", "if", "else", "do", "count", "from", "as", "to", "step", "while", "function", "special", "with", "end", "return", "skip", "stop", "try", "error", "in", "object", "global", "include" };
+        public static readonly string[] QEYWORDS = { "f", "l", "e", "c", "t", "n", "w", "fd", "sd", "od", "i", "s", "d", "g", "v" };
 
         public const string LETTERS_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
         public const string ALPHANUM_UNDERSCORE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
         public const string DIGITS = "0123456789";
         public const string DIGITS_PERIOD = "0123456789.";
-
-        public static readonly string[] KEYWORDS = { "item", "and", "or", "invert", "if", "else", "do", "count", "from", "as", "to", "step", "while", "function", "special", "with", "end", "return", "skip", "stop", "try", "error", "in", "object", "global", "include" };
-        public static readonly string[] QEYWORDS = { "f", "l", "e", "c", "t", "n", "w", "fd", "sd", "od", "i", "s", "d", "g", "v" };
 
         public static readonly Dictionary<string, string[]> SPECIALS = new Dictionary<string, string[]>()
         {

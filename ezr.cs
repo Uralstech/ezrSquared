@@ -4,7 +4,11 @@ using ezrSquared.Nodes;
 using ezrSquared.Values;
 using ezrSquared.Helpers;
 using static ezrSquared.Constants.constants;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
+using System.IO;
+using System;
 
 using ezrSquared.Libraries.IO;
 using ezrSquared.Libraries.STD;
@@ -420,8 +424,8 @@ namespace ezrSquared.Main
         public class parser
         {
             private token[] tokens;
-            public token currentToken;
-            public int index;
+            private token currentToken;
+            private int index;
 
             private bool usingQSyntax = false;
 

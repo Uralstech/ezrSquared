@@ -1,4 +1,5 @@
 ﻿using ezrSquared.General;
+using System;
 
 namespace ezrSquared.Errors
 {

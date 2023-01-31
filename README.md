@@ -38,6 +38,10 @@ And the differences:
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.1.0.0.6** - [31-01-23]
+    * Fixed character_list comparison and hashing
+    * Made shell code simpler
+
 * **prerelease-1.1.0.0.5** - [24-01-23]
     * Improved globalPredefinedContext implementation
 
