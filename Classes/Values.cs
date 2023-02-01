@@ -1145,6 +1145,31 @@ namespace ezrSquared.Values
             return null;
         }
 
+        public override item? subbedBy(item other, out error? error)
+        {
+            error = null;
+            if (other is integer || other is @float)
+            {
+                value otherValue = (value)other;
+                if (otherValue.storedValue < 0)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be negative value", context);
+                    return null;
+                }
+                else if (otherValue.storedValue >= storedValue.Count)
+                {
+                    error = new runtimeError(other.startPos, other.endPos, RT_MATH, "Index cannot be greater than or equal to length of character_list", context);
+                    return null;
+                }
+
+                storedValue.RemoveAt((int)otherValue.storedValue);
+                return new nothing().setContext(context);
+            }
+
+            error = illegalOperation(other);
+            return null;
+        }
+
         public override item? multedBy(item other, out error? error)
         {
             error = null;
@@ -1213,7 +1238,7 @@ namespace ezrSquared.Values
                     return null;
                 }
 
-                return new @string(storedValue[otherValue.storedValue].ToString()).setContext(context);
+                return new @string(storedValue[(int)otherValue.storedValue].ToString()).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -1239,7 +1264,6 @@ namespace ezrSquared.Values
             internalContext.symbolTable.set("insert", new predefined_function("character_list_insert", charListInsert, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("set", new predefined_function("character_list_set", charListSet, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("remove", new predefined_function("character_list_remove", charListRemove, new string[1] { "value" }));
-            internalContext.symbolTable.set("remove_at", new predefined_function("character_list_remove_at", charListRemoveAt, new string[1] { "index" }));
             internalContext.symbolTable.set("as_integer", new predefined_function("character_list_as_integer", asInteger, new string[0] { }));
             internalContext.symbolTable.set("as_float", new predefined_function("character_list_as_float", asFloat, new string[0] { }));
             internalContext.symbolTable.set("try_as_integer", new predefined_function("character_list_try_as_integer", tryAsInteger, new string[0] { }));
@@ -1348,25 +1372,6 @@ namespace ezrSquared.Values
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "CharacterList does not contain value", context));
 
             ((List<char>)storedValue).Remove(charValue);
-            return result.success(new nothing());
-        }
-
-        private runtimeResult charListRemoveAt(context context, position[] positions)
-        {
-            runtimeResult result = new runtimeResult();
-            item index = context.symbolTable.get("index");
-
-            if (index is not integer)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
-
-            int indexAsInt = ((integer)index).storedValue;
-
-            if (indexAsInt < 0)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
-            else if (indexAsInt >= ((List<char>)storedValue).Count)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be greater than length of character_list", context));
-
-            ((List<char>)storedValue).RemoveAt(indexAsInt);
             return result.success(new nothing());
         }
 
@@ -1659,7 +1664,7 @@ namespace ezrSquared.Values
                 }
 
                 item removedValue = storedValue[(int)otherValue.storedValue];
-                storedValue.RemoveAt(otherValue);
+                storedValue.RemoveAt((int)otherValue.storedValue);
                 return removedValue.setContext(context);
             }
 
@@ -1751,7 +1756,6 @@ namespace ezrSquared.Values
             internalContext.symbolTable.set("insert", new predefined_function("list_insert", listInsert, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("set", new predefined_function("list_set", listSet, new string[2] { "index", "value" }));
             internalContext.symbolTable.set("remove", new predefined_function("list_remove", listRemove, new string[1] { "value" }));
-            internalContext.symbolTable.set("remove_at", new predefined_function("list_remove_at", listRemoveAt, new string[1] { "index" }));
             internalContext.symbolTable.set("as_boolean", new predefined_function("list_as_boolean", asBoolean, new string[0] { }));
             internalContext.symbolTable.set("as_string", new predefined_function("list_as_string", asString, new string[0] { }));
             internalContext.symbolTable.set("as_character_list", new predefined_function("list_as_character_list", asCharList, new string[0] { }));
@@ -1831,25 +1835,6 @@ namespace ezrSquared.Values
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "List does not contain value", context));
 
             ((List<item>)storedValue).Remove(value);
-            return result.success(new nothing());
-        }
-
-        private runtimeResult listRemoveAt(context context, position[] positions)
-        {
-            runtimeResult result = new runtimeResult();
-            item index = context.symbolTable.get("index");
-
-            if (index is not integer)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
-
-            int indexAsInt = ((integer)index).storedValue;
-
-            if (indexAsInt < 0)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be less than zero", context));
-            else if (indexAsInt >= ((List<item>)storedValue).Count)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index cannot be greater than length of list", context));
-
-            ((List<item>)storedValue).RemoveAt(indexAsInt);
             return result.success(new nothing());
         }
 

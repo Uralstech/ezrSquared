@@ -1,42 +1,30 @@
 # ezr²
 
-## Warning!
-ezr² is still in beta! Huge changes can occur between updates and code written in one version may not work in the next or previous ones!
-
 ## What is it?
 ezr² is an easy to learn and practical programming language made in C#
 
 ## Download link?
-All releases of the shell and source code are available [here](https://github.com/Uralstech/ezrSquared/releases)
-
-## Where can I learn ezr²?
-The documentation won't be out till the full, stable release
+All releases of the shell and source code are available [here](https://github.com/Uralstech/ezrSquared/releases) - for mobile releases,
+check out [ezr² Portable Interpreter](https://udgames.itch.io/ezrsquared-pi), an interpreter made with the help of
+[ezr² Net4.8](https://github.com/Uralstech/ezrSquaredNet4.8) in [Unity](https://unity.com/)!
 
 ## Are there any example scripts?
 Yeah! Check them out [here](https://github.com/Uralstech/ezrSquared/tree/master/Tests)
 
 ## When will ezr² release?
-idk lol - but till it fully releases, try the prerelease version! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
-
-## The name feels familiar...
-ezr² is heavily inspired by [ezrlang](https://github.com/Uralstech/ezrlang), which is another one of my projects -
-Here are the similarities:
-* The syntax is quite similar
-* The code is based on the same concept
-* Well, the name is basically the same
-
-And the differences:
-* ezrlang was made in Python
-* QSyntax is not available in ezrlang
-* Count loops are different
-* All the variable types have had an overhaul in ezr²
-* ezr² is much faster
+I just need to finish the documentation! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
 
 ## Progress
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Function; 4th place -> Library; 5th place -> Patch**
 
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
+
+* **prerelease-1.2.0.0.0** - [01-02-23]
+    * Added `remove` operation to character_list
+    * Removed `remove_at` function in character_list and list as they are redundant - use the `remove` operation
+    * Fixed list `remove` operation
+    * Fixed bug in list, character_list `remove` and `get` operations - ezr² would crash if input was a float
 
 * **prerelease-1.1.0.0.6** - [31-01-23]
     * Fixed character_list comparison and hashing
@@ -148,7 +136,3 @@ And the differences:
 
 * **beta-1.0.0.0.0** - [22-12-22]
     * Initial release!
-
-### TODO
-* **More libraries**
-* **More testing**
