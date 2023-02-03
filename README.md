@@ -20,6 +20,16 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.0.0.0** - [03-02-23]
+    * ezr² now searches for name of DLL file as the main class in CSAELs
+    * Error tags now correspond to their errors
+    * New error tag `length-error`
+    * Error tag `overflow` now `overflow-error`
+    * New global variable for error tag `overflow`
+    * Global variables `err_illop` and `err_undef` are now `err_illegalop` and `err_undefined`
+    * Functions `insert`, `remove` in character_list now support string / character_list values of length > 1
+    * Other new errors - check the commits
+
 * **prerelease-1.2.0.0.0** - [01-02-23]
     * Added `remove` operation to character_list
     * Removed `remove_at` function in character_list and list as they are redundant - use the `remove` operation

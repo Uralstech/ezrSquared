@@ -629,8 +629,10 @@ namespace ezrSquared.Main
 
                             if (isSimple)
                                 return result.success(new simpleVariableAssignNode(varName, operatorToken, expression, isGlobal, startPos, currentToken.endPos.copy()));
+                            else if (isGlobal)
+                                return result.failure(new invalidGrammarError("Variable assignment in objects cannot be globalized", startPos, currentToken.endPos));
                             else
-                                return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, false, startPos, currentToken.endPos.copy()));
+                                return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, startPos, currentToken.endPos.copy()));
                         }
                         else if (isGlobal)
                         {
@@ -697,8 +699,10 @@ namespace ezrSquared.Main
 
                     if (isSimple)
                         return result.success(new simpleVariableAssignNode(varName, operatorToken, expression, isGlobal, startPos, currentToken.endPos.copy()));
+                    else if (isGlobal)
+                        return result.failure(new invalidGrammarError("Variable assignment in objects cannot be globalized", startPos, currentToken.endPos));
                     else
-                        return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, false, startPos, currentToken.endPos.copy()));
+                        return result.success(new objectVariableAssignNode(accessNode, varName, operatorToken, expression, startPos, currentToken.endPos.copy()));
                 }
                 else if (isGlobal)
                     reverse(result.advanceCount);
@@ -2864,13 +2868,8 @@ namespace ezrSquared.Main
                     variable = newVariable;
                 }
 
-                if (node.isGlobal)
-                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, "This type of variable assignment does not support globalization", context));
-                else
-                {
-                    result.register(object_.set(varName, variable));
-                    if (result.shouldReturn()) return result;
-                }
+                result.register(object_.set(varName, variable));
+                if (result.shouldReturn()) return result;
                 return result.success(variable);
             }
 
@@ -3136,7 +3135,7 @@ namespace ezrSquared.Main
                                     if (tag_ == null)
                                         return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"\"{catchTagToken.value}\" is not defined", context));
                                     else if (tag_ is not @string)
-                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"Error tag must be a string", context));
+                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_TYPE, $"Error tag must be a string", context));
                                     catchTag = ((@string)tag_).storedValue;
                                 }
                                 else
@@ -3215,7 +3214,7 @@ namespace ezrSquared.Main
                     if (parent == null)
                         return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_UNDEFINED, $"\"{node.inheritanceToken.value}\" is not defined", context));
                     else if (parent is not @class)
-                        return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_TYPE, $"\"{node.inheritanceToken.value}\" is not a class", context));
+                        return result.failure(new runtimeError(node.inheritanceToken.startPos, node.inheritanceToken.endPos, RT_TYPE, "Parent must be a class", context));
                     inheritFrom = (@class)parent;
 
                     for (int i = 0; i < inheritFrom.argNames.Length; i++)
@@ -3301,7 +3300,7 @@ namespace ezrSquared.Main
                         if (nickname == null)
                             return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"\"{node.nicknameToken.value}\" is not defined", context));
                         else if (nickname is not @string)
-                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"Nickname must be a string", context));
+                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_TYPE, $"Nickname must be a string", context));
                         name = ((@string)nickname).storedValue;
                     }
                 }
@@ -3337,9 +3336,9 @@ namespace ezrSquared.Main
 
                     try
                     {
-                        Type? mainLibClass = DLL.GetType("Main");
+                        Type? mainLibClass = DLL.GetType(formattedFileName);
                         if (mainLibClass == null)
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find main library class in script \"{file}\"", context));
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, $"Main library class in script \"{file}\" is not defined", context));
 
                         dynamic? val = Activator.CreateInstance(mainLibClass);
 
@@ -3349,11 +3348,11 @@ namespace ezrSquared.Main
                             if (result.shouldReturn()) return result;
                         }
                         else
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find main library class in script \"{file}\"", context));
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, $"Main library class in script \"{file}\" is not defined", context));
                     }
                     catch (Exception exception)
                     {
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to finish executing script \"{file}\"\n{exception.Message}", context));
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n{exception.Message}", context));
                     }
                 }
                 else
@@ -3370,11 +3369,11 @@ namespace ezrSquared.Main
 
                     token[] tokens = new lexer(file, script).compileTokens(out error? error);
                     if (error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{error.asString()}", context));
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n\n{error.asString()}", context));
 
                     parseResult parseResult = new parser(tokens).parse();
                     if (parseResult.error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to finish executing script \"{file}\"\n\n{parseResult.error.asString()}", context));
+                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n\n{parseResult.error.asString()}", context));
 
                     value = result.register(new @class(formattedFileName, null, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                     if (result.shouldReturn()) return result;
@@ -3401,8 +3400,8 @@ namespace ezrSquared.Main
                     predefinedSymbolTable.set("version__", new @string(VERSION));
 
                     predefinedSymbolTable.set("err_any", new @string(RT_DEFAULT));
-                    predefinedSymbolTable.set("err_illop", new @string(RT_ILLEGALOP));
-                    predefinedSymbolTable.set("err_undef", new @string(RT_UNDEFINED));
+                    predefinedSymbolTable.set("err_illegalop", new @string(RT_ILLEGALOP));
+                    predefinedSymbolTable.set("err_undefined", new @string(RT_UNDEFINED));
                     predefinedSymbolTable.set("err_key", new @string(RT_KEY));
                     predefinedSymbolTable.set("err_index", new @string(RT_INDEX));
                     predefinedSymbolTable.set("err_args", new @string(RT_ARGS));
@@ -3410,6 +3409,8 @@ namespace ezrSquared.Main
                     predefinedSymbolTable.set("err_math", new @string(RT_MATH));
                     predefinedSymbolTable.set("err_run", new @string(RT_RUN));
                     predefinedSymbolTable.set("err_io", new @string(RT_IO));
+                    predefinedSymbolTable.set("err_overflow", new @string(RT_OVERFLOW));
+                    predefinedSymbolTable.set("err_length", new @string(RT_LEN));
 
                     predefinedSymbolTable.set("show", new builtin_function("show", new string[1] { "message" }));
                     predefinedSymbolTable.set("show_error", new builtin_function("show_error", new string[2] { "tag", "message" }));

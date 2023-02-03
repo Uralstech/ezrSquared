@@ -4,8 +4,8 @@ namespace ezrSquared.Constants
 {
     public static class constants
     {
-        public const string VERSION = "prerelease-1.2.0.0.0";
-        public const string VERSION_DATE = "01.02.2023";
+        public const string VERSION = "prerelease-1.3.0.0.0";
+        public const string VERSION_DATE = "03.02.2023";
 
         public static readonly string[] KEYWORDS = { "item", "and", "or", "invert", "if", "else", "do", "count", "from", "as", "to", "step", "while", "function", "special", "with", "end", "return", "skip", "stop", "try", "error", "in", "object", "global", "include" };
         public static readonly string[] QEYWORDS = { "f", "l", "e", "c", "t", "n", "w", "fd", "sd", "od", "i", "s", "d", "g", "v" };
@@ -49,7 +49,7 @@ namespace ezrSquared.Constants
         };
 
         public const string RT_DEFAULT = "any";
-        public const string RT_OVERFLOW = "overflow";
+        public const string RT_OVERFLOW = "overflow-error";
         public const string RT_ILLEGALOP = "operation-error";
         public const string RT_UNDEFINED = "undefined-error";
         public const string RT_KEY = "key-error";
@@ -57,6 +57,7 @@ namespace ezrSquared.Constants
         public const string RT_ARGS = "arguments-error";
         public const string RT_TYPE = "type-error";
         public const string RT_MATH = "math-error";
+        public const string RT_LEN = "length-error";
         public const string RT_RUN = "run-error";
         public const string RT_IO = "io-error";
     }

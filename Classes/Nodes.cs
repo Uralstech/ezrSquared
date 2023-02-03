@@ -111,7 +111,7 @@ namespace ezrSquared.Nodes
         public node accessNode;
         public token varName;
 
-        public objectVariableAssignNode(node accessNode, token varName, token? operatorToken, node valueNode, bool isGlobal, position startPos, position endPos) : base(operatorToken, valueNode, isGlobal, startPos, endPos) { this.accessNode = accessNode; this.varName = varName; }
+        public objectVariableAssignNode(node accessNode, token varName, token? operatorToken, node valueNode, position startPos, position endPos) : base(operatorToken, valueNode, false, startPos, endPos) { this.accessNode = accessNode; this.varName = varName; }
     }
 
     public class binaryOperationNode : node
