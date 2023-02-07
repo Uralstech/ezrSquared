@@ -20,6 +20,10 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.0.0.1** - [07-02-23]
+    * Fixed `in` expression
+    * character_list `remove` operation now returns the removed character
+
 * **prerelease-1.3.0.0.0** - [03-02-23]
     * ezr² now searches for name of DLL file as the main class in CSAELs
     * Error tags now correspond to their errors

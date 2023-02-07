@@ -217,9 +217,9 @@ namespace ezrSquared.Values
         {
             error = null;
             if (other is list)
-                return new boolean(((list)other).hasElement(this)).setContext(context);
+                return new boolean(((list)other).hasElement(this, out error)).setContext(context);
             else if (other is array)
-                return new boolean(((array)other).hasElement(this)).setContext(context);
+                return new boolean(((array)other).hasElement(this, out error)).setContext(context);
 
             error = illegalOperation();
             return null;
@@ -1162,8 +1162,9 @@ namespace ezrSquared.Values
                     return null;
                 }
 
+                string removed = storedValue[(int)otherValue.storedValue].ToString();
                 storedValue.RemoveAt((int)otherValue.storedValue);
-                return new nothing().setContext(context);
+                return new @string(removed).setContext(context);
             }
 
             error = illegalOperation(other);
@@ -1441,10 +1442,14 @@ namespace ezrSquared.Values
     {
         public array(item[] elements) : base(elements) { }
 
-        public bool hasElement(item other)
+        public bool hasElement(item other, out error? error)
         {
+            error = null;
             for (int i = 0; i < storedValue.Length; i++)
-                if (storedValue[i].Equals(other)) return true;
+            {
+                if (storedValue[i].ItemEquals(other, out error)) return true;
+                if (error != null) return false;
+            }
             return false;
         }
 
@@ -1617,10 +1622,14 @@ namespace ezrSquared.Values
         public list(item[] elements) : base(elements.ToList()) { }
         public list(List<item> elements) : base(elements) { }
 
-        public bool hasElement(item other)
+        public bool hasElement(item other, out error? error)
         {
+            error = null;
             for (int i = 0; i < storedValue.Count; i++)
-                if (storedValue[i].Equals(other)) return true;
+            {
+                if (storedValue[i].ItemEquals(other, out error)) return true;
+                if (error != null) return false;
+            }
             return false;
         }
 

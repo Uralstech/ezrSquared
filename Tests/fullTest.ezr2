@@ -1,57 +1,57 @@
-@  'in'
-show('----item test----')
+@  "in"
+show("----item test----")
 item a: 2
 show(a)
 item a: 3
 show(a)
-show('----and/or test----')
+show("----and/or test----")
 show(a and 6)
 show(a and 0)
 show(a or 6)
 show(a or 0)
-show('----invert test----')
+show("----invert test----")
 show(invert a)
 show(invert true)
 show(invert 0)
 show(invert 65)
-show('----if test----')
+show("----if test----")
 if a do
-show('sds')
+show("sds")
 else do
-show('sd')
+show("sd")
 end
 if invert a do
-show('sds')
+show("sds")
 else do
-show('sd')
+show("sd")
 end
 if invert a do
-show('sds')
+show("sds")
 else if invert 1 do
-show('sd')
+show("sd")
 else do
-show('dssdf')
+show("dssdf")
 end
-show('----count test----')
+show("----count test----")
 count from 0 to 10 as i do
-show('sd')
+show("sd")
 end
 count from 0 to 10 step 2 as i do
-show('sd')
+show("sd_")
 end
 count from 0 to 10 as i do
 if i = 5 do
 skip
 end
-show('sd' + i.as_string())
+show("sd" + i.as_string())
 end
 count from 0 to 10 as i do
 if i = 5 do
 stop
 end
-show('sd' + i.as_string())
+show("sd2" + i.as_string())
 end
-show('----while test----')
+show("----while test----")
 while a do
 show(a)
 item a: a - 1
@@ -72,77 +72,77 @@ stop
 end
 show(a)
 end
-show('----func test----')
+show("----func test----")
 function name with args do
 show(args)
 end
 function nameno do
-show('noargs')
+show("noargs")
 end
 function retu do
 return 2
 end
-show(name('fdgffdf'))
+show(name("fdgffdf"))
 show(nameno())
 show(retu())
-show('----try test----')
+show("----try test----")
 try do
 1/0
 end
 try do
 1/0
 error do
-show('errrrr')
+show("errrrr")
 end
 try do
 1/0
-error 'MATH' do
-show('errrrr')
+error "math-error" do
+show("errrrr")
 error do
-show('sdfsdf')
+show("sdfsdf")
 end
 try do
 1/0
-error 'MAH' do
-show('errrrr')
+error "MAH" do
+show("errrrr")
 error do
-show('sdfsdf')
+show("sdfsdf")
 end
-@ show('----include/as test----')
-@ include 'time.py'
+@ show("----include/as test----")
+@ include "time.py"
 @ show(time.time())
 @ show(time.localTime(time.time()))
 @ show(time.localTime(time.time()).readableTime())
-@ include 'time.py' as t
+@ include "time.py" as t
 @ show(t.time())
 @ show(t.localTime(t.time()))
 @ show(t.localTime(t.time()).readableTime())
-show('----global test----')
+show("----global test----")
 function ChangeA with NewA do
-show('a: ' + a.as_string())
+show("a: " + a.as_string())
 function localChangeA with localNewA do
 function local2ChangeA with local2NewA do
 global item a: local2NewA
 end
 local2ChangeA(localNewA)
-show('a: ' + a.as_string())
+show("a: " + a.as_string())
 end
 localChangeA(NewA)
 end
 ChangeA(123124)
-show('----in test----')
-show('sd' in (1,2,3))
-show('sd' in (1,'sd',3))
-show('sd' in [1,2,3])
-show('sd' in [1,'sd',3])
-show('----array test----')
+show("----in test----")
+show("sd" in (1,2,3))
+show("sd" in (1,"sd",3))
+show("sd" in [1,2,3])
+show("sd" in [1,"sd",3])
+show("----array test----")
 show((1))
 show((1,))
 show((1,2,3))
 show((1,2,3)<=1)
 show((1,2,3)*6)
 show(((1,2,3)*6)/2)
-show('----list test----')
+show("----list test----")
 show([1])
 show([1,2,3])
 show([1,2,3]<=1)
@@ -161,7 +161,7 @@ show(a=a)
 show(a!a)
 show(a=[1,2,3])
 show(a![1,2,3])
-show('----dict test----')
+show("----dict test----")
 show({1:2})
 show({1:2, 3:4, 5:6})
 show({1:2, 3:4, 5:6}<=1)
@@ -181,25 +181,25 @@ show(a=a)
 show(a!a)
 show(a={1:2, 3:4, 5:6})
 show(a!{1:2, 3:4, 5:6})
-show('----obj test----')
+show("----obj test----")
 object obj do
 item a: 4
 function name with args do
-show('obj')
+show("obj")
 show(args)
 end
 end
 object objtoo with args do
 item a: args
 function name do
-show('obj')
+show("obj")
 show(args)
 end
 end
 show(obj())
 show(obj().a)
-show(obj().name('fsd'))
-show(objtoo('dsfsfdfdsfsd'))
-show(objtoo('dsfsfdfdsfsd').a)
-show(objtoo('dsfsfdfdsfsd').name())
-show('----test complete----')
+show(obj().name("fsd"))
+show(objtoo("dsfsfdfdsfsd"))
+show(objtoo("dsfsfdfdsfsd").a)
+show(objtoo("dsfsfdfdsfsd").name())
+show("----test complete----")
