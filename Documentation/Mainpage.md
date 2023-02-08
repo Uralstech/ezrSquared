@@ -99,7 +99,8 @@ show("Hello, my name is " + name)
 show("My age is " + age.as_string())
 ```
 
-That's it for this tutorial! Check out the documentation if you want to know more.
+That's it for this tutorial! This is only the very tip of the ezr² iceberg - check out the documentation
+if you want to know more.
 
 ## Documentation
 Coming soon!
