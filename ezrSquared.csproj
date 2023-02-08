@@ -16,5 +16,6 @@
 
   <ItemGroup>
     <Folder Include="Installer\bin\" />
+    <Folder Include="Documentation\" />
   </ItemGroup>
 </Project>
