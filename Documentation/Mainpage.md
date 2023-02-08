@@ -35,6 +35,10 @@ This way, a string is easy to recognize for ezr². Here are a few more examples 
 "This one is a bit longer. There is no limit to how long a string can be!"
 ```
 
+You also might have noticed that after printing "Hello, World!" to the screen, the `show()` function also printed "nothing".
+This means **the function returned nothing**. If you code in `"Example"` and enter, only `"Example"` will be printed to the screen.
+This means **the expression `"Example"` returned the string "Example"** - ezr² is only showing that to the screen.
+
 ### Numbers
 Now that we’ve seen strings let’s move on to **numbers**. Just like strings,
 we can ask ezr² to print numbers using the `show()` function.
@@ -91,8 +95,8 @@ in the integer. You can learn more about this in the documentation.
 item age: 42
 item name: "Joe"
 
-show("Hello, my name is" + name)
-show("My age is" + age.as_string())
+show("Hello, my name is " + name)
+show("My age is " + age.as_string())
 ```
 
 That's it for this tutorial! Check out the documentation if you want to know more.
