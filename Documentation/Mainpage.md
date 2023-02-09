@@ -176,7 +176,7 @@ information about the written code - like how the code works. They do not affect
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
 we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
 **A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - **count loops** and **while loops**.
-Count loops repeat the given code a **set amount of times**.
+**Count loops** repeat the given code a **set amount of times**.
 ```
 count to 10 do
 	show("Hello, World!")
@@ -278,5 +278,21 @@ Here are all the list operators:
 |    \<=   | item access    | [6,2] <= 1                   |
 
 We can access the length of the list with the `length` variable built into the list, just like wiht arrays.
+
+### Loops (Part 2)
+**While loops** repeat the given code **till the given condition turns false**.
+```
+item password: get("Enter password: ")
+while password ! "yeet" do
+	item password: get("Password is false! Try again: ")
+end
+```
+
+While loops can also be used to run code infinitely!
+```
+while true do
+	show("Hello, World!")
+end
+```
 
 That's it for this tutorial! More coming soon!
