@@ -22,7 +22,7 @@ function to do so.
 show("Hello, World!")
 ```
 
-The `show()` function takes anything you put between the parentheses and prints it to the screen.
+The `show()` function takes anything we put between the parentheses and prints it to the screen.
 But we must feed it the correct type of data for it to work. For example, text in ezr² is always put between **double quotes**.
 In the world of computer programming, we call this a **string**.
 
@@ -36,7 +36,7 @@ This way, a string is easy to recognize for ezr². Here are a few more examples 
 ```
 
 You also might have noticed that after printing "Hello, World!" to the screen, the `show()` function also printed "nothing".
-This means **the function returned nothing**. If you code in `"Example"` and enter, only `"Example"` will be printed to the screen.
+This means **the function returned nothing**. If we code in `"Example"` and enter, only `"Example"` will be printed to the screen.
 This means **the expression `"Example"` returned the string "Example"** - ezr² is only showing that to the screen. `nothing` is a representation
 of, well, nothing - equivalent to null (C#, C, Java, etc) or none (Python).
 
@@ -90,7 +90,7 @@ item age: 42
 And just like numbers and strings, we can print a variable with the `show()` function. In the following example, we assign a few
 variables and then print them. Here we are also adding strings together - this combines or **concatenates** the two strings.
 We have to convert the `age` variable to a string to be able to add it to another string, so we use the `as_string` function
-in the integer. You will learn more about functions later.
+in the integer. We will learn more about functions later.
 
 ```
 item age: 42
@@ -113,7 +113,7 @@ item num2: get("Enter num 2: ")
 show(num1 + num2)
 ```
 
-If you tried the code, you will see that it's not adding the numbers, but concatenating them! As in, if you enter `2` and `4` as `num1`
+If we try the code, we will see that it's not adding the numbers, but concatenating them! As in, if we enter `2` and `4` as `num1`
 and `num2` respectively, the result will be `24`, not `6`.
 
 **This is because the `get()` function returns a string.** We need to convert the string into an integer. To do so we use the `as_integer()` function
@@ -126,12 +126,12 @@ show(num1 + num2)
 ```
 
 ### Conditions
-Try entering normal text as the input for the above code - you'll get an error! This is because the `as_integer()` function cannot convert
+Try entering normal text as the input for the above code - we'll get an error! This is because the `as_integer()` function cannot convert
 normal text to integers. To avoid the user seeing the messy error, we can use the `try_as_integer()` function. But, this function returns `nothing`
 if it is unable to convert the string to an integer! If we try to add `nothing` and a number together we'll get an error! We have to make sure
-that `num1` and `num2` are integers before we add them. We can do this with `if` expressions. The `if` expression has a body of code that only executes
-whenever the `if` statement's condition is met. The additional `else` statement, which also has a body of code, runs if the `if`
-condition is false. The `else if` statement is used when you wish to satisfy one statement while the other is false.
+that `num1` and `num2` are integers before we add them. We can do this with **if expressions**. The if expression has a body of code that only executes
+whenever the if statement's condition is met. The additional else statement, which also has a body of code, runs if the if
+condition is false. The else if statement is used when we wish to satisfy one statement while the other is false.
 
 ```
 item num1: get("Enter num 1: ").try_as_integer()
@@ -159,6 +159,96 @@ Here are all the comparison operators:
 |    or    | and                      |  3 = 2 and 2 > 1, 2 = 5 and 5 = 2, 2 = 2 and 2 > 1  |
 |    and   | or                       |  3 = 2 or 2 > 1, 2 = 5 or 5 = 2, 2 = 2 or 2 > 1     |
 
-If you use conditions outside if expressions they will return **booleans**. Booleans are just two values - **true** or **false**.
+If we use comparisons outside if expressions they will return **booleans**. Booleans are just two values - **true** or **false**.
+
+### One-liners
+You might have noticed that the if expression has the **end** keyword at the end. All multi-line ezr² expressions **must** end with the
+**end** keyword. Noticed that I said "All multi-line ezr² expressions"? We can write all these in one line - these are called **one-liners**.
+They are the same as writing the multi-line version of an expression, but they must fit in a single line. For example -
+```
+if get("Hello there! ") = "General Kenobi" do show("Nice")
+```
+
+### Loops (Part 1)
+For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
+we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
+**A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - **count loops** and **while loops**.
+Count loops repeat the given code a **set amount of times**.
+```
+count to 10 do
+	show("Hello, World!")
+end
+```
+
+The count loop can optionally keep account of the **iteration variable**. The iteration variable, starting at zero, is the value that gets incremented each loop or **iteration**.
+The count loop checks if the iteration variable is less than the max iterations - if not it stops the loop. Iteration variables are useful if we want to iterate
+over a **list** or **array**, using the variable as the index.
+```
+count to 10 as i do
+	show("The iteration variable, named 'i' is: " + i.as_string())
+end
+```
+
+Now, what if we don't want the loop/iteration variable to start at zero? We can also set the start of a count loop!
+```
+count from -5 to 5 as i do
+	show("The iteration variable, named 'i' is: " + i.as_string())
+end
+```
+
+Lastly, what if we want the iteration variable to skip a few numbers? Say we only want even numbers? We can set the **step** of the count loop!
+The step is what the loop adds to the iteration variable every iteration.
+```
+count to 10 step 2 as i do
+	show("The iteration variable, named 'i' is: " + i.as_string())
+end
+
+count from 1 to 10 step 2 as i do
+	show("The iteration variable, named 'i' is: " + i.as_string())
+end
+```
+
+### Arrays
+If we try the one-liner version of the count loop, like -
+```
+count to 10 do show("Hi!")
+```
+We'll see a whole lot of `nothing`s in parentheses, separated by commas! That's an **array**.
+
+Arrays are used to store multiple items of any type in a single variable. It is ordered and unchangeable, or **immutable**.
+When we say that arrays are ordered, it means that the items have a defined order, and that order will not change.
+Array items are indexed, the first item has index `0`, the second item has index `1` and so on. Items of an array can be
+accessed with the `<=` operator -
+```
+item array_example: (1, "string", 3.54, nothing, false)
+show(array_example <= 0)
+show(array_example <= 1)
+show(array_example <= 2)
+show(array_example <= 3)
+show(array_example <= 4)
+
+show(array_example <= "sd")
+```
+That last line of code should show an error - the item after the `<=` operator must be a valid index in the array!
+
+Here are all the array operators:
+
+| Operator |      Name      |    Example    |
+|----------|:--------------:|--------------:|
+|     *    | duplication    | (2,3) * 4     |
+|     /    | division       | (6,2,3,4) / 2 |
+|    \<=   | item access    | (6,2) <= 1    |
+
+Now, what if we want to create an array with one item? Let's try it -
+```
+item array_example: (3)
+show(array_example)
+```
+
+This won't work, as _ thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
+```
+item array_example: (3,)
+show(array_example)
+```
 
 That's it for this tutorial! More coming soon!
