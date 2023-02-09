@@ -169,6 +169,9 @@ They are the same as writing the multi-line version of an expression, but they m
 if get("Hello there! ") = "General Kenobi" do show("Nice")
 ```
 
+Note that new lines can be coded as the semicolon (`;`) symbol. Comments are signified by the at symbol (`@`) at the start. Comments are just more
+information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezr².
+
 ### Loops (Part 1)
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
 we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
@@ -245,10 +248,35 @@ item array_example: (3)
 show(array_example)
 ```
 
-This won't work, as _ thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
+This won't work, as ezr² thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
 ```
 item array_example: (3,)
 show(array_example)
 ```
+
+We can access the length of the array with the `length` variable built into the array -
+```
+item array_example: (1,2,3,4)
+show(array_example.length)
+```
+
+### Lists
+**Lists** are like arrays, but they are changable or **mutable**. They are created with square brackets, instead of parentheses.
+```
+item list_example: [1,"string",1.45,nothing,true]
+show(list_example)
+```
+
+Here are all the list operators:
+
+| Operator |      Name      |            Example           |
+|----------|:--------------:|-----------------------------:|
+|     +    | append         | item lst: [1,5]; lst + 4     |
+|     -    | remove         | item lst: [1,5]; lst - 1     |
+|     *    | duplication    | [2,3] * 4                    |
+|     /    | division       | [6,2,3,4] / 2                |
+|    \<=   | item access    | [6,2] <= 1                   |
+
+We can access the length of the list with the `length` variable built into the list, just like wiht arrays.
 
 That's it for this tutorial! More coming soon!
