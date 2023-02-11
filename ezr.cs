@@ -3210,7 +3210,7 @@ namespace ezrSquared.Main
 
                 string name = node.nameToken.value.ToString();
                 if (!SPECIALS.Keys.Contains(name))
-                    return result.failure(new runtimeError(node.nameToken.startPos, node.nameToken.endPos, RT_UNDEFINED, $"Undefined special function", context));
+                    return result.failure(new runtimeError(node.nameToken.startPos, node.nameToken.endPos, RT_UNDEFINED, $"Special function \"{name}\" is not defined", context));
 
                 item special = new special(name, node.bodyNode, SPECIALS[name], node.shouldReturnNull).setPosition(node.startPos, node.endPos).setContext(context);
                 context.symbolTable.set(name, special);

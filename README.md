@@ -20,6 +20,9 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.0.0.3** - [12-02-23]
+    * Better `undefined` error message for special functions
+
 * **prerelease-1.3.0.0.2** - [11-02-23]
     * Fixed object definition QuickSyntax
 
