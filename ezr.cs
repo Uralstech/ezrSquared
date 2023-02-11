@@ -2477,6 +2477,7 @@ namespace ezrSquared.Main
                 }
 
                 token varName;
+                bool varNameIsQEY = false;
                 if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
                 {
                     if (inheritFrom == null)
@@ -2489,33 +2490,53 @@ namespace ezrSquared.Main
                 }
                 else
                 {
+                    varNameIsQEY = currentToken.matchString(TOKENTYPE.QEY, "n");
+
                     varName = currentToken;
                     result.registerAdvance();
                     advance();
                 }
 
                 List<token> argNames = new List<token>();
-                if (currentToken.matchString(TOKENTYPE.QEY, "n"))
+                bool matchedN = currentToken.matchString(TOKENTYPE.QEY, "n");
+                if (matchedN || varNameIsQEY)
                 {
-                    result.registerAdvance();
-                    advance();
-
-                    if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
-                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-                    argNames.Add(currentToken);
-                    result.registerAdvance();
-                    advance();
-
-                    while (currentToken.type == TOKENTYPE.COMMA)
+                    if (matchedN)
                     {
                         result.registerAdvance();
                         advance();
+                    }
 
-                        if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                    if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                    {
+                        if (currentToken.type != TOKENTYPE.COLON && !matchedN)
+                            return result.failure(new invalidGrammarError("Expected [IDENTIFIER], 'n' or ':'", currentToken.startPos, currentToken.endPos));
+                        else if (matchedN)
                             return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                    }
+                    else if (currentToken.type != TOKENTYPE.COLON)
+                    {
+                        if (varNameIsQEY && !matchedN)
+                        {
+                            varName = inheritFrom;
+                            inheritFrom = null;
+                        }
+
                         argNames.Add(currentToken);
                         result.registerAdvance();
                         advance();
+
+                        while (currentToken.type == TOKENTYPE.COMMA)
+                        {
+                            result.registerAdvance();
+                            advance();
+
+                            if (currentToken.type != TOKENTYPE.ID && currentToken.type != TOKENTYPE.QEY)
+                                return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                            argNames.Add(currentToken);
+                            result.registerAdvance();
+                            advance();
+                        }
                     }
                 }
 

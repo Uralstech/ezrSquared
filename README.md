@@ -20,6 +20,9 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.0.0.2** - [11-02-23]
+    * Fixed object definition QuickSyntax
+
 * **prerelease-1.3.0.0.1** - [07-02-23]
     * Fixed `in` expression
     * character_list `remove` operation now returns the removed character
