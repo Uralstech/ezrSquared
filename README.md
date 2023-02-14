@@ -15,10 +15,14 @@ Yeah! Check them out [here](https://github.com/Uralstech/ezrSquared/tree/master/
 I just need to finish the documentation! If you find any bugs, report them [here](https://github.com/Uralstech/ezrSquared/issues)
 
 ## Progress
-**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Function; 4th place -> Library; 5th place -> Patch**
+**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**
 
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
+
+* **prerelease-1.3.1.0.0** - [14-02-23]
+    * Fixed a count loop error message
+    * Better error message for else if statements
 
 * **prerelease-1.3.0.0.3** - [12-02-23]
     * Better `undefined` error message for special functions
