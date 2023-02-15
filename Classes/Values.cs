@@ -2272,7 +2272,7 @@ namespace ezrSquared.Values
 
             error? error = run(Path.GetFileName(path), script, runtimeContext, out item? _);
             if (error != null)
-                return result.failure(new runtimeError(startPos, endPos, RT_RUN, $"Failed to execute script \"{path}\"\n\n{error.asString()}", context));
+                return result.failure(new runtimeRunError(startPos, endPos, $"Failed to execute script \"{path}\"", error.asString(), context));
             return result.success(new nothing());
         }
 

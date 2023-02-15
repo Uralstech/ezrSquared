@@ -20,6 +20,9 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.2.0.0** - [15-02-23]
+    * New runtimeRunError error class!
+
 * **prerelease-1.3.1.0.0** - [14-02-23]
     * Fixed a count loop error message
     * Better error message for else if statements

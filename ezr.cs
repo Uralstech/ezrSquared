@@ -3381,7 +3381,7 @@ namespace ezrSquared.Main
                     }
                     catch (Exception exception)
                     {
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n{exception.Message}", context));
+                        return result.failure(new runtimeRunError(node.startPos, node.endPos, $"Failed to execute script \"{file}\"", exception.Message, context));
                     }
                 }
                 else
@@ -3398,11 +3398,11 @@ namespace ezrSquared.Main
 
                     token[] tokens = new lexer(file, script).compileTokens(out error? error);
                     if (error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n\n{error.asString()}", context));
+                        return result.failure(new runtimeRunError(node.startPos, node.endPos, $"Failed to execute script \"{file}\"", error.asString(), context));
 
                     parseResult parseResult = new parser(tokens).parse();
                     if (parseResult.error != null)
-                        return result.failure(new runtimeError(node.startPos, node.endPos, RT_RUN, $"Failed to execute script \"{file}\"\n\n{parseResult.error.asString()}", context));
+                        return result.failure(new runtimeRunError(node.startPos, node.endPos, $"Failed to execute script \"{file}\"", parseResult.error.asString(), context));
 
                     value = result.register(new @class(formattedFileName, null, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                     if (result.shouldReturn()) return result;

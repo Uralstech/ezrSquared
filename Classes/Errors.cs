@@ -1,14 +1,15 @@
 ﻿using ezrSquared.General;
+using static ezrSquared.Constants.constants;
 using System;
 
 namespace ezrSquared.Errors
 {
     public abstract class error
     {
-        public string name;
-        public string details;
-        public position startPos;
-        public position endPos;
+        internal string name;
+        internal string details;
+        internal position startPos;
+        internal position endPos;
 
         public error(string name, string details, position startPos, position endPos)
         {
@@ -52,12 +53,12 @@ namespace ezrSquared.Errors
 
     public class runtimeError : error
     {
-        public context context;
+        private context context;
         public runtimeError(position startPos, position endPos, string tag, string details, context context) : base(tag, details, startPos, endPos) { this.context = context; }
 
         public override string asString() { return $"{generateTraceback()}(runtime error) : {details} -> tag '{name}'\n\n{stringWithUnderline(startPos.text, startPos, endPos)}"; }
 
-        private string generateTraceback()
+        internal string generateTraceback()
         {
             string result = "";
             position? pos = startPos;
@@ -72,5 +73,13 @@ namespace ezrSquared.Errors
 
             return $"Traceback - most recent call last:\n{result}";
         }
+    }
+
+    public class runtimeRunError : runtimeError
+    {
+        private string runError;
+        public runtimeRunError(position startPos, position endPos, string details, string runError, context context) : base(startPos, endPos, RT_RUN, details, context) { this.runError = runError; }
+
+        public override string asString() { return $"{generateTraceback()}(runtime error) : {details} -> tag '{name}'\n\n{stringWithUnderline(startPos.text, startPos, endPos)}\n\n{runError}"; }
     }
 }
