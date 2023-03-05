@@ -20,6 +20,13 @@ I just need to finish the documentation! If you find any bugs, report them [here
 ### Released
 **Check the [GitHub Commits](https://github.com/Uralstech/ezrSquared/commits) for all changes in source code**
 
+* **prerelease-1.3.3.0.0** - [05-03-23]
+    * New `console` module for IO library
+    * New `simple_show` builtin function
+    * Fixed predefined function execution
+    * Better error messages
+    * Added changes for Linux version of builtin function `clear`
+
 * **prerelease-1.3.2.0.0** - [15-02-23]
     * New runtimeRunError error class!
 

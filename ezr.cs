@@ -3249,7 +3249,7 @@ namespace ezrSquared.Main
                     for (int i = 0; i < inheritFrom.argNames.Length; i++)
                     {
                         if (!argNames.Contains(inheritFrom.argNames[i]))
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_TYPE, $"Class definition does not contain parent argument \"{inheritFrom.argNames[i]}\"", context));
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, $"Parent argument \"{inheritFrom.argNames[i]}\" is not defined", context));
                     }
                 }
 
@@ -3440,8 +3440,9 @@ namespace ezrSquared.Main
                     predefinedSymbolTable.set("err_io", new @string(RT_IO));
                     predefinedSymbolTable.set("err_overflow", new @string(RT_OVERFLOW));
                     predefinedSymbolTable.set("err_length", new @string(RT_LEN));
-
+                    
                     predefinedSymbolTable.set("show", new builtin_function("show", new string[1] { "message" }));
+                    predefinedSymbolTable.set("simple_show", new builtin_function("simple_show", new string[1] { "message" }));
                     predefinedSymbolTable.set("show_error", new builtin_function("show_error", new string[2] { "tag", "message" }));
                     predefinedSymbolTable.set("get", new builtin_function("get", new string[1] { "message" }));
                     predefinedSymbolTable.set("clear", new builtin_function("clear", new string[0]));
@@ -3450,6 +3451,7 @@ namespace ezrSquared.Main
                     predefinedSymbolTable.set("run", new builtin_function("run", new string[1] { "file" }));
 
                     position pos = new position(0, 0, 0, "<main>", "");
+                    predefinedSymbolTable.set("console", new console().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
                     predefinedSymbolTable.set("file", new @file().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
                     predefinedSymbolTable.set("folder", new folder().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
                     predefinedSymbolTable.set("path", new path().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);

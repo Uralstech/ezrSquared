@@ -3,11 +3,567 @@ using ezrSquared.Helpers;
 using ezrSquared.Errors;
 using ezrSquared.General;
 using static ezrSquared.Constants.constants;
+using System.Collections.Generic;
 using System.IO;
 using System;
 
 namespace ezrSquared.Libraries.IO
 {
+    public class console : baseFunction
+    {
+        private Dictionary<string, ConsoleKey> stringToKeyLookup = new Dictionary<string, ConsoleKey>()
+        {
+            { "Backspace", ConsoleKey.Backspace },
+            { "Tab", ConsoleKey.Tab },
+            { "Clear", ConsoleKey.Clear },
+            { "Enter", ConsoleKey.Enter },
+            { "Pause", ConsoleKey.Pause },
+            { "Escape", ConsoleKey.Escape },
+            { "Spacebar", ConsoleKey.Spacebar },
+            { "PageUp", ConsoleKey.PageUp },
+            { "PageDown", ConsoleKey.PageDown },
+            { "End", ConsoleKey.End },
+            { "Home", ConsoleKey.Home },
+            { "LeftArrow", ConsoleKey.LeftArrow },
+            { "UpArrow", ConsoleKey.UpArrow },
+            { "RightArrow", ConsoleKey.RightArrow },
+            { "DownArrow", ConsoleKey.DownArrow },
+            { "Select", ConsoleKey.Select },
+            { "Print", ConsoleKey.Print },
+            { "Execute", ConsoleKey.Execute },
+            { "PrintScreen", ConsoleKey.PrintScreen },
+            { "Insert", ConsoleKey.Insert },
+            { "Delete", ConsoleKey.Delete },
+            { "Help", ConsoleKey.Help },
+            { "D0", ConsoleKey.D0 },
+            { "D1", ConsoleKey.D1 },
+            { "D2", ConsoleKey.D2 },
+            { "D3", ConsoleKey.D3 },
+            { "D4", ConsoleKey.D4 },
+            { "D5", ConsoleKey.D5 },
+            { "D6", ConsoleKey.D6 },
+            { "D7", ConsoleKey.D7 },
+            { "D8", ConsoleKey.D8 },
+            { "D9", ConsoleKey.D9 },
+            { "A", ConsoleKey.A },
+            { "B", ConsoleKey.B },
+            { "C", ConsoleKey.C },
+            { "D", ConsoleKey.D },
+            { "E", ConsoleKey.E },
+            { "F", ConsoleKey.F },
+            { "G", ConsoleKey.G },
+            { "H", ConsoleKey.H },
+            { "I", ConsoleKey.I },
+            { "J", ConsoleKey.J },
+            { "K", ConsoleKey.K },
+            { "L", ConsoleKey.L },
+            { "M", ConsoleKey.M },
+            { "N", ConsoleKey.N },
+            { "O", ConsoleKey.O },
+            { "P", ConsoleKey.P },
+            { "Q", ConsoleKey.Q },
+            { "R", ConsoleKey.R },
+            { "S", ConsoleKey.S },
+            { "T", ConsoleKey.T },
+            { "U", ConsoleKey.U },
+            { "V", ConsoleKey.V },
+            { "W", ConsoleKey.W },
+            { "X", ConsoleKey.X },
+            { "Y", ConsoleKey.Y },
+            { "Z", ConsoleKey.Z },
+            { "LeftWindows", ConsoleKey.LeftWindows },
+            { "RightWindows", ConsoleKey.RightWindows },
+            { "Applications", ConsoleKey.Applications },
+            { "Sleep", ConsoleKey.Sleep },
+            { "NumPad0", ConsoleKey.NumPad0 },
+            { "NumPad1", ConsoleKey.NumPad1 },
+            { "NumPad2", ConsoleKey.NumPad2 },
+            { "NumPad3", ConsoleKey.NumPad3 },
+            { "NumPad4", ConsoleKey.NumPad4 },
+            { "NumPad5", ConsoleKey.NumPad5 },
+            { "NumPad6", ConsoleKey.NumPad6 },
+            { "NumPad7", ConsoleKey.NumPad7 },
+            { "NumPad8", ConsoleKey.NumPad8 },
+            { "NumPad9", ConsoleKey.NumPad9 },
+            { "Multiply", ConsoleKey.Multiply },
+            { "Add", ConsoleKey.Add },
+            { "Separator", ConsoleKey.Separator },
+            { "Subtract", ConsoleKey.Subtract },
+            { "Decimal", ConsoleKey.Decimal },
+            { "Divide", ConsoleKey.Divide },
+            { "F1", ConsoleKey.F1 },
+            { "F2", ConsoleKey.F2 },
+            { "F3", ConsoleKey.F3 },
+            { "F4", ConsoleKey.F4 },
+            { "F5", ConsoleKey.F5 },
+            { "F6", ConsoleKey.F6 },
+            { "F7", ConsoleKey.F7 },
+            { "F8", ConsoleKey.F8 },
+            { "F9", ConsoleKey.F9 },
+            { "F10", ConsoleKey.F10 },
+            { "F11", ConsoleKey.F11 },
+            { "F12", ConsoleKey.F12 },
+            { "F13", ConsoleKey.F13 },
+            { "F14", ConsoleKey.F14 },
+            { "F15", ConsoleKey.F15 },
+            { "F16", ConsoleKey.F16 },
+            { "F17", ConsoleKey.F17 },
+            { "F18", ConsoleKey.F18 },
+            { "F19", ConsoleKey.F19 },
+            { "F20", ConsoleKey.F20 },
+            { "F21", ConsoleKey.F21 },
+            { "F22", ConsoleKey.F22 },
+            { "F23", ConsoleKey.F23 },
+            { "F24", ConsoleKey.F24 },
+            { "BrowserBack", ConsoleKey.BrowserBack },
+            { "BrowserForward", ConsoleKey.BrowserForward },
+            { "BrowserRefresh", ConsoleKey.BrowserRefresh },
+            { "BrowserStop", ConsoleKey.BrowserStop },
+            { "BrowserSearch", ConsoleKey.BrowserSearch },
+            { "BrowserFavorites", ConsoleKey.BrowserFavorites },
+            { "BrowserHome", ConsoleKey.BrowserHome },
+            { "VolumeMute", ConsoleKey.VolumeMute },
+            { "VolumeDown", ConsoleKey.VolumeDown },
+            { "VolumeUp", ConsoleKey.VolumeUp },
+            { "MediaNext", ConsoleKey.MediaNext },
+            { "MediaPrevious", ConsoleKey.MediaPrevious },
+            { "MediaStop", ConsoleKey.MediaStop },
+            { "MediaPlay", ConsoleKey.MediaPlay },
+            { "LaunchMail", ConsoleKey.LaunchMail },
+            { "LaunchMediaSelect", ConsoleKey.LaunchMediaSelect },
+            { "LaunchApp1", ConsoleKey.LaunchApp1 },
+            { "LaunchApp2", ConsoleKey.LaunchApp2 },
+            { "Oem1", ConsoleKey.Oem1 },
+            { "OemPlus", ConsoleKey.OemPlus },
+            { "OemComma", ConsoleKey.OemComma },
+            { "OemMinus", ConsoleKey.OemMinus },
+            { "OemPeriod", ConsoleKey.OemPeriod },
+            { "Oem2", ConsoleKey.Oem2 },
+            { "Oem3", ConsoleKey.Oem3 },
+            { "Oem4", ConsoleKey.Oem4 },
+            { "Oem5", ConsoleKey.Oem5 },
+            { "Oem6", ConsoleKey.Oem6 },
+            { "Oem7", ConsoleKey.Oem7 },
+            { "Oem8", ConsoleKey.Oem8 },
+            { "Oem102", ConsoleKey.Oem102 },
+            { "Process", ConsoleKey.Process },
+            { "Packet", ConsoleKey.Packet },
+            { "Attention", ConsoleKey.Attention },
+            { "CrSel", ConsoleKey.CrSel },
+            { "ExSel", ConsoleKey.ExSel },
+            { "EraseEndOfFile", ConsoleKey.EraseEndOfFile },
+            { "Play", ConsoleKey.Play },
+            { "Zoom", ConsoleKey.Zoom },
+            { "NoName", ConsoleKey.NoName },
+            { "Pa1", ConsoleKey.Pa1 },
+            { "OemClear", ConsoleKey.OemClear }
+        };
+        private Dictionary<ConsoleKey, string> keyToStringLookup = new Dictionary<ConsoleKey, string>()
+        {
+            { ConsoleKey.Backspace , "Backspace" },
+            { ConsoleKey.Tab , "Tab" },
+            { ConsoleKey.Clear , "Clear" },
+            { ConsoleKey.Enter , "Enter" },
+            { ConsoleKey.Pause , "Pause" },
+            { ConsoleKey.Escape , "Escape" },
+            { ConsoleKey.Spacebar , "Spacebar" },
+            { ConsoleKey.PageUp , "PageUp" },
+            { ConsoleKey.PageDown , "PageDown" },
+            { ConsoleKey.End , "End" },
+            { ConsoleKey.Home , "Home" },
+            { ConsoleKey.LeftArrow , "LeftArrow" },
+            { ConsoleKey.UpArrow , "UpArrow" },
+            { ConsoleKey.RightArrow , "RightArrow" },
+            { ConsoleKey.DownArrow , "DownArrow" },
+            { ConsoleKey.Select , "Select" },
+            { ConsoleKey.Print , "Print" },
+            { ConsoleKey.Execute , "Execute" },
+            { ConsoleKey.PrintScreen , "PrintScreen" },
+            { ConsoleKey.Insert , "Insert" },
+            { ConsoleKey.Delete , "Delete" },
+            { ConsoleKey.Help , "Help" },
+            { ConsoleKey.D0 , "D0" },
+            { ConsoleKey.D1 , "D1" },
+            { ConsoleKey.D2 , "D2" },
+            { ConsoleKey.D3 , "D3" },
+            { ConsoleKey.D4 , "D4" },
+            { ConsoleKey.D5 , "D5" },
+            { ConsoleKey.D6 , "D6" },
+            { ConsoleKey.D7 , "D7" },
+            { ConsoleKey.D8 , "D8" },
+            { ConsoleKey.D9 , "D9" },
+            { ConsoleKey.A , "A" },
+            { ConsoleKey.B , "B" },
+            { ConsoleKey.C , "C" },
+            { ConsoleKey.D , "D" },
+            { ConsoleKey.E , "E" },
+            { ConsoleKey.F , "F" },
+            { ConsoleKey.G , "G" },
+            { ConsoleKey.H , "H" },
+            { ConsoleKey.I , "I" },
+            { ConsoleKey.J , "J" },
+            { ConsoleKey.K , "K" },
+            { ConsoleKey.L , "L" },
+            { ConsoleKey.M , "M" },
+            { ConsoleKey.N , "N" },
+            { ConsoleKey.O , "O" },
+            { ConsoleKey.P , "P" },
+            { ConsoleKey.Q , "Q" },
+            { ConsoleKey.R , "R" },
+            { ConsoleKey.S , "S" },
+            { ConsoleKey.T , "T" },
+            { ConsoleKey.U , "U" },
+            { ConsoleKey.V , "V" },
+            { ConsoleKey.W , "W" },
+            { ConsoleKey.X , "X" },
+            { ConsoleKey.Y , "Y" },
+            { ConsoleKey.Z , "Z" },
+            { ConsoleKey.LeftWindows , "LeftWindows" },
+            { ConsoleKey.RightWindows , "RightWindows" },
+            { ConsoleKey.Applications , "Applications" },
+            { ConsoleKey.Sleep , "Sleep" },
+            { ConsoleKey.NumPad0 , "NumPad0" },
+            { ConsoleKey.NumPad1 , "NumPad1" },
+            { ConsoleKey.NumPad2 , "NumPad2" },
+            { ConsoleKey.NumPad3 , "NumPad3" },
+            { ConsoleKey.NumPad4 , "NumPad4" },
+            { ConsoleKey.NumPad5 , "NumPad5" },
+            { ConsoleKey.NumPad6 , "NumPad6" },
+            { ConsoleKey.NumPad7 , "NumPad7" },
+            { ConsoleKey.NumPad8 , "NumPad8" },
+            { ConsoleKey.NumPad9 , "NumPad9" },
+            { ConsoleKey.Multiply , "Multiply" },
+            { ConsoleKey.Add , "Add" },
+            { ConsoleKey.Separator , "Separator" },
+            { ConsoleKey.Subtract , "Subtract" },
+            { ConsoleKey.Decimal , "Decimal" },
+            { ConsoleKey.Divide , "Divide" },
+            { ConsoleKey.F1 , "F1" },
+            { ConsoleKey.F2 , "F2" },
+            { ConsoleKey.F3 , "F3" },
+            { ConsoleKey.F4 , "F4" },
+            { ConsoleKey.F5 , "F5" },
+            { ConsoleKey.F6 , "F6" },
+            { ConsoleKey.F7 , "F7" },
+            { ConsoleKey.F8 , "F8" },
+            { ConsoleKey.F9 , "F9" },
+            { ConsoleKey.F10 , "F10" },
+            { ConsoleKey.F11 , "F11" },
+            { ConsoleKey.F12 , "F12" },
+            { ConsoleKey.F13 , "F13" },
+            { ConsoleKey.F14 , "F14" },
+            { ConsoleKey.F15 , "F15" },
+            { ConsoleKey.F16 , "F16" },
+            { ConsoleKey.F17 , "F17" },
+            { ConsoleKey.F18 , "F18" },
+            { ConsoleKey.F19 , "F19" },
+            { ConsoleKey.F20 , "F20" },
+            { ConsoleKey.F21 , "F21" },
+            { ConsoleKey.F22 , "F22" },
+            { ConsoleKey.F23 , "F23" },
+            { ConsoleKey.F24 , "F24" },
+            { ConsoleKey.BrowserBack , "BrowserBack" },
+            { ConsoleKey.BrowserForward , "BrowserForward" },
+            { ConsoleKey.BrowserRefresh , "BrowserRefresh" },
+            { ConsoleKey.BrowserStop , "BrowserStop" },
+            { ConsoleKey.BrowserSearch , "BrowserSearch" },
+            { ConsoleKey.BrowserFavorites , "BrowserFavorites" },
+            { ConsoleKey.BrowserHome , "BrowserHome" },
+            { ConsoleKey.VolumeMute , "VolumeMute" },
+            { ConsoleKey.VolumeDown , "VolumeDown" },
+            { ConsoleKey.VolumeUp , "VolumeUp" },
+            { ConsoleKey.MediaNext , "MediaNext" },
+            { ConsoleKey.MediaPrevious , "MediaPrevious" },
+            { ConsoleKey.MediaStop , "MediaStop" },
+            { ConsoleKey.MediaPlay , "MediaPlay" },
+            { ConsoleKey.LaunchMail , "LaunchMail" },
+            { ConsoleKey.LaunchMediaSelect , "LaunchMediaSelect" },
+            { ConsoleKey.LaunchApp1 , "LaunchApp1" },
+            { ConsoleKey.LaunchApp2 , "LaunchApp2" },
+            { ConsoleKey.Oem1 , "Oem1" },
+            { ConsoleKey.OemPlus , "OemPlus" },
+            { ConsoleKey.OemComma , "OemComma" },
+            { ConsoleKey.OemMinus , "OemMinus" },
+            { ConsoleKey.OemPeriod , "OemPeriod" },
+            { ConsoleKey.Oem2 , "Oem2" },
+            { ConsoleKey.Oem3 , "Oem3" },
+            { ConsoleKey.Oem4 , "Oem4" },
+            { ConsoleKey.Oem5 , "Oem5" },
+            { ConsoleKey.Oem6 , "Oem6" },
+            { ConsoleKey.Oem7 , "Oem7" },
+            { ConsoleKey.Oem8 , "Oem8" },
+            { ConsoleKey.Oem102 , "Oem102" },
+            { ConsoleKey.Process , "Process" },
+            { ConsoleKey.Packet , "Packet" },
+            { ConsoleKey.Attention , "Attention" },
+            { ConsoleKey.CrSel , "CrSel" },
+            { ConsoleKey.ExSel , "ExSel" },
+            { ConsoleKey.EraseEndOfFile , "EraseEndOfFile" },
+            { ConsoleKey.Play , "Play" },
+            { ConsoleKey.Zoom , "Zoom" },
+            { ConsoleKey.NoName , "NoName" },
+            { ConsoleKey.Pa1 , "Pa1" },
+            { ConsoleKey.OemClear , "OemClear" }
+        };
+
+        private Dictionary<string, ConsoleColor> stringToConsoleColorLookup = new Dictionary<string, ConsoleColor>()
+        {
+            { "black", ConsoleColor.Black },
+            { "dark blue", ConsoleColor.DarkBlue },
+            { "dark green", ConsoleColor.DarkGreen },
+            { "dark cyan", ConsoleColor.DarkCyan },
+            { "dark red", ConsoleColor.DarkRed },
+            { "dark magenta", ConsoleColor.DarkMagenta },
+            { "dark yellow", ConsoleColor.DarkYellow },
+            { "gray", ConsoleColor.Gray },
+            { "dark gray", ConsoleColor.DarkGray },
+            { "blue", ConsoleColor.Blue },
+            { "green", ConsoleColor.Green },
+            { "cyan", ConsoleColor.Cyan },
+            { "red", ConsoleColor.Red },
+            { "magenta", ConsoleColor.Magenta },
+            { "yellow", ConsoleColor.Yellow },
+            { "white", ConsoleColor.White }
+        };
+        private Dictionary<ConsoleColor, string> consoleColorToStringLookup = new Dictionary<ConsoleColor, string>()
+        {
+            { ConsoleColor.Black, "black" },
+            { ConsoleColor.DarkBlue, "dark blue" },
+            { ConsoleColor.DarkGreen, "dark green" },
+            { ConsoleColor.DarkCyan, "dark cyan" },
+            { ConsoleColor.DarkRed, "dark red" },
+            { ConsoleColor.DarkMagenta, "dark magenta" },
+            { ConsoleColor.DarkYellow, "dark yellow" },
+            { ConsoleColor.Gray, "gray" },
+            { ConsoleColor.DarkGray, "dark gray" },
+            { ConsoleColor.Blue, "blue" },
+            { ConsoleColor.Green, "green" },
+            { ConsoleColor.Cyan, "cyan" },
+            { ConsoleColor.Red, "red" },
+            { ConsoleColor.Magenta, "magenta" },
+            { ConsoleColor.Yellow, "yellow" },
+            { ConsoleColor.White, "white" }
+        };
+
+        public console() : base("<io <console>>") { }
+
+        public override runtimeResult execute(item[] args)
+        {
+            context internalContext = base.generateContext();
+            internalContext.symbolTable.set("is_key_pressed", new predefined_function("console_is_key_pressed", keyPressed, new string[4] { "key", "shift_pressed",  "control_pressed", "alt_pressed" }));
+            internalContext.symbolTable.set("current_key_pressed", new predefined_function("console_current_key_pressed", anyKeyPressed, new string[0]));
+            internalContext.symbolTable.set("is_numberlocked", new predefined_function("console_is_numberlocked", numberLocked, new string[0]));
+            internalContext.symbolTable.set("is_capslocked", new predefined_function("console_is_capslocked", capsLocked, new string[0]));
+            internalContext.symbolTable.set("get_background", new predefined_function("console_get_background", getConsoleBackground, new string[0]));
+            internalContext.symbolTable.set("set_background", new predefined_function("console_set_background", setConsoleBackground, new string[1] { "color" }));
+            internalContext.symbolTable.set("get_foreground", new predefined_function("console_get_foreground", getConsoleForeground, new string[0]));
+            internalContext.symbolTable.set("set_foreground", new predefined_function("console_set_foreground", setConsoleForeground, new string[1] { "color" }));
+            internalContext.symbolTable.set("reset_colors", new predefined_function("console_reset_colors", consoleResetColors, new string[0]));
+            internalContext.symbolTable.set("get_cursor_position", new predefined_function("console_get_cursor_position", getCursorPosition, new string[0]));
+            internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[1] { "position" }));
+            internalContext.symbolTable.set("get_cursor_size", new predefined_function("console_get_cursor_size", getCursorSize, new string[0]));
+            internalContext.symbolTable.set("set_cursor_size", new predefined_function("console_set_cursor_size", setCursorSize, new string[1] { "size" }));
+            internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", getCursorVisibility, new string[0]));
+            internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", setCursorVisibility, new string[1] { "visibility" }));
+            internalContext.symbolTable.set("exit", new predefined_function("console_exit", stopApplication, new string[0]));
+
+            return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
+        }
+
+        private runtimeResult getCursorVisibility(context context, position[] positions)
+        {
+            return new runtimeResult().success(new boolean(Console.CursorVisible));
+        }
+
+        private runtimeResult setCursorVisibility(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item visibility = context.symbolTable.get("visibility");
+            if (visibility is not boolean)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Visibility must be a boolean", context));
+
+            Console.CursorVisible = ((value)visibility).storedValue;
+            return result.success(new nothing());
+        }
+
+        private runtimeResult getCursorSize(context context, position[] positions)
+        {
+            return new runtimeResult().success(new integer(Console.CursorSize));
+        }
+
+        private runtimeResult setCursorSize(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item size = context.symbolTable.get("size");
+            if (size is not integer && size is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Size must be an integer or float", context));
+
+            int sizeValue = (int)((value)size).storedValue;
+            if (sizeValue < 1 || sizeValue > 100)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, "Size must be in range 1-100", context));
+
+            Console.CursorSize = sizeValue;
+            return result.success(new nothing());
+        }
+
+        private runtimeResult getCursorPosition(context context, position[] positions)
+        {
+            (int left, int top) = Console.GetCursorPosition();
+
+            return new runtimeResult().success(new array(new item[2] { new integer(left).setPosition(positions[0], positions[1]).setContext(context), new integer(top).setPosition(positions[0], positions[1]).setContext(context) }));
+        }
+
+        private runtimeResult setCursorPosition(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item pos = context.symbolTable.get("position");
+            if (pos is not array && pos is not list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must be an array or list", context));
+
+            item[] posArray = (pos is array) ? ((array)pos).storedValue : ((list)pos).storedValue.ToArray();
+            if (posArray.Length != 2)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must be an array or list of length 2", context));
+
+            for (int i = 0; i < posArray.Length; i++)
+            {
+                if (posArray[i] is not integer && posArray[i] is not @float)
+                    return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must only contain integers or floats", context));
+            }
+
+            (int left, int top) = ((int)((value)posArray[0]).storedValue, (int)((value)posArray[1]).storedValue);
+            if (left < 0 || left > Console.BufferWidth)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Position X must be in range 0-{Console.BufferWidth}", context));
+            if (top < 0 || top > Console.BufferHeight)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Position Y must be in range 0-{Console.BufferHeight}", context));
+
+            Console.SetCursorPosition(left, top);
+            return result.success(new nothing());
+        }
+
+        private runtimeResult consoleResetColors(context context, position[] positions)
+        {
+            Console.ResetColor();
+            return new runtimeResult().success(new nothing());
+        }
+
+        private runtimeResult stopApplication(context context, position[] positions)
+        {
+            Environment.Exit(0);
+            return new runtimeResult().success(new nothing());
+        }
+
+        private runtimeResult getConsoleBackground(context context, position[] positions)
+        {
+            return new runtimeResult().success(new @string(consoleColorToStringLookup[Console.BackgroundColor]));
+        }
+
+        private runtimeResult setConsoleBackground(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item color = context.symbolTable.get("color");
+            if (color is not @string && color is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Color must be a string or character_list", context));
+
+            string colorName = (color is @string) ? ((@string)color).storedValue.ToString() : string.Join("", ((character_list)color).storedValue);
+            if (!stringToConsoleColorLookup.ContainsKey(colorName))
+                return result.failure(new runtimeError(positions[0], positions[1], RT_KEY, "Unknown color", context));
+
+            Console.BackgroundColor = stringToConsoleColorLookup[colorName];
+            return result.success(new nothing());
+        }
+
+        private runtimeResult getConsoleForeground(context context, position[] positions)
+        {
+            return new runtimeResult().success(new @string(consoleColorToStringLookup[Console.ForegroundColor]));
+        }
+
+        private runtimeResult setConsoleForeground(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item color = context.symbolTable.get("color");
+            if (color is not @string && color is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Color must be a string or character_list", context));
+
+            string colorName = (color is @string) ? ((@string)color).storedValue.ToString() : string.Join("", ((character_list)color).storedValue);
+            if (!stringToConsoleColorLookup.ContainsKey(colorName))
+                return result.failure(new runtimeError(positions[0], positions[1], RT_KEY, "Unknown color", context));
+
+            Console.ForegroundColor = stringToConsoleColorLookup[colorName];
+            return result.success(new nothing());
+        }
+
+        private runtimeResult keyPressed(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item key = context.symbolTable.get("key");
+            if (key is not @string && key is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Key must be a string or character_list", context));
+
+            item shift = context.symbolTable.get("shift_pressed");
+            if (shift is not boolean)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Shift_pressed must be a boolean", context));
+
+            item control = context.symbolTable.get("control_pressed");
+            if (control is not boolean)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Control_pressed must be a boolean", context));
+
+            item alt = context.symbolTable.get("alt_pressed");
+            if (alt is not boolean)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Alt_pressed must be a boolean", context));
+
+            string keyCode = (key is @string) ? ((@string)key).storedValue.ToString() : string.Join("", ((character_list)key).storedValue);
+            if (!stringToKeyLookup.ContainsKey(keyCode))
+                return result.failure(new runtimeError(positions[0], positions[1], RT_KEY, "Unknown key", context));
+
+            if (!Console.KeyAvailable) return result.success(new nothing());
+
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+            bool shiftPress = (((value)shift).storedValue) ? (keyPress.Modifiers & ConsoleModifiers.Shift) != 0 : true;
+            bool controlPress = (((value)control).storedValue) ? (keyPress.Modifiers & ConsoleModifiers.Control) != 0  : true;
+            bool altPress = (((value)alt).storedValue) ? (keyPress.Modifiers & ConsoleModifiers.Alt) != 0  : true;
+            return result.success(new boolean(keyPress.Key == stringToKeyLookup[keyCode] && shiftPress && controlPress && altPress));
+        }
+
+        private runtimeResult anyKeyPressed(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+            if (!Console.KeyAvailable)
+                return result.success(new nothing());
+
+            ConsoleKeyInfo keyPress = Console.ReadKey(true);
+
+            return result.success(new array(new item[2] {
+                new @string(keyToStringLookup[keyPress.Key]).setPosition(positions[0], positions[1]).setContext(context),
+                new array(new item[3] {
+                        new boolean((keyPress.Modifiers & ConsoleModifiers.Shift) != 0).setPosition(positions[0], positions[1]).setContext(context),
+                        new boolean((keyPress.Modifiers & ConsoleModifiers.Control) != 0).setPosition(positions[0], positions[1]).setContext(context),
+                        new boolean((keyPress.Modifiers & ConsoleModifiers.Alt) != 0).setPosition(positions[0], positions[1]).setContext(context)
+                    }).setPosition(positions[0], positions[1]).setContext(context)
+            }));
+        }
+
+        private runtimeResult numberLocked(context context, position[] positions)
+        {
+            return new runtimeResult().success(new boolean(Console.NumberLock));
+        }
+
+        private runtimeResult capsLocked(context context, position[] positions)
+        {
+            return new runtimeResult().success(new boolean(Console.CapsLock));
+        }
+
+        public override item copy() { return new console().setPosition(startPos, endPos).setContext(context); }
+
+        public override string ToString() { return $"<builtin library {name}>"; }
+        public override bool ItemEquals(item obj, out error? error) { error = null; return obj is console; }
+    }
+
     public class @file : baseFunction
     {
         public @file() : base("<io <file>>") { }

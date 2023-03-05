@@ -4,6 +4,7 @@ using ezrSquared.Nodes;
 using ezrSquared.Helpers;
 using static ezrSquared.Constants.constants;
 using static ezrSquared.Main.ezr;
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
@@ -12,6 +13,12 @@ using System;
 
 namespace ezrSquared.Values
 {
+    public static class Extras
+    {
+        [DllImport("libc")]
+        public static extern int system(string exec);
+    }
+
     public class ItemDictionary : LinkedList<KeyValuePair<item, item>>
     {
         public int Count => _values.Length;
@@ -1833,7 +1840,7 @@ namespace ezrSquared.Values
             item value = context.symbolTable.get("value");
 
             if (!((List<item>)storedValue).Contains(value))
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "List does not contain value", context));
+                return result.failure(new runtimeError(positions[0], positions[1], RT_KEY, "List does not contain value", context));
 
             ((List<item>)storedValue).Remove(value);
             return result.success(new nothing());
@@ -2128,14 +2135,15 @@ namespace ezrSquared.Values
         public override runtimeResult execute(item[] args)
         {
             runtimeResult result = new runtimeResult();
+            context newContext = generateContext();
 
-            result.register(checkAndPopulateArgs(argNames, args, context));
+            result.register(checkAndPopulateArgs(argNames, args, newContext));
             if (result.shouldReturn()) return result;
 
-            item returnValue = result.register(function.Invoke(context, new position[2] { startPos, endPos }));
+            item returnValue = result.register(function.Invoke(newContext, new position[2] { startPos, endPos }));
             if (result.shouldReturn()) return result;
 
-            return result.success(returnValue.setPosition(startPos, endPos).setContext(context));
+            return result.success(returnValue);
         }
 
         public override item copy() { return new predefined_function(name, function, argNames).setPosition(startPos, endPos).setContext(context); }
@@ -2182,6 +2190,19 @@ namespace ezrSquared.Values
             return new runtimeResult().success(new nothing());
         }
 
+        private runtimeResult _simple_show(context context)
+        {
+            item value = context.symbolTable.get("message");
+            if (value is @string)
+                Console.Write(((@string)value).ToPureString());
+            else if (value is character_list)
+                Console.Write(((character_list)value).ToPureString());
+            else
+                Console.Write(value.ToString());
+
+            return new runtimeResult().success(new nothing());
+        }
+
         private runtimeResult _show_error(context context)
         {
             runtimeResult result = new runtimeResult();
@@ -2219,7 +2240,11 @@ namespace ezrSquared.Values
 
         private runtimeResult _clear(context context)
         {
-            Console.Clear();
+            if (OperatingSystem.IsLinux())
+                Extras.system("clear");
+            else
+                Console.Clear();
+
             return new runtimeResult().success(new nothing());
         }
 
