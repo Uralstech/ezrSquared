@@ -31,20 +31,20 @@ Now, to install ezr² on your PC, follow these steps:
 **\>>** Download the latest release of ezr² from https://github.com/Uralstech/ezrSquared/releases - `ezrSquared.Ubuntu.tar.xz` for Linux (Ubuntu) and `ezrSquared.Windows.Installer.exe` for Windows.  <br>
 **\>>** Linux (Ubuntu): Extract the `tar.xz` file to a folder of your choice.  <br>
 **\>>** OPTIONAL: Add the folder to your PATH environment variable.  <br>
-**\>>** Verify that ezr² is installed by running `ezr²` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).
+**\>>** Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).
 
 If you want ezr² on your Android device, check out [ezr² Portable Interpreter](https://udgames.itch.io/ezrSquared-pi), an interpreter made with the help of
 [ezr² Net4.8](https://github.com/Uralstech/ezrSquaredNet4.8) in [Unity](https://unity.com/)!
 
 ## Usage
 
-An ezr² script has the extension `.ezr2`. To run an ezr² script, use the `ezr²` command followed by the path to the script file:
+An ezr² script has the extension `.ezr2`. To run an ezr² script, use the `ezrSquared` command followed by the path to the script file:
 
 ```cmd
-> ezr² hello.ezr2
-Use the ezr² command without any arguments to start the biShell:
+> ezrSquared hello.ezr2
+Use the ezrSquared command without any arguments to start the biShell:
 
-> ezr²
+> ezrSquared
 You can type any valid ezr² expression in the shell and see its result.
 ```
 
