@@ -1,5 +1,5 @@
 # The `ezr²` Programming Language
-**ezr² (aka ezrSquared) an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 ## Advantages
 
