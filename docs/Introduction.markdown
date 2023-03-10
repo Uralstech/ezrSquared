@@ -26,7 +26,7 @@ as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
 ## Tutorial For Beginners
 This section kicks off an extensive tutorial that will get you up and running with ezr²!
-(Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
+(Heavily inspired by [***this Python tutorial***](https://python.land/python-tutorial))
 
 ### Hello World, Displaying Text to The Screen and Strings
 There's a tradition in which programming tutorials start with a so-called **Hello World** program.

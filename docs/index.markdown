@@ -46,13 +46,13 @@ For more information check out [*An Introduction to ezr².*](https://uralstech.g
 
 Now, to install ezr² on your PC, follow these steps:
 
-**\>>** Download the latest release of ezr² from https://github.com/Uralstech/ezrSquared/releases - `ezrSquared.Ubuntu.tar.xz` for Linux (Ubuntu) and `ezrSquared.Windows.Installer.exe` for Windows.  <br>
+**\>>** Download the latest release of ezr² from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases) - `ezrSquared.Ubuntu.tar.xz` for Linux (Ubuntu) and `ezrSquared.Windows.Installer.exe` for Windows.  <br>
 **\>>** Linux (Ubuntu): Extract the `tar.xz` file to a folder of your choice.  <br>
 **\>>** OPTIONAL: Add the folder to your PATH environment variable.  <br>
 **\>>** Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).
 
-If you want ezr² on your Android device, check out [ezr² Portable Interpreter](https://udgames.itch.io/ezrSquared-pi), an interpreter made with the help of
-[ezr² Net4.8](https://github.com/Uralstech/ezrSquaredNet4.8) in [Unity](https://unity.com/)!
+If you want ezr² on your Android device, check out [***ezr² Portable Interpreter***](https://udgames.itch.io/ezrSquared-pi), an interpreter made with the help of
+[***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
 
 ## Usage
 
@@ -60,18 +60,18 @@ An ezr² script has the extension `.ezr2`. To run an ezr² script, use the `ezrS
 
 ```cmd
 > ezrSquared hello.ezr2
-Use the ezrSquared command without any arguments to start the biShell:
+Use the "ezrSquared" command without any arguments to start the biShell:
 
 > ezrSquared
 You can type any valid ezr² expression in the shell and see its result.
 ```
 
 ## Documentation
-The official documentation for ezr² is also available at https://uralstech.github.io/ezrSquared/Introduction and is still **work in progress**.
-While I finish that, check out some example programs here: https://github.com/Uralstech/ezrSquared/tree/master/Tests
+The official documentation for ezr² is also available at [***An Introduction to ezr²***](https://uralstech.github.io/ezrSquared/Introduction) and is still **work in progress**.
+While I finish that, check out some example programs in [***GitHub.***](https://github.com/Uralstech/ezrSquared/tree/master/Tests)
 
 ## Latest Updates
-**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [**Semantic Versioning 2.0.0**](https://semver.org/) for the first stable release.
+**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
 * **prerelease-1.3.3.0.0** - [05-03-23]
     * New `console` module for IO library
