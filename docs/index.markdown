@@ -48,18 +48,18 @@ For more information check out the [*Introduction and Documentation page*](https
 Now, to install ezr² on your PC, follow these steps:
 
 ### Windows
-**Step 1 >** Download the latest release of ezr² (`ezrSquared.Windows.Installer.exe`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).  <br>
-**Step 2 >** Run the installer and go through the installation.  <br>
-**Step 3 >** Add the folder where ezr² has been installed (usually `C:\Users\[USER]\AppData\Local\Programs\ezr²`) to your PATH environment variable.  <br>
-**Step 4 >** Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).  <br>
-**Step 5 >** Start coding!
+1. Download the latest release of ezr² (`ezrSquared.Windows.Installer.exe`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
+2. Run the installer and go through the installation.
+3. Add the folder where ezr² has been installed (usually `C:\Users\[USER]\AppData\Local\Programs\ezr²`) to your PATH environment variable.
+4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).
+5. Start coding!
 
 ### Ubuntu
-**Step 1 >** Download the latest release of ezr² (`ezrSquared.Ubuntu.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).  <br>
-**Step 2 >** Extract the `tar.xz` file to a folder of your choice.  <br>
-**Step 3 >** Add the folder to your PATH environment variable.  <br>
-**Step 4 >** Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).  <br>
-**Step 5 >** Start coding!
+1. Download the latest release of ezr² (`ezrSquared.Ubuntu.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
+2. Extract the `tar.xz` file to a folder of your choice.
+3. Add the folder to your PATH environment variable.
+4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (use Ctrl+C to exit).
+5. Start coding!
 
 ### Android
 Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of

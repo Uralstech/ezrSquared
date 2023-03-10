@@ -16,8 +16,6 @@ color_scheme: dark
 aux_links:
   "ezrSquared on GitHub":
     - "//github.com/Uralstech/ezrSquared"
-  "ezrSquared on Google Play":
-    - "//play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter"
 aux_links_new_tab: true
 
 search:
