@@ -11,6 +11,13 @@ plugins:
 favicon_ico: "/assets/images/favicon.ico"
 color_scheme: dark
 
+aux_links:
+  "ezrSquared on GitHub":
+    - "//github.com/Uralstech/ezrSquared"
+  "ezrSquared on Google PlayStore":
+    - "//play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter"
+aux_links_new_tab: true
+
 search:
   heading_level: 3
   previews: 3
@@ -20,12 +27,10 @@ search:
   rel_url: true
   button: true
 
-aux_links:
-  "ezrSquared on GitHub":
-    - "//github.com/Uralstech/ezrSquared"
-  "ezrSquared on Google PlayStore":
-    - "//play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter"
-aux_links_new_tab: true
+callouts:
+  warning:
+    title: Warning
+    color: yellow
 
 footer_content: "ezrSquared is licensed under the <a href=\"https://github.com/Uralstech/ezrSquared/blob/021e19ee7a136eabf00ddfb621a05d0d5bb6bc76/LICENSE.txt\">Apache License, Version 2.0</a>."
 
