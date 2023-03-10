@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Introduction
+title: "Introduction and Documentation / Tutorial"
 nav_order: 2
 ---
 
@@ -85,7 +85,7 @@ In computer programming, there's a strong distinction between non-fractional num
 while the latter are called **floats**. Now try this:
 
 ```
-show(3/2.0)
+show(3 / 2.0)
 ```
 
 This should display `1.5` to the screen, because we have specified that `2.0` is a **float**.
@@ -208,7 +208,7 @@ count to 10 as i do
 end
 ```
 
-Now, what if we don't want the loop/iteration variable to start at zero? We can also set the start of a count loop!
+Now, what if we don't want the loop / iteration variable to start at zero? We can also set the start of a count loop!
 ```
 count from -5 to 5 as i do
 	show("The iteration variable, named 'i' is: " + i.as_string())
