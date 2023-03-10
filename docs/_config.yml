@@ -1,15 +1,13 @@
 encoding: UTF-8
-title: ezr²
+title: ezrSquared
 email: info@uralstech.in
-description: >- # this means to ignore newlines until "baseurl:"
-  ezr² is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://uralstech.in/" # the base hostname & protocol for your site, e.g. http://example.com
+description: An easy to learn and practical programming language for beginners and experts alike!
+baseurl: ""
+url: "https://uralstech.in/"
 markdown: kramdown
 
-# Build settings
 theme: jekyll-theme-hacker
 remote_theme: pages-themes/hacker@v0.2.0
 plugins:
-  - jekyll-remote-theme # add this line to the plugins list if you already have one
+  - jekyll-remote-theme
   - jekyll-feed
