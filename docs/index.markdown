@@ -3,6 +3,7 @@ layout: default
 ---
 
 # The `ezr²` Programming Language
+{:toc}
 **ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 ## Why Learn ezr²?
@@ -15,6 +16,7 @@ boilerplate syntax for the shorter **QuickSyntax**. The normal syntax satisfies 
 as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
 ## Tutorial For Beginners
+{:toc}
 This section kicks off an extensive tutorial that will get you up and running with ezr²!
 (Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
 
