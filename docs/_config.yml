@@ -28,7 +28,7 @@ title: The ezrSquared Programming Language
 markdown: GFM
 
 # Build settings
-theme: hacker
+theme: Hacker
 plugins:
   - jekyll-feed
 
