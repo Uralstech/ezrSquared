@@ -3,7 +3,7 @@ layout: default
 title: Introduction
 ---
 
-# An Introduction to ezr²
+# An Introduction to ezrÂ²
 {: .no_toc }
 
 <details open markdown="block">
@@ -15,17 +15,17 @@ title: Introduction
 {:toc}
 </details>
 
-## Why Learn ezr²?
-ezr² is a programming language that's **easy to learn** and **practical to use**.
-ezr² can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
-the functionalities of ezr² with **libraries**. If you already know C#, you can even
-help in ezr² development with **C# Assisted ezr² Libraries** (**CSAELs**)! CSAELs bring
-the existing functionality of C# to ezr²! Experienced ezr² programmers can even ditch the
+## Why Learn ezrÂ²?
+ezrÂ² is a programming language that's **easy to learn** and **practical to use**.
+ezrÂ² can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
+the functionalities of ezrÂ² with **libraries**. If you already know C#, you can even
+help in ezrÂ² development with **C# Assisted ezrÂ² Libraries** (**CSAELs**)! CSAELs bring
+the existing functionality of C# to ezrÂ²! Experienced ezrÂ² programmers can even ditch the
 boilerplate syntax for the shorter **QuickSyntax**. The normal syntax satisfies the beginner,
 as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
 ## Tutorial For Beginners
-This section kicks off an extensive tutorial that will get you up and running with ezr²!
+This section kicks off an extensive tutorial that will get you up and running with ezrÂ²!
 (Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
 
 ### Hello World, Displaying Text to The Screen and Strings
@@ -38,11 +38,11 @@ show("Hello, World!")
 ```
 
 The `show()` function takes anything we put between the parentheses and prints it to the screen.
-But we must feed it the correct type of data for it to work. For example, text in ezr² is always put between **double quotes**.
+But we must feed it the correct type of data for it to work. For example, text in ezrÂ² is always put between **double quotes**.
 In the world of computer programming, we call this a **string**.
 
 Double quotes around strings are essential because they precisely **mark the start and end** of a string.
-This way, a string is easy to recognize for ezr². Here are a few more examples of valid strings:
+This way, a string is easy to recognize for ezrÂ². Here are a few more examples of valid strings:
 
 ```
 "Hello world"
@@ -52,12 +52,12 @@ This way, a string is easy to recognize for ezr². Here are a few more examples o
 
 You also might have noticed that after printing "Hello, World!" to the screen, the `show()` function also printed "nothing".
 This means **the function returned nothing**. If we code in `"Example"` and enter, only `"Example"` will be printed to the screen.
-This means **the expression `"Example"` returned the string "Example"** - ezr² is only showing that to the screen. `nothing` is a representation
+This means **the expression `"Example"` returned the string "Example"** - ezrÂ² is only showing that to the screen. `nothing` is a representation
 of, well, nothing - equivalent to null (C#, C, Java, etc) or none (Python).
 
 ### Numbers
 Now that we've seen strings let's move on to **numbers**. Just like strings,
-we can ask ezr² to print numbers using the `show()` function.
+we can ask ezrÂ² to print numbers using the `show()` function.
 Unlike strings, numbers **don't need quotes around them**.
 So, to print the number 10, use this:
 
@@ -93,7 +93,7 @@ will always return a float.** This rule is the same for all operators.
 
 ### Variables
 Wouldn't it be nice to store the results of the calculations we made above? For this, we use **variables**.
-**Variables allow us to store things in memory** for as long as the ezr² program runs. Like a restaurant reservation
+**Variables allow us to store things in memory** for as long as the ezrÂ² program runs. Like a restaurant reservation
 under your name, a variable is a named reservation of a small part of your computer's memory.
 
 The syntax to assign a variable is so: `item NAME: VALUE`. To assign the number 42 to a variable called age, we would write:
@@ -177,20 +177,20 @@ Here are all the comparison operators:
 If we use comparisons outside if expressions they will return **booleans**. Booleans are just two values - **true** or **false**.
 
 ### One-liners
-You might have noticed that the if expression has the **end** keyword at the end. All multi-line ezr² expressions **must** end with the
-**end** keyword. Noticed that I said "All multi-line ezr² expressions"? We can write all these in one line - these are called **one-liners**.
+You might have noticed that the if expression has the **end** keyword at the end. All multi-line ezrÂ² expressions **must** end with the
+**end** keyword. Noticed that I said "All multi-line ezrÂ² expressions"? We can write all these in one line - these are called **one-liners**.
 They are the same as writing the multi-line version of an expression, but they must fit in a single line. For example -
 ```
 if get("Hello there! ") = "General Kenobi" do show("Nice")
 ```
 
 Note that new lines can be coded as the semicolon (`;`) symbol. Comments are signified by the at symbol (`@`) at the start. Comments are just more
-information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezr².
+information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezrÂ².
 
 ### Loops (Part 1)
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
 we want the code to run forever? Or even a set number of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
-**A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - **count loops** and **while loops**.
+**A loop keeps executing the given body of code till a condition is satisfied.** ezrÂ² has two types of loops - **count loops** and **while loops**.
 **Count loops** repeat the given code a **set number of times**.
 ```
 count to 10 do
@@ -263,7 +263,7 @@ item array_example: (3)
 show(array_example)
 ```
 
-This won't work, as ezr² thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
+This won't work, as ezrÂ² thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
 ```
 item array_example: (3,)
 show(array_example)
