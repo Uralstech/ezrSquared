@@ -25,10 +25,10 @@ title: The ezrSquared Programming Language
 #   ezrSquared is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
 # baseurl: "" # the subpath of your site, e.g. /blog
 # url: "https://uralstech.in/" # the base hostname & protocol for your site, e.g. http://example.com
-markdown: GFM
+markdown: kramdown
 
 # Build settings
-theme: jekyll-theme-hacker
+theme: hacker
 plugins:
   - jekyll-feed
 
