@@ -28,8 +28,10 @@ title: The ezrSquared Programming Language
 markdown: GFM
 
 # Build settings
-theme: Hacker
+remote_theme: pages-themes/hacker@v0.2.0
+theme: hacker
 plugins:
+  - jekyll-remote-theme
   - jekyll-feed
 
 # Exclude from processing.
