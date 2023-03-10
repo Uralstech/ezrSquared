@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Introduction and Documentation / Tutorial"
+title: "Introduction and Documentation"
 nav_order: 2
 ---
 
