@@ -1,9 +1,11 @@
 ---
 layout: default
+title: Introduction to ezr²
 ---
 
 # The `ezr²` Programming Language
-{: .no_toc }
+**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+
 <details open markdown="block">
   <summary>
     Table of contents
@@ -12,8 +14,6 @@ layout: default
 - TOC
 {:toc}
 </details>
-
-**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 ## Why Learn ezr²?
 ezr² is a programming language that's **easy to learn** and **practical to use**.
@@ -28,7 +28,7 @@ as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 This section kicks off an extensive tutorial that will get you up and running with ezr²!
 (Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
 
-### Hello World (Displaying Text To The Screen)
+### Hello World, Displaying Text To The Screen and Strings
 There's a tradition in which programming tutorials start with a so-called **Hello World** program.
 A Hello World program simply prints the words "Hello world" to the screen. We use the `show()`
 function to do so.
@@ -76,7 +76,7 @@ Try some of these operators on numbers!
 |     %    | modulo         |  9 % 2  |
 |     ^    | powered by     |  4 ^ 2  |
 
-### Floating Point Numbers
+### Floating-point Numbers
 While playing around with the division operator, you might have gotten some
 rounded off results - for example `3 / 2` returns `1` instead of `1.5` which is correct.
 In computer programming, there's a strong distinction between non-fractional numbers like
