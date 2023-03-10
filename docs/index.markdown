@@ -1,22 +1,29 @@
-Ôªø# The `ezr¬≤` Programming Language
-**ezr¬≤ (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+---
+# Feel free to add content and custom Front Matter to this file.
+# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
-## Why Learn ezr¬≤?
-ezr¬≤ is a programming language that's **easy to learn** and **practical to use**.
-ezr¬≤ can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
-the functionalities of ezr¬≤ with **libraries**. If you already know C#, you can even
-help in ezr¬≤ development with **C# Assisted ezr¬≤ Libraries** (**CSAELs**)! CSAELs bring
-the existing functionality of C# to ezr¬≤! Experianced ezr¬≤ programmers can even ditch the
+layout: home
+---
+
+# The `ezr≤` Programming Language
+**ezr≤ (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+
+## Why Learn ezr≤?
+ezr≤ is a programming language that's **easy to learn** and **practical to use**.
+ezr≤ can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
+the functionalities of ezr≤ with **libraries**. If you already know C#, you can even
+help in ezr≤ development with **C# Assisted ezr≤ Libraries** (**CSAELs**)! CSAELs bring
+the existing functionality of C# to ezr≤! Experianced ezr≤ programmers can even ditch the
 boilerplate syntax for the shorter **QuickSyntax**. The normal syntax satisfies the beginner,
 as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
 ## Tutorial For Beginners
-This section kicks off an extensive tutorial that will get you up and running with ezr¬≤!
+This section kicks off an extensive tutorial that will get you up and running with ezr≤!
 (Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
 
 ### Hello World (Displaying Text To The Screen)
-There‚Äôs a tradition in which programming tutorials start with a so-called **Hello World** program.
-A Hello World program simply prints the words ‚ÄúHello world‚Äù to the screen. We use the `show()`
+Thereís a tradition in which programming tutorials start with a so-called **Hello World** program.
+A Hello World program simply prints the words ìHello worldî to the screen. We use the `show()`
 function to do so.
 
 ```
@@ -24,11 +31,11 @@ show("Hello, World!")
 ```
 
 The `show()` function takes anything we put between the parentheses and prints it to the screen.
-But we must feed it the correct type of data for it to work. For example, text in ezr¬≤ is always put between **double quotes**.
+But we must feed it the correct type of data for it to work. For example, text in ezr≤ is always put between **double quotes**.
 In the world of computer programming, we call this a **string**.
 
 Double quotes around strings are essential because they precisely **mark the start and end** of a string.
-This way, a string is easy to recognize for ezr¬≤. Here are a few more examples of valid strings:
+This way, a string is easy to recognize for ezr≤. Here are a few more examples of valid strings:
 
 ```
 "Hello world"
@@ -38,13 +45,13 @@ This way, a string is easy to recognize for ezr¬≤. Here are a few more examples 
 
 You also might have noticed that after printing "Hello, World!" to the screen, the `show()` function also printed "nothing".
 This means **the function returned nothing**. If we code in `"Example"` and enter, only `"Example"` will be printed to the screen.
-This means **the expression `"Example"` returned the string "Example"** - ezr¬≤ is only showing that to the screen. `nothing` is a representation
+This means **the expression `"Example"` returned the string "Example"** - ezr≤ is only showing that to the screen. `nothing` is a representation
 of, well, nothing - equivalent to null (C#, C, Java, etc) or none (Python).
 
 ### Numbers
-Now that we‚Äôve seen strings let‚Äôs move on to **numbers**. Just like strings,
-we can ask ezr¬≤ to print numbers using the `show()` function.
-Unlike strings, numbers **don‚Äôt need quotes around them**.
+Now that weíve seen strings letís move on to **numbers**. Just like strings,
+we can ask ezr≤ to print numbers using the `show()` function.
+Unlike strings, numbers **donít need quotes around them**.
 So to print the number 10, use this:
 
 ```
@@ -65,7 +72,7 @@ Try some of these operators on numbers!
 ### Floating Point Numbers
 While playing around with the division operator, you might have gotten some
 rounded off results - for example `3 / 2` returns `1` instead of `1.5` which is correct.
-In computer programming, there‚Äôs a strong distinction between non-fractional numbers like
+In computer programming, thereís a strong distinction between non-fractional numbers like
 1, 3, and 42 and fractional numbers like 3.14. The former are called **integers**,
 while the latter are called **floats**. Now try this:
 
@@ -78,9 +85,9 @@ This should display `1.5` to the screen, because we have specified that `2.0` is
 will always return a float.** This rule is the same for all operators.
 
 ### Variables
-Wouldn‚Äôt it be nice to store the results of the calculations we made above? For this, we use **variables**.
-**Variables allow us to store things in memory** for as long as the ezr¬≤ program runs. Like a restaurant reservation
-under your name, a variable is a named reservation of a small part of your computer‚Äôs memory.
+Wouldnít it be nice to store the results of the calculations we made above? For this, we use **variables**.
+**Variables allow us to store things in memory** for as long as the ezr≤ program runs. Like a restaurant reservation
+under your name, a variable is a named reservation of a small part of your computerís memory.
 
 The syntax to assign a variable is so: `item NAME: VALUE`. To assign the number 42 to a variable called age, we would write:
 
@@ -163,20 +170,20 @@ Here are all the comparison operators:
 If we use comparisons outside if expressions they will return **booleans**. Booleans are just two values - **true** or **false**.
 
 ### One-liners
-You might have noticed that the if expression has the **end** keyword at the end. All multi-line ezr¬≤ expressions **must** end with the
-**end** keyword. Noticed that I said "All multi-line ezr¬≤ expressions"? We can write all these in one line - these are called **one-liners**.
+You might have noticed that the if expression has the **end** keyword at the end. All multi-line ezr≤ expressions **must** end with the
+**end** keyword. Noticed that I said "All multi-line ezr≤ expressions"? We can write all these in one line - these are called **one-liners**.
 They are the same as writing the multi-line version of an expression, but they must fit in a single line. For example -
 ```
 if get("Hello there! ") = "General Kenobi" do show("Nice")
 ```
 
 Note that new lines can be coded as the semicolon (`;`) symbol. Comments are signified by the at symbol (`@`) at the start. Comments are just more
-information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezr¬≤.
+information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezr≤.
 
 ### Loops (Part 1)
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
 we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
-**A loop keeps executing the given body of code till a condition is satisfied.** ezr¬≤ has two types of loops - **count loops** and **while loops**.
+**A loop keeps executing the given body of code till a condition is satisfied.** ezr≤ has two types of loops - **count loops** and **while loops**.
 **Count loops** repeat the given code a **set amount of times**.
 ```
 count to 10 do
@@ -249,7 +256,7 @@ item array_example: (3)
 show(array_example)
 ```
 
-This won't work, as ezr¬≤ thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
+This won't work, as ezr≤ thinks `(3)` is part of an operation - not an array. So, we have to have a comma after the first item!
 ```
 item array_example: (3,)
 show(array_example)
