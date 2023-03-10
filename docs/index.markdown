@@ -4,6 +4,8 @@ title: Introduction to ezr²
 ---
 
 # The `ezr²` Programming Language
+{: .no_toc }
+
 **ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 <details open markdown="block">
