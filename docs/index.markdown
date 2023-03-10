@@ -22,7 +22,7 @@ ezr² is a programming language that's **easy to learn** and **practical to use*
 ezr² can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
 the functionalities of ezr² with **libraries**. If you already know C#, you can even
 help in ezr² development with **C# Assisted ezr² Libraries** (**CSAELs**)! CSAELs bring
-the existing functionality of C# to ezr²! Experianced ezr² programmers can even ditch the
+the existing functionality of C# to ezr²! Experienced ezr² programmers can even ditch the
 boilerplate syntax for the shorter **QuickSyntax**. The normal syntax satisfies the beginner,
 as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
@@ -30,7 +30,7 @@ as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 This section kicks off an extensive tutorial that will get you up and running with ezr²!
 (Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
 
-### Hello World, Displaying Text To The Screen and Strings
+### Hello World, Displaying Text to The Screen and Strings
 There's a tradition in which programming tutorials start with a so-called **Hello World** program.
 A Hello World program simply prints the words "Hello world" to the screen. We use the `show()`
 function to do so.
@@ -61,7 +61,7 @@ of, well, nothing - equivalent to null (C#, C, Java, etc) or none (Python).
 Now that we've seen strings let's move on to **numbers**. Just like strings,
 we can ask ezr² to print numbers using the `show()` function.
 Unlike strings, numbers **don't need quotes around them**.
-So to print the number 10, use this:
+So, to print the number 10, use this:
 
 ```
 show(10)
@@ -118,7 +118,7 @@ show("My age is " + age.as_string())
 ```
 
 ### User Input
-Let's make a simple adder - The user will enter two numbers, and the adder will return the result of adding them together.
+Let's make a simple adder - the user will enter two numbers, and the adder will return the result of adding them together.
 To do so we need to get the user's input. We can use the `get()` function for that. We have to feed it the message to show to the user.
 We can enter `nothing` if we don't want any message with the input request.
 
@@ -191,9 +191,9 @@ information about the written code - like how the code works. They do not affect
 
 ### Loops (Part 1)
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
-we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
+we want the code to run forever? Or even a set number of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
 **A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - **count loops** and **while loops**.
-**Count loops** repeat the given code a **set amount of times**.
+**Count loops** repeat the given code a **set number of times**.
 ```
 count to 10 do
 	show("Hello, World!")
@@ -278,7 +278,7 @@ show(array_example.length)
 ```
 
 ### Lists
-**Lists** are like arrays, but they are changable or **mutable**. They are created with square brackets, instead of parentheses.
+**Lists** are like arrays, but they are changeable or **mutable**. They are created with square brackets, instead of parentheses.
 ```
 item list_example: [1,"string",1.45,nothing,true]
 show(list_example)
@@ -294,7 +294,7 @@ Here are all the list operators:
 |     /    | division       | [6,2,3,4] / 2                |
 |    \<=   | item access    | [6,2] <= 1                   |
 
-We can access the length of the list with the `length` variable built into the list, just like wiht arrays.
+We can access the length of the list with the `length` variable built into the list, just like with arrays.
 
 ### Loops (Part 2)
 **While loops** repeat the given code **till the given condition turns false**.
