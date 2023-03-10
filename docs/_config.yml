@@ -28,7 +28,7 @@ title: The ezrSquared Programming Language
 markdown: kramdown
 
 # Build settings
-theme: hacker
+theme: jekyll-theme-hacker
 plugins:
   - jekyll-feed
 
