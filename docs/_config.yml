@@ -2,9 +2,29 @@ title: ezrSquared
 email: info@uralstech.in
 description: An easy to learn and practical programming language for beginners and experts alike!
 markdown: kramdown
-show_downloads: true
 
 remote_theme: just-the-docs/just-the-docs@v0.4.1
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
+  
+favicon_ico: "/assets/images/favicon.ico"
+color_scheme: dark
+
+aux_links:
+  "ezrSquared on GitHub":
+    - "//github.com/Uralstech/ezrSquared"
+  "ezrSquared on Google PlayStore":
+    - "//play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter"
+aux_links_new_tab: true
+
+footer_content: "ezrSquared is licensed under the <a href=\"https://github.com/Uralstech/ezrSquared/tree/main/LICENSE.txt\">Apache License 2.0</a>."
+
+last_edit_timestamp: true
+last_edit_time_format: "%b %e %Y at %I:%M %p"
+
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub."
+gh_edit_repository: "https://github.com/Uralstech/ezrSquared/"
+gh_edit_branch: "ghpages"
+gh_edit_view_mode: "tree"
