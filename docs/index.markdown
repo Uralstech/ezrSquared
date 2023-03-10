@@ -1,12 +1,13 @@
 ---
 layout: default
 title: The ezr² Programming Language
+nav_order: 1
 ---
 
 # The `ezr²` Programming Language
 {: .no_toc }
 
-**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
+**ezr², or ezrSquared if you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
 For more information check out [*An Introduction to ezr².*](https://uralstech.github.io/ezrSquared/Introduction)**
 
 <details open markdown="block">

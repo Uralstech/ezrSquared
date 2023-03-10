@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Introduction
+nav_order: 2
 ---
 
 # An Introduction to ezr²
