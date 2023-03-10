@@ -1,4 +1,7 @@
-﻿# ezr² Wiki
+﻿<title>The ezr² Programming Language</title>
+
+# The `ezr²` Programming Language
+**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 ## Why Learn ezr²?
 ezr² is a programming language that's **easy to learn** and **practical to use**.

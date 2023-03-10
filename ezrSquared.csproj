@@ -9,13 +9,4 @@
     <StartupObject>ezrSquared.Shell.ezrShell</StartupObject>
     <ApplicationIcon>Graphics\Icon.ico</ApplicationIcon>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="Graphics\Icon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Installer\bin\" />
-    <Folder Include="Documentation\" />
-  </ItemGroup>
 </Project>
