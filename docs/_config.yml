@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-encoding: utf-8
+encoding: UTF-8
 title: The ezrSquared Programming Language
 email: info@uralstech.in
 description: >- # this means to ignore newlines until "baseurl:"
