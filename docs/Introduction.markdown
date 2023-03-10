@@ -1,22 +1,37 @@
-﻿# The `ezr²` Programming Language
-**ezr² (aka ezrSquared) is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+---
+layout: default
+title: "Introduction and Documentation"
+nav_order: 2
+---
+
+# An Introduction to ezr²
+{: .no_toc }
+
+<details open markdown="block">
+  <summary>
+    Table of contents
+  </summary>
+  {: .text-delta }
+- TOC
+{:toc}
+</details>
 
 ## Why Learn ezr²?
 ezr² is a programming language that's **easy to learn** and **practical to use**.
 ezr² can be learnt by anyone, **of any age**, in a few minutes. Anyone can extend
 the functionalities of ezr² with **libraries**. If you already know C#, you can even
 help in ezr² development with **C# Assisted ezr² Libraries** (**CSAELs**)! CSAELs bring
-the existing functionality of C# to ezr²! Experianced ezr² programmers can even ditch the
+the existing functionality of C# to ezr²! Experienced ezr² programmers can even ditch the
 boilerplate syntax for the shorter **QuickSyntax**. The normal syntax satisfies the beginner,
 as it is easy to use and QuickSyntax satisfies the expert, as it is very short.
 
 ## Tutorial For Beginners
 This section kicks off an extensive tutorial that will get you up and running with ezr²!
-(Heavily inspired by [this Python tutorial](https://python.land/python-tutorial))
+(Heavily inspired by [***this Python tutorial***](https://python.land/python-tutorial))
 
-### Hello World (Displaying Text To The Screen)
-There’s a tradition in which programming tutorials start with a so-called **Hello World** program.
-A Hello World program simply prints the words “Hello world” to the screen. We use the `show()`
+### Hello World, Displaying Text to The Screen and Strings
+There's a tradition in which programming tutorials start with a so-called **Hello World** program.
+A Hello World program simply prints the words "Hello world" to the screen. We use the `show()`
 function to do so.
 
 ```
@@ -42,10 +57,10 @@ This means **the expression `"Example"` returned the string "Example"** - ezr² 
 of, well, nothing - equivalent to null (C#, C, Java, etc) or none (Python).
 
 ### Numbers
-Now that we’ve seen strings let’s move on to **numbers**. Just like strings,
+Now that we've seen strings let's move on to **numbers**. Just like strings,
 we can ask ezr² to print numbers using the `show()` function.
-Unlike strings, numbers **don’t need quotes around them**.
-So to print the number 10, use this:
+Unlike strings, numbers **don't need quotes around them**.
+So, to print the number 10, use this:
 
 ```
 show(10)
@@ -62,15 +77,15 @@ Try some of these operators on numbers!
 |     %    | modulo         |  9 % 2  |
 |     ^    | powered by     |  4 ^ 2  |
 
-### Floating Point Numbers
+### Floating-point Numbers
 While playing around with the division operator, you might have gotten some
 rounded off results - for example `3 / 2` returns `1` instead of `1.5` which is correct.
-In computer programming, there’s a strong distinction between non-fractional numbers like
+In computer programming, there's a strong distinction between non-fractional numbers like
 1, 3, and 42 and fractional numbers like 3.14. The former are called **integers**,
 while the latter are called **floats**. Now try this:
 
 ```
-show(3/2.0)
+show(3 / 2.0)
 ```
 
 This should display `1.5` to the screen, because we have specified that `2.0` is a **float**.
@@ -78,9 +93,9 @@ This should display `1.5` to the screen, because we have specified that `2.0` is
 will always return a float.** This rule is the same for all operators.
 
 ### Variables
-Wouldn’t it be nice to store the results of the calculations we made above? For this, we use **variables**.
+Wouldn't it be nice to store the results of the calculations we made above? For this, we use **variables**.
 **Variables allow us to store things in memory** for as long as the ezr² program runs. Like a restaurant reservation
-under your name, a variable is a named reservation of a small part of your computer’s memory.
+under your name, a variable is a named reservation of a small part of your computer's memory.
 
 The syntax to assign a variable is so: `item NAME: VALUE`. To assign the number 42 to a variable called age, we would write:
 
@@ -102,7 +117,7 @@ show("My age is " + age.as_string())
 ```
 
 ### User Input
-Let's make a simple adder - The user will enter two numbers, and the adder will return the result of adding them together.
+Let's make a simple adder - the user will enter two numbers, and the adder will return the result of adding them together.
 To do so we need to get the user's input. We can use the `get()` function for that. We have to feed it the message to show to the user.
 We can enter `nothing` if we don't want any message with the input request.
 
@@ -175,9 +190,9 @@ information about the written code - like how the code works. They do not affect
 
 ### Loops (Part 1)
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
-we want the code to run forever? Or even a set amount of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
+we want the code to run forever? Or even a set number of times? Do we have to keep copying and pasting it? No! We'll use **loops** for that.
 **A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - **count loops** and **while loops**.
-**Count loops** repeat the given code a **set amount of times**.
+**Count loops** repeat the given code a **set number of times**.
 ```
 count to 10 do
 	show("Hello, World!")
@@ -193,7 +208,7 @@ count to 10 as i do
 end
 ```
 
-Now, what if we don't want the loop/iteration variable to start at zero? We can also set the start of a count loop!
+Now, what if we don't want the loop / iteration variable to start at zero? We can also set the start of a count loop!
 ```
 count from -5 to 5 as i do
 	show("The iteration variable, named 'i' is: " + i.as_string())
@@ -262,7 +277,7 @@ show(array_example.length)
 ```
 
 ### Lists
-**Lists** are like arrays, but they are changable or **mutable**. They are created with square brackets, instead of parentheses.
+**Lists** are like arrays, but they are changeable or **mutable**. They are created with square brackets, instead of parentheses.
 ```
 item list_example: [1,"string",1.45,nothing,true]
 show(list_example)
@@ -278,7 +293,7 @@ Here are all the list operators:
 |     /    | division       | [6,2,3,4] / 2                |
 |    \<=   | item access    | [6,2] <= 1                   |
 
-We can access the length of the list with the `length` variable built into the list, just like wiht arrays.
+We can access the length of the list with the `length` variable built into the list, just like with arrays.
 
 ### Loops (Part 2)
 **While loops** repeat the given code **till the given condition turns false**.
