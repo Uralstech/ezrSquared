@@ -4,6 +4,6 @@ description: An easy to learn and practical programming language for beginners a
 markdown: kramdown
 show_downloads: true
 
-theme: jekyll-theme-hacker
+theme: just-the-docs
 plugins:
   - jekyll-feed

@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 gem "github-pages", "~> 228", group: :jekyll_plugins
 gem "jekyll-theme-hacker", group: :jekyll_plugins
+gem "just-the-docs"
 gem "minima"
 
 group :jekyll_plugins do
