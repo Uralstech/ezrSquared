@@ -1,11 +1,11 @@
+encoding: UTF-8
 title: ezrSquared
+email: info@uralstech.in
 description: >-
   An easy to learn and practical programming language for beginners and experts alike!
-email: info@uralstech.in
-markdown: kramdown
-encoding: UTF-8
 baseurl: ""
 url: "https://uralstech.in/"
+markdown: kramdown
 show_downloads: true
 
 theme: jekyll-theme-hacker
