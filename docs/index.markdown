@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: default
 ---
 
 # The `ezr²` Programming Language
