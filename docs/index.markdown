@@ -8,7 +8,7 @@ nav_order: 1
 {: .no_toc }
 
 **ezr², or ezrSquared when you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
-For more information check out [*Introduction and Documentation.*](https://uralstech.github.io/ezrSquared/Introduction)**
+For more information check out the [*Introduction and Documentation page*](https://uralstech.github.io/ezrSquared/Introduction).**
 
 <details open markdown="block">
   <summary>
@@ -68,8 +68,8 @@ You can type any valid ezr² expression in the shell and see its result.
 ```
 
 ## Documentation
-The official documentation for ezr² is also available in the [***Introduction and Documentation page***](https://uralstech.github.io/ezrSquared/Introduction) and is still **work in progress**.
-While I finish that, check out some example programs in [***GitHub.***](https://github.com/Uralstech/ezrSquared/tree/master/Tests)
+The official documentation for ezr² is available in the [***Introduction and Documentation page***](https://uralstech.github.io/ezrSquared/Introduction), but is still **work in progress**.
+While I finish that, check out some example programs in [***GitHub***](https://github.com/Uralstech/ezrSquared/tree/master/Tests).
 
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
