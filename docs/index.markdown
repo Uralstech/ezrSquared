@@ -69,7 +69,8 @@ Now, to install ezr² on your PC, follow these steps:
 {: .no_toc }
 
 Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of
-[***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
+[***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)! If you are interested in how ezr² was embedded to the portable interpreter, check out the
+[***C# in ezr² page***](https://uralstech.github.io/ezrSquared/CSAELs).
 
 ### Other
 {: .no_toc }
