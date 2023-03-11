@@ -41,6 +41,7 @@ For more information check out the [*Introduction and Documentation page*](https
 - Automatic memory management
 
 ## Installation
+{: .no_toc }
 
 {: .warning }
 **BEFORE YOU START CODING:** ezr² is still in **pre-release** status. That means **ezr² might get backwards-incompatible updates every now and then**.
@@ -64,6 +65,9 @@ Now, to install ezr² on your PC, follow these steps:
 ### Android
 Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of
 [***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
+
+### Other
+For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build. If you're a contributor, feel free to add the build to the latest [***release***](https://github.com/Uralstech/ezrSquared/releases).
 
 ## Usage
 
