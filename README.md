@@ -3,7 +3,7 @@
 For more information check out the [*Introduction and Documentation page*](https://uralstech.github.io/ezrSquared/Introduction).**
 
 ## Update!
-All information and documentation about ezr² has been moved to ***https://uralstech.github.io/ezrSquared/***!
+All information and documentation about ezr² has been moved to ***https://uralstech.github.io/ezrSquared***!
 
 ## Advantages
 
@@ -64,43 +64,6 @@ You can type any valid ezr² expression in the shell and see its result.
 ## Documentation
 The official documentation for ezr² is available in the [***Introduction and Documentation page***](https://uralstech.github.io/ezrSquared/Introduction), but is still **work in progress**.
 While I finish that, check out some example programs in [***GitHub***](https://github.com/Uralstech/ezrSquared/tree/master/Tests).
-
-## Latest Updates
-**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
-
-* **prerelease-1.3.3.0.0** - [05-03-23]
-    * New `console` module for IO library
-    * New `simple_show` builtin function
-    * Fixed predefined function execution
-    * Better error messages
-    * Added changes for Linux version of builtin function `clear`
-
-* **prerelease-1.3.2.0.0** - [15-02-23]
-    * New runtimeRunError error class!
-
-* **prerelease-1.3.1.0.0** - [14-02-23]
-    * Fixed a count loop error message
-    * Better error message for else if statements
-
-* **prerelease-1.3.0.0.3** - [12-02-23]
-    * Better `undefined` error message for special functions
-
-* **prerelease-1.3.0.0.2** - [11-02-23]
-    * Fixed object definition QuickSyntax
-
-* **prerelease-1.3.0.0.1** - [07-02-23]
-    * Fixed `in` expression
-    * character_list `remove` operation now returns the removed character
-
-* **prerelease-1.3.0.0.0** - [03-02-23]
-    * ezr² now searches for name of DLL file as the main class in CSAELs
-    * Error tags now correspond to their errors
-    * New error tag `length-error`
-    * Error tag `overflow` now `overflow-error`
-    * New global variable for error tag `overflow`
-    * Global variables `err_illop` and `err_undef` are now `err_illegalop` and `err_undefined`
-    * Functions `insert`, `remove` in character_list now support string / character_list values of length > 1
-    * Other new errors - check the commits
 
 ## Contributing
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.
