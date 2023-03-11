@@ -1,6 +1,5 @@
 # The `ezr²` Programming Language
-**ezr², or ezrSquared when you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
-For more information check out the [*Introduction and Documentation page*](https://uralstech.github.io/ezrSquared/Introduction).**
+**ezr², or ezrSquared when you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 ## Update!
 All information and documentation about ezr² has been moved to ***https://uralstech.github.io/ezrSquared***! This ReadMe will not be updated with the latest information.
