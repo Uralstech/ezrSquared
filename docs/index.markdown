@@ -41,7 +41,6 @@ For more information check out the [*Introduction and Documentation page*](https
 - Automatic memory management
 
 ## Installation
-{: .no_toc }
 
 {: .warning }
 **BEFORE YOU START CODING:** ezr² is still in **pre-release** status. That means **ezr² might get backwards-incompatible updates every now and then**.
@@ -49,6 +48,8 @@ For more information check out the [*Introduction and Documentation page*](https
 Now, to install ezr² on your PC, follow these steps:
 
 ### Windows
+{: .no_toc }
+
 1. Download the latest release of ezr² (`ezrSquared.Windows.Installer.exe`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
 2. Run the installer and go through the installation.
 3. Add the folder where ezr² has been installed (`C:\Users\[USER]\AppData\Local\Programs\ezr²` or `C:\Program Files (x86)\ezr²` by default) to your PATH environment variable.
@@ -56,6 +57,8 @@ Now, to install ezr² on your PC, follow these steps:
 5. Start coding!
 
 ### Ubuntu
+{: .no_toc }
+
 1. Download the latest release of ezr² (`ezrSquared.Ubuntu.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
 2. Extract the `tar.xz` file to a folder of your choice.
 3. Add the folder to your PATH environment variable.
@@ -63,10 +66,14 @@ Now, to install ezr² on your PC, follow these steps:
 5. Start coding!
 
 ### Android
+{: .no_toc }
+
 Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of
 [***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
 
 ### Other
+{: .no_toc }
+
 For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build. If you're a contributor, feel free to add the build to the latest [***release***](https://github.com/Uralstech/ezrSquared/releases).
 
 ## Usage
