@@ -3,7 +3,7 @@
 For more information check out the [*Introduction and Documentation page*](https://uralstech.github.io/ezrSquared/Introduction).**
 
 ## Update!
-All information and documentation about ezr² has been moved to ***https://uralstech.github.io/ezrSquared***!
+All information and documentation about ezr² has been moved to ***https://uralstech.github.io/ezrSquared***! This ReadMe will not be updated with the latest information.
 
 ## Advantages
 
@@ -25,41 +25,6 @@ All information and documentation about ezr² has been moved to ***https://uralst
 - Support for C# through CSAELS
 - Multiple paradigms
 - Automatic memory management
-
-## Installation
-**BEFORE YOU START CODING:** ezr² is still in **pre-release** status. That means **ezr² might get backwards-incompatible updates every now and then**.
-
-Now, to install ezr² on your PC, follow these steps:
-
-### Windows
-1. Download the latest release of ezr² (`ezrSquared.Windows.Installer.exe`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
-2. Run the installer and go through the installation.
-3. Add the folder where ezr² has been installed (`C:\Users\[USER]\AppData\Local\Programs\ezr²` or `C:\Program Files (x86)\ezr²` by default) to your PATH environment variable.
-4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
-5. Start coding!
-
-### Ubuntu
-1. Download the latest release of ezr² (`ezrSquared.Ubuntu.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
-2. Extract the `tar.xz` file to a folder of your choice.
-3. Add the folder to your PATH environment variable.
-4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
-5. Start coding!
-
-### Android
-Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of
-[***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
-
-## Usage
-
-An ezr² script has the extension `.ezr2`. To run an ezr² script, use the `ezrSquared` command followed by the path to the script file:
-
-```cmd
-> ezrSquared hello.ezr2
-Use the "ezrSquared" command without any arguments to start the biShell:
-
-> ezrSquared
-You can type any valid ezr² expression in the shell and see its result.
-```
 
 ## Documentation
 The official documentation for ezr² is available in the [***Introduction and Documentation page***](https://uralstech.github.io/ezrSquared/Introduction), but is still **work in progress**.
