@@ -162,7 +162,7 @@ Here are all the comparison operators:
 |    or    | and                      |  3 = 2 and 2 > 1, 2 = 5 and 5 = 2, 2 = 2 and 2 > 1  |
 |    and   | or                       |  3 = 2 or 2 > 1, 2 = 5 or 5 = 2, 2 = 2 or 2 > 1     |
 
-If you use comparisons outside if expressions they will return **booleans**. Booleans are just two values - **true** or **false**.
+If you use **comparisons outside if expressions** they **will return a *boolean***. **Booleans are just two values - *true* or *false***.
 
 ### One-liners
 You might have noticed that the if expression has the *end* keyword at the end. **All multi-line ezr² expressions *must* end with the *end* keyword**. But **you can write all multi-line expressions in one line - these are called *one-liners***.
