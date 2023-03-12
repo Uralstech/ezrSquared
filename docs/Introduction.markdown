@@ -179,7 +179,7 @@ For the above scripts, you might have found it annoying to have to copy and past
 you want the code to run forever? Or even a set number of times? Do you have to keep copying and pasting it? No! You'll use *loops* for that.
 **A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - *count loops* and *while loops*.
 
-#### Count Loops
+#### **Count Loops**
 ***Count loops* repeat the given code a *set number of times***.
 ```
 count to 10 do
@@ -214,7 +214,7 @@ count from 1 to 10 step 2 as i do
 end
 ```
 
-#### While Loops
+#### **While Loops**
 ***While loops* repeat the given code *till the given condition turns false***.
 ```
 item password: get("Enter password: ")
