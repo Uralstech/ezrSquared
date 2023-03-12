@@ -174,10 +174,12 @@ if get("Hello there! ") = "General Kenobi" do show("Nice")
 Note that **new lines can be coded as the semicolon (`;`) symbol**. **Comments are signified by the at symbol (`@`) at the start**. Comments are just more
 information about the written code - like how the code works. They do not affect the execution of any code and are ignored by ezr².
 
-### Loops (Part 1)
+### Looping
 For the above scripts, you might have found it annoying to have to copy and paste the code again and again to try it out. What if
 you want the code to run forever? Or even a set number of times? Do you have to keep copying and pasting it? No! You'll use *loops* for that.
 **A loop keeps executing the given body of code till a condition is satisfied.** ezr² has two types of loops - *count loops* and *while loops*.
+
+#### Count Loops
 ***Count loops* repeat the given code a *set number of times***.
 ```
 count to 10 do
@@ -209,6 +211,22 @@ end
 
 count from 1 to 10 step 2 as i do
 	show("The iteration variable, named 'i' is: " + i.as_string())
+end
+```
+
+#### While Loops
+***While loops* repeat the given code *till the given condition turns false***.
+```
+item password: get("Enter password: ")
+while password ! "yeet" do
+	item password: get("Password is false! Try again: ")
+end
+```
+
+While loops **can also be used to run code infinitely**!
+```
+while true do
+	show("Hello, World!")
 end
 ```
 
@@ -278,21 +296,5 @@ Here are all the list operators:
 |    \<=   | item access    | [6,2] <= 1                   |
 
 You can **access the length of the list with the built-in `length` variable in the list**, just like with arrays.
-
-### Loops (Part 2)
-***While loops* repeat the given code *till the given condition turns false***.
-```
-item password: get("Enter password: ")
-while password ! "yeet" do
-	item password: get("Password is false! Try again: ")
-end
-```
-
-While loops **can also be used to run code infinitely**!
-```
-while true do
-	show("Hello, World!")
-end
-```
 
 That's it for this tutorial! More coming soon!
