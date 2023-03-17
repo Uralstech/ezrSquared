@@ -8,6 +8,8 @@ function WriteAt with s, x, y do
 end
 
 function Main do
+    clear()
+
     item currentPos: console.get_cursor_position()
     global item origRow: currentPos <= 1
     global item origCol: currentPos <= 0
