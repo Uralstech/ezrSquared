@@ -2858,7 +2858,7 @@ namespace ezrSquared.Main
                 item object_ = result.register(visit(binOpNode.leftNode, context));
                 if (result.shouldReturn()) return result;
 
-                if (object_ is value)
+                if (object_.UPDATEONACCESS)
                     object_ = result.register(object_.execute(new item[0]));
                 if (result.shouldReturn()) return result;
 
@@ -2911,7 +2911,7 @@ namespace ezrSquared.Main
                 if (node.operatorToken.type == TOKENTYPE.PERIOD)
                 {
                     left = left.copy().setPosition(node.startPos, node.endPos);
-                    if (left is value)
+                    if (left.UPDATEONACCESS)
                         left = result.register(left.execute(new item[0]));
                     if (result.shouldReturn()) return result;
 
@@ -3450,19 +3450,6 @@ namespace ezrSquared.Main
                     predefinedSymbolTable.set("type_of", new builtin_function("type_of", new string[1] { "value" }));
                     predefinedSymbolTable.set("run", new builtin_function("run", new string[1] { "file" }));
 
-                    position pos = new position(0, 0, 0, "<main>", "");
-                    predefinedSymbolTable.set("console", new console().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("file", new @file().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("folder", new folder().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("path", new path().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-
-                    predefinedSymbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("float", new float_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("string", new string_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-                    predefinedSymbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-
-                    predefinedSymbolTable.set("random", new random().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-
                     _globalPredefinedContext.symbolTable = predefinedSymbolTable;
                 }
 
@@ -3472,12 +3459,32 @@ namespace ezrSquared.Main
 
         public static List<string> LOCALLIBPATHS = new List<string>();
 
-        public static error? run(string file, string input, context runtimeContext, out item? result)
+        public static error? easyRun(string file, string input, context runtimeContext, out item? result)
         {
             result = null;
             string fullFilePath = Path.GetDirectoryName(Path.GetFullPath(file));
             if (fullFilePath != Directory.GetCurrentDirectory())
                 LOCALLIBPATHS.Add(fullFilePath);
+
+            position pos = new position(0, 0, 0, "<main>", "");
+            _globalPredefinedContext.symbolTable.set("console", new console().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("file", new @file().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("folder", new folder().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("path", new path().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+            _globalPredefinedContext.symbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("float", new float_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("string", new string_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+            _globalPredefinedContext.symbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+            _globalPredefinedContext.symbolTable.set("random", new random().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
+
+            return simpleRun(file, input, runtimeContext, out result);
+        }
+
+        public static error? simpleRun(string file, string input, context runtimeContext, out item? result)
+        {
+            result = null;
 
             lexer lexer = new lexer(file, input);
             token[] tokens = lexer.compileTokens(out error? error);

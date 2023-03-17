@@ -65,7 +65,7 @@ namespace ezrSquared.Shell
 
                 if (!string.IsNullOrEmpty(script))
                 {
-                    error? error = ezr.run("<ezr² biShell>", script, runtimeContext, out item? result);
+                    error? error = ezr.easyRun("<ezr² biShell>", script, runtimeContext, out item? result);
                     if (error != null) Console.WriteLine(error.asString());
                     else if (result != null)
                     {

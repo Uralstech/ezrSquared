@@ -1,5 +1,8 @@
 CHANGELOG - What's new?
 
+* prerelease-1.3.3.0.1 - [17-03-23]
+    * Fixed bug: Objects now update internalContext when updating main context
+
 * prerelease-1.3.3.0.0 - [05-03-23]
     * New `console` module for IO library
     * New `simple_show` builtin function

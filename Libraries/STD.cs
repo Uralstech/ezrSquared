@@ -9,6 +9,8 @@ namespace ezrSquared.Libraries.STD
 {
     public class integer_class : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public integer_class() : base("<std <integer>>") { }
 
         public override runtimeResult execute(item[] args)
@@ -28,6 +30,8 @@ namespace ezrSquared.Libraries.STD
 
     public class float_class : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public float_class() : base("<std <float>>") { }
 
         public override runtimeResult execute(item[] args)
@@ -56,6 +60,8 @@ namespace ezrSquared.Libraries.STD
 
     public class string_class : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public string_class() : base("<std <string>>") { }
 
         public override runtimeResult execute(item[] args)
@@ -95,6 +101,8 @@ namespace ezrSquared.Libraries.STD
 
     public class character_list_class : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public character_list_class() : base("<std <character_list>>") { }
 
         public override runtimeResult execute(item[] args)

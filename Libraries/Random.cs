@@ -8,6 +8,8 @@ namespace ezrSquared.Libraries.Random
 {
     public class random : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         private System.Random random_;
         public random() : base("<random <random>>")
         { random_ = new System.Random(); }

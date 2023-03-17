@@ -1,0 +1,37 @@
+
+item origRow: (global item origCol: 0)
+
+function WriteAt with s, x, y do
+    
+        console.set_cursor_position((origCol + x, origRow + y))
+        simple_show(s)
+end
+
+function Main do
+    item currentPos: console.get_cursor_position()
+    global item origRow: currentPos <= 1
+    global item origCol: currentPos <= 0
+
+    WriteAt("+", 0, 0)
+    WriteAt("|", 0, 1)
+    WriteAt("|", 0, 2)
+    WriteAt("|", 0, 3)
+    WriteAt("+", 0, 4)
+
+    WriteAt("-", 1, 4)
+    WriteAt("-", 2, 4)
+    WriteAt("-", 3, 4)
+    WriteAt("+", 4, 4)
+
+    WriteAt("|", 4, 3)
+    WriteAt("|", 4, 2)
+    WriteAt("|", 4, 1)
+    WriteAt("+", 4, 0)
+
+    WriteAt("-", 3, 0)
+    WriteAt("-", 2, 0)
+    WriteAt("-", 1, 0)
+
+    WriteAt("All done!", 0, 6)
+    show("")
+end

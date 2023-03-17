@@ -11,6 +11,8 @@ namespace ezrSquared.Libraries.IO
 {
     public class console : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         private Dictionary<string, ConsoleKey> stringToKeyLookup = new Dictionary<string, ConsoleKey>()
         {
             { "Backspace", ConsoleKey.Backspace },
@@ -566,6 +568,8 @@ namespace ezrSquared.Libraries.IO
 
     public class @file : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public @file() : base("<io <file>>") { }
 
         public override runtimeResult execute(item[] args)
@@ -780,6 +784,8 @@ namespace ezrSquared.Libraries.IO
 
     public class folder : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public folder() : base("<io <folder>>") { }
 
         public override runtimeResult execute(item[] args)
@@ -1070,6 +1076,8 @@ namespace ezrSquared.Libraries.IO
 
     public class path : baseFunction
     {
+        public override bool UPDATEONACCESS => true;
+
         public path() : base("<io <path>>") { }
 
         public override runtimeResult execute(item[] args)

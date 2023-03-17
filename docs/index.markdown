@@ -97,6 +97,9 @@ Meanwhile, check out some example programs in [***GitHub***](https://github.com/
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
+* prerelease-1.3.3.0.1 - [17-03-23]
+    * Fixed bug: Objects now update internalContext when updating main context
+
 * **prerelease-1.3.3.0.0** - [05-03-23]
     * New `console` module for IO library
     * New `simple_show` builtin function
