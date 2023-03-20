@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+	<SelfContained>True</SelfContained>
     
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>ezrSquared</RootNamespace>
