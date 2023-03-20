@@ -27,4 +27,8 @@
   <PropertyGroup Condition="'$(IsLinux)'=='true'">
 	<DefineConstants>LINUX</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Installer\bin\" />
+  </ItemGroup>
 </Project>
