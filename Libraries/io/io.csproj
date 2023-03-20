@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+	<ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <Reference Include="ezrSquared">
+      <HintPath>..\..\bin\Release\net7.0\win-x86\ezrSquared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+	
+  <PropertyGroup>
+  	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  	<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+</Project>

@@ -1002,9 +1002,10 @@ namespace ezrSquared.Values
 
             if (start is not integer)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Index must be an integer", context));
-            else if (substring is not @string)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Substring must be a string", context));
+            else if (substring is not @string && substring is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Substring must be a string or character_list", context));
 
+            string subString = (substring is @string) ? ((@string)substring).storedValue : string.Join("", ((character_list)substring).storedValue);
             int startAsInt = ((integer)start).storedValue;
 
             if (startAsInt < 0)
@@ -1012,7 +1013,7 @@ namespace ezrSquared.Values
             else if (startAsInt > storedValue.ToString().Length)
                 return result.failure(new runtimeError(positions[0], positions[1], RT_INDEX, "Index cannot be greater than length of string", context));
 
-            return result.success(new @string(storedValue.ToString().Insert(startAsInt, ((@string)substring).storedValue.ToString())));
+            return result.success(new @string(storedValue.ToString().Insert(startAsInt, subString)));
         }
 
         private runtimeResult stringReplace(context context, position[] positions)
@@ -1021,11 +1022,14 @@ namespace ezrSquared.Values
             item old = context.symbolTable.get("old");
             item new_ = context.symbolTable.get("new");
 
-            if (old is not @string)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Old must be a string", context));
-            if (new_ is not @string)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "New must be a string", context));
-            return result.success(new @string(storedValue.ToString().Replace(((@string)old).storedValue.ToString(), ((@string)new_).storedValue.ToString())));
+            if (old is not @string && old is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Old must be a string or character_list", context));
+            if (new_ is not @string && new_ is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "New must be a string or character_list", context));
+            string oldString = (old is @string) ? ((@string)old).storedValue : string.Join("", ((character_list)old).storedValue);
+            string newString = (new_ is @string) ? ((@string)new_).storedValue : string.Join("", ((character_list)new_).storedValue);
+
+            return result.success(new @string(storedValue.ToString().Replace(oldString, newString)));
         }
 
         private runtimeResult stringSplit(context context, position[] positions)
@@ -1033,9 +1037,11 @@ namespace ezrSquared.Values
             runtimeResult result = new runtimeResult();
             item substring = context.symbolTable.get("substring");
 
-            if (substring is not @string)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Substring must be a string", context));
-            string[] split = storedValue.ToString().Split(((@string)substring).storedValue.ToString());
+            if (substring is not @string && substring is not character_list)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Substring must be a string or character_list", context));
+
+            string subString = (substring is @string) ? ((@string)substring).storedValue : string.Join("", ((character_list)substring).storedValue);
+            string[] split = storedValue.ToString().Split(subString);
 
             item[] elements = new item[split.Length];
             for (int i = 0; i < split.Length; i++)
@@ -1058,7 +1064,12 @@ namespace ezrSquared.Values
 
             string[] arrayAsString = new string[items.Length];
             for (int i = 0; i < items.Length; i++)
-                arrayAsString[i] = items[i].ToString();
+            {
+                if (items[i] is @string || items[i] is character_list)
+                    arrayAsString[i] = (items[i] is @string) ? ((@string)items[i]).storedValue : string.Join("", ((character_list)items[i]).storedValue);
+                else
+                    arrayAsString[i] = items[i].ToString();
+            }
 
             return result.success(new @string(string.Join(storedValue.ToString(), arrayAsString)));
         }

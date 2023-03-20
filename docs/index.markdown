@@ -97,42 +97,14 @@ Meanwhile, check out some example programs in [***GitHub***](https://github.com/
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
-* **prerelease-1.3.3.0.1** - [17-03-23]
-    * Fixed bug: Objects now update internalContext when updating main context
+* prerelease-1.4.0.1.0 - [20-03-23]
+    * Windows-only functions in the IO library are now actually Windows-only
 
-* **prerelease-1.3.3.0.0** - [05-03-23]
-    * New `console` module for IO library
-    * New `simple_show` builtin function
-    * Fixed predefined function execution
-    * Better error messages
-    * Added changes for Linux version of builtin function `clear`
-
-* **prerelease-1.3.2.0.0** - [15-02-23]
-    * New runtimeRunError error class!
-
-* **prerelease-1.3.1.0.0** - [14-02-23]
-    * Fixed a count loop error message
-    * Better error message for else if statements
-
-* **prerelease-1.3.0.0.3** - [12-02-23]
-    * Better `undefined` error message for special functions
-
-* **prerelease-1.3.0.0.2** - [11-02-23]
-    * Fixed object definition QuickSyntax
-
-* **prerelease-1.3.0.0.1** - [07-02-23]
-    * Fixed `in` expression
-    * character_list `remove` operation now returns the removed character
-
-* **prerelease-1.3.0.0.0** - [03-02-23]
-    * ezr² now searches for name of DLL file as the main class in CSAELs
-    * Error tags now correspond to their errors
-    * New error tag `length-error`
-    * Error tag `overflow` now `overflow-error`
-    * New global variable for error tag `overflow`
-    * Global variables `err_illop` and `err_undef` are now `err_illegalop` and `err_undefined`
-    * Functions `insert`, `remove` in character_list now support string / character_list values of length > 1
-    * Other new errors - check the commits
+* **prerelease-1.4.0.0.0** - [20-03-23]
+    * Overhaul of module/library system, including `include` expression
+    * Merged STD and Random libraries
+    * Error tags in `error` statements are now expressions
+    * Added character_list support for some built-in string functions
 
 ## Contributing
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.

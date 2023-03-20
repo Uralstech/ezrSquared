@@ -6,8 +6,13 @@
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>ezrSquared</RootNamespace>
     <StartupObject>ezrSquared.Shell.ezrShell</StartupObject>
+	<ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     
     <ApplicationIcon>Graphics\Icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Installer\bin\" />
+  </ItemGroup>
 </Project>
