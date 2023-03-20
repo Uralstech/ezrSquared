@@ -354,8 +354,18 @@ namespace ezrSquared.Libraries.IO
             context internalContext = base.generateContext();
             internalContext.symbolTable.set("is_key_pressed", new predefined_function("console_is_key_pressed", keyPressed, new string[4] { "key", "shift_pressed", "control_pressed", "alt_pressed" }));
             internalContext.symbolTable.set("current_key_pressed", new predefined_function("console_current_key_pressed", anyKeyPressed, new string[0]));
-            internalContext.symbolTable.set("is_numberlocked", new predefined_function("console_is_numberlocked", numberLocked, new string[0]));
-            internalContext.symbolTable.set("is_capslocked", new predefined_function("console_is_capslocked", capsLocked, new string[0]));
+            
+            if (OperatingSystem.IsWindows())
+            {
+                internalContext.symbolTable.set("is_numberlocked", new predefined_function("console_is_numberlocked", numberLocked, new string[0]));
+                internalContext.symbolTable.set("is_capslocked", new predefined_function("console_is_capslocked", capsLocked, new string[0]));
+
+                internalContext.symbolTable.set("get_cursor_size", new predefined_function("console_get_cursor_size", getCursorSize, new string[0]));
+                internalContext.symbolTable.set("set_cursor_size", new predefined_function("console_set_cursor_size", setCursorSize, new string[1] { "size" }));
+                internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", getCursorVisibility, new string[0]));
+                internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", setCursorVisibility, new string[1] { "visibility" }));
+            }
+
             internalContext.symbolTable.set("get_background", new predefined_function("console_get_background", getConsoleBackground, new string[0]));
             internalContext.symbolTable.set("set_background", new predefined_function("console_set_background", setConsoleBackground, new string[1] { "color" }));
             internalContext.symbolTable.set("get_foreground", new predefined_function("console_get_foreground", getConsoleForeground, new string[0]));
@@ -363,18 +373,11 @@ namespace ezrSquared.Libraries.IO
             internalContext.symbolTable.set("reset_colors", new predefined_function("console_reset_colors", consoleResetColors, new string[0]));
             internalContext.symbolTable.set("get_cursor_position", new predefined_function("console_get_cursor_position", getCursorPosition, new string[0]));
             internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[1] { "position" }));
-#if WINDOWS
-            internalContext.symbolTable.set("get_cursor_size", new predefined_function("console_get_cursor_size", getCursorSize, new string[0]));
-            internalContext.symbolTable.set("set_cursor_size", new predefined_function("console_set_cursor_size", setCursorSize, new string[1] { "size" }));
-            internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", getCursorVisibility, new string[0]));
-            internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", setCursorVisibility, new string[1] { "visibility" }));
-#endif
             internalContext.symbolTable.set("exit", new predefined_function("console_exit", stopApplication, new string[0]));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
         }
 
-#if WINDOWS
         private runtimeResult getCursorVisibility(context context, position[] positions)
         {
             return new runtimeResult().success(new boolean(Console.CursorVisible));
@@ -412,7 +415,6 @@ namespace ezrSquared.Libraries.IO
             Console.CursorSize = sizeValue;
             return result.success(new nothing());
         }
-#endif
 
         private runtimeResult getCursorPosition(context context, position[] positions)
         {

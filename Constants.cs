@@ -4,7 +4,7 @@ namespace ezrSquared.Constants
 {
     public static class constants
     {
-        public const string VERSION = "prerelease-1.4.0.0.0";
+        public const string VERSION = "prerelease-1.4.0.1.0";
         public const string VERSION_DATE = "20.03.2023";
 
         public static readonly string[] KEYWORDS = { "item", "and", "or", "invert", "if", "else", "do", "count", "from", "as", "to", "step", "while", "function", "special", "with", "end", "return", "skip", "stop", "try", "error", "in", "object", "global", "include" };

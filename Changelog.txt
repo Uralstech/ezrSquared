@@ -1,5 +1,8 @@
 CHANGELOG - What's new?
 
+* prerelease-1.4.0.1.0 - [20-03-23]
+    * Windows-only functions in the IO library are now actually Windows-only
+
 * prerelease-1.4.0.0.0 - [20-03-23]
     * Overhaul of module/library system, including `include` expression
     * Merged STD and Random libraries
