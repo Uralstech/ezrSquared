@@ -234,12 +234,12 @@ namespace ezrSquared.Nodes
 
     public class includeNode : node
     {
-        public token nameToken;
+        public node fileNode;
         public token? nicknameToken;
 
-        public includeNode(token nameToken, token? nicknameToken, position startPos, position endPos) : base(startPos, endPos)
+        public includeNode(node fileNode, token? nicknameToken, position startPos, position endPos) : base(startPos, endPos)
         {
-            this.nameToken = nameToken;
+            this.fileNode = fileNode;
             this.nicknameToken = nicknameToken;
         }
     }

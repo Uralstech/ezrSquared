@@ -10,10 +10,6 @@ using System.Linq;
 using System.IO;
 using System;
 
-using ezrSquared.Libraries.IO;
-using ezrSquared.Libraries.STD;
-using ezrSquared.Libraries.Random;
-
 namespace ezrSquared.Main
 {
     public class ezr
@@ -1473,22 +1469,11 @@ namespace ezrSquared.Main
                         result.registerAdvance();
                         advance();
 
-                        token? error = null;
-                        token? varName = null;
-                        if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                        {
-                            error = currentToken;
-                            result.registerAdvance();
-                            advance();
-                        }
-                        else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                        {
-                            error = currentToken;
-                            error.type = TOKENTYPE.ID;
-                            result.registerAdvance();
-                            advance();
-                        }
+                        node? error = result.tryRegister(this.expression());
+                        if (error == null)
+                            reverse(result.reverseCount);
 
+                        token? varName = null;
                         if (currentToken.matchString(TOKENTYPE.KEY, "as"))
                         {
                             result.registerAdvance();
@@ -1505,7 +1490,7 @@ namespace ezrSquared.Main
                         if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
                         {
                             if (error == null && varName == null)
-                                return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
+                                return result.failure(new invalidGrammarError("Expected Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~', 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                             else if (varName == null)
                                 return result.failure(new invalidGrammarError("Expected 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                             return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
@@ -1552,22 +1537,11 @@ namespace ezrSquared.Main
                     result.registerAdvance();
                     advance();
 
-                    token? error = null;
-                    token? varName = null;
-                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                    {
-                        error = currentToken;
-                        result.registerAdvance();
-                        advance();
-                    }
-                    else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                    {
-                        error = currentToken;
-                        error.type = TOKENTYPE.ID;
-                        result.registerAdvance();
-                        advance();
-                    }
+                    node? error = result.tryRegister(this.expression());
+                    if (error == null)
+                        reverse(result.reverseCount);
 
+                    token? varName = null;
                     if (currentToken.matchString(TOKENTYPE.KEY, "as"))
                     {
                         result.registerAdvance();
@@ -1584,7 +1558,7 @@ namespace ezrSquared.Main
                     if (!currentToken.matchString(TOKENTYPE.KEY, "do"))
                     {
                         if (error == null && varName == null)
-                            return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], 'as' or 'do'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~', 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                         else if (varName == null)
                             return result.failure(new invalidGrammarError("Expected 'as' or 'do'", currentToken.startPos, currentToken.endPos));
                         return result.failure(new invalidGrammarError("Expected 'do'", currentToken.startPos, currentToken.endPos));
@@ -1830,18 +1804,8 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
-                token file;
-                if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                    file = currentToken;
-                else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                {
-                    file = currentToken;
-                    file.type = TOKENTYPE.ID;
-                }
-                else
-                    return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-                result.registerAdvance();
-                advance();
+                node file = result.register(expression());
+                if (result.error != null) return result;
 
                 token? nickname = null;
                 if (currentToken.matchString(TOKENTYPE.KEY, "as"))
@@ -1849,15 +1813,13 @@ namespace ezrSquared.Main
                     result.registerAdvance();
                     advance();
 
-                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                        nickname = currentToken;
-                    else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
+                    if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
                         nickname = currentToken;
                         nickname.type = TOKENTYPE.ID;
                     }
                     else
-                        return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                     result.registerAdvance();
                     advance();
                 }
@@ -2211,22 +2173,11 @@ namespace ezrSquared.Main
                         result.registerAdvance();
                         advance();
 
-                        token? error = null;
-                        token? varName = null;
-                        if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                        {
-                            error = currentToken;
-                            result.registerAdvance();
-                            advance();
-                        }
-                        else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                        {
-                            error = currentToken;
-                            error.type = TOKENTYPE.ID;
-                            result.registerAdvance();
-                            advance();
-                        }
+                        node? error = result.tryRegister(this.expression());
+                        if (error == null)
+                            reverse(result.reverseCount);
 
+                        token? varName = null;
                         if (currentToken.type == TOKENTYPE.ARROW)
                         {
                             result.registerAdvance();
@@ -2243,7 +2194,7 @@ namespace ezrSquared.Main
                         if (currentToken.type != TOKENTYPE.COLON)
                         {
                             if (error == null && varName == null)
-                                return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], '->' or ':'", currentToken.startPos, currentToken.endPos));
+                                return result.failure(new invalidGrammarError("Expected Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~', '->' or ':'", currentToken.startPos, currentToken.endPos));
                             else if (varName == null)
                                 return result.failure(new invalidGrammarError("Expected '->' or ':'", currentToken.startPos, currentToken.endPos));
                             return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
@@ -2289,22 +2240,11 @@ namespace ezrSquared.Main
                     result.registerAdvance();
                     advance();
 
-                    token? error = null;
-                    token? varName = null;
-                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                    {
-                        error = currentToken;
-                        result.registerAdvance();
-                        advance();
-                    }
-                    else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                    {
-                        error = currentToken;
-                        error.type = TOKENTYPE.ID;
-                        result.registerAdvance();
-                        advance();
-                    }
+                    node? error = result.tryRegister(this.expression());
+                    if (error == null)
+                        reverse(result.reverseCount);
 
+                    token? varName = null;
                     if (currentToken.type == TOKENTYPE.ARROW)
                     {
                         result.registerAdvance();
@@ -2321,7 +2261,7 @@ namespace ezrSquared.Main
                     if (currentToken.type != TOKENTYPE.COLON)
                     {
                         if (error == null && varName == null)
-                            return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST], [IDENTIFIER], '->' or ':'", currentToken.startPos, currentToken.endPos));
+                            return result.failure(new invalidGrammarError("Expected Expected [INT], [FLOAT], [STRING], [CHARACTER-LIST], [IDENTIFIER], 'if', 'count', 'while', 'try', 'function', 'special', 'object', 'include', 'invert', 'global', 'item', '!', '(', '[', '{', '+', '-', '~', '->' or ':'", currentToken.startPos, currentToken.endPos));
                         else if (varName == null)
                             return result.failure(new invalidGrammarError("Expected '->' or ':'", currentToken.startPos, currentToken.endPos));
                         return result.failure(new invalidGrammarError("Expected ':'", currentToken.startPos, currentToken.endPos));
@@ -2588,34 +2528,22 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
-                token file;
-                if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                    file = currentToken;
-                else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
-                {
-                    file = currentToken;
-                    file.type = TOKENTYPE.ID;
-                }
-                else
-                    return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
-                result.registerAdvance();
-                advance();
+                node file = result.register(expression());
+                if (result.error != null) return result;
 
                 token? nickname = null;
                 if (currentToken.matchString(TOKENTYPE.QEY, "n"))
                 {
                     result.registerAdvance();
                     advance();
-
-                    if (currentToken.type == TOKENTYPE.STRING || currentToken.type == TOKENTYPE.CHARLIST)
-                        nickname = currentToken;
-                    else if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
+                    
+                    if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
                         nickname = currentToken;
                         nickname.type = TOKENTYPE.ID;
                     }
                     else
-                        return result.failure(new invalidGrammarError("Expected [STRING], [CHARACTER-LIST] or [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
+                        return result.failure(new invalidGrammarError("Expected [IDENTIFIER]", currentToken.startPos, currentToken.endPos));
                     result.registerAdvance();
                     advance();
                 }
@@ -3156,19 +3084,13 @@ namespace ezrSquared.Main
                             }
                             else
                             {
-                                token catchTagToken = (token)node.catches[i][0];
-                                string catchTag = string.Empty;
-                                if (catchTagToken.type == TOKENTYPE.ID)
-                                {
-                                    item? tag_ = context.symbolTable.get(catchTagToken.value.ToString());
-                                    if (tag_ == null)
-                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_UNDEFINED, $"\"{catchTagToken.value}\" is not defined", context));
-                                    else if (tag_ is not @string)
-                                        return result.failure(new runtimeError(catchTagToken.startPos, catchTagToken.endPos, RT_TYPE, $"Error tag must be a string", context));
-                                    catchTag = ((@string)tag_).storedValue;
-                                }
-                                else
-                                    catchTag = catchTagToken.value.ToString();
+                                node errorNode = (node)node.catches[i][0];
+                                item errorTag = result.register(visit(errorNode, context));
+                                if (result.shouldReturn()) return result;
+
+                                if (errorTag is not @string && errorTag is not character_list)
+                                    return result.failure(new runtimeError(errorNode.startPos, errorNode.endPos, RT_TYPE, $"Error tag must be a string or character_list", context));
+                                string catchTag = (errorTag is @string) ? ((@string)errorTag).storedValue : string.Join("", ((character_list)errorTag).storedValue);
 
                                 if (catchTag == tag || catchTag == RT_DEFAULT)
                                 {
@@ -3297,58 +3219,82 @@ namespace ezrSquared.Main
             {
                 runtimeResult result = new runtimeResult();
 
-                string file = node.nameToken.value.ToString();
+                item file = result.register(visit(node.fileNode, context));
+                if (result.shouldReturn()) return result;
 
-                string? realFilepath = null;
-                if (File.Exists(file))
-                    realFilepath = file;
+                if (file is not @string && file is not character_list)
+                    return result.failure(new runtimeError(node.fileNode.startPos, node.fileNode.endPos, RT_TYPE, $"Filepath must be a string or character_list", context));
+                string filepath = (file is @string) ? ((@string)file).storedValue : string.Join("", ((character_list)file).storedValue);
+
+                string[] localLibPaths = new string[LOCALLIBPATHS.Count];
+                for (int i = 0; i < LOCALLIBPATHS.Count; i++)
+                    localLibPaths[i] = Path.Join(LOCALLIBPATHS[i], filepath);
+
+                if (!Path.HasExtension(filepath))
+                {
+                    string dllLibPath = Path.Join(STATICLIBPATH, $"{filepath}.dll");
+                    string ezr2LibPath = Path.Join(STATICLIBPATH, $"{filepath}.ezr2");
+
+                    string dllPath = $"{filepath}.dll";
+                    string ezr2Path = $"{filepath}.ezr2";
+
+                    if (Path.Exists(dllLibPath))
+                        filepath = dllLibPath;
+                    else if (Path.Exists(ezr2LibPath))
+                        filepath = ezr2LibPath;
+                    else if (Path.Exists(dllPath))
+                        filepath = dllPath;
+                    else if (Path.Exists(ezr2Path))
+                        filepath = ezr2Path;
+                    else
+                    {
+                        for (int i = 0; i < localLibPaths.Length; i++)
+                        {
+                            string dllLocalPath = $"{localLibPaths[i]}.dll";
+                            string ezr2LocalPath = $"{localLibPaths[i]}.ezr2";
+
+                            if (Path.Exists(dllLocalPath))
+                            {
+                                filepath = dllLocalPath;
+                                break;
+                            }
+                            else if (Path.Exists(ezr2LocalPath))
+                            {
+                                filepath = ezr2LocalPath;
+                                break;
+                            }
+                        }
+                    }
+                }
                 else
                 {
-                    for (int i = 0; i < LOCALLIBPATHS.Count; i++)
+                    for (int i = 0; i < localLibPaths.Length; i++)
                     {
-                        string path = Path.Join(LOCALLIBPATHS[i], file);
-                        if (File.Exists(path))
+                        if (File.Exists(localLibPaths[i]))
                         {
-                            realFilepath = path;
+                            filepath = localLibPaths[i];
                             break;
                         }
                     }
                 }
 
-                if (realFilepath == null)
+                if (!File.Exists(filepath))
                     return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Script \"{file}\" was not found", context));
 
                 string name;
+                string nickname_ = string.Empty;
                 if (node.nicknameToken != null)
                 {
-                    if (node.nicknameToken.type == TOKENTYPE.STRING || node.nicknameToken.type == TOKENTYPE.CHARLIST)
-                        name = node.nicknameToken.value.ToString();
-                    else
-                    {
-                        item? nickname = context.symbolTable.get(node.nicknameToken.value.ToString());
-                        if (nickname == null)
-                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_UNDEFINED, $"\"{node.nicknameToken.value}\" is not defined", context));
-                        else if (nickname is not @string)
-                            return result.failure(new runtimeError(node.nicknameToken.startPos, node.nicknameToken.endPos, RT_TYPE, $"Nickname must be a string", context));
-                        name = ((@string)nickname).storedValue;
-                    }
+                    nickname_ = node.nicknameToken.value.ToString();
+                    name = nickname_;
                 }
                 else
                 {
-                    string? filenameWithoutExtension = Path.GetFileNameWithoutExtension(file);
-                    name = (filenameWithoutExtension != null) ? filenameWithoutExtension : file;
+                    string? filenameWithoutExtension = Path.GetFileNameWithoutExtension(filepath);
+                    name = (filenameWithoutExtension != null) ? filenameWithoutExtension : filepath;
                 }
 
-                string formattedFileName = "";
-                for (int i = 0; i < name.Length; i++)
-                {
-                    if (!ALPHANUM_UNDERSCORE.Contains(name[i]))
-                        formattedFileName += '_';
-                    else
-                        formattedFileName += name[i];
-                }
-
-                string? extension = Path.GetExtension(file);
+                string? extension = Path.GetExtension(filepath);
 
                 item value;
                 if (extension == ".dll")
@@ -3356,7 +3302,7 @@ namespace ezrSquared.Main
                     Assembly DLL;
                     try
                     {
-                        DLL = Assembly.LoadFile(file);
+                        DLL = Assembly.LoadFile(filepath);
                     }
                     catch (Exception exception)
                     {
@@ -3365,19 +3311,60 @@ namespace ezrSquared.Main
 
                     try
                     {
-                        Type? mainLibClass = DLL.GetType(formattedFileName);
-                        if (mainLibClass == null)
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, $"Main library class in script \"{file}\" is not defined", context));
+                        Type[] foundTypes = DLL.GetExportedTypes();
 
-                        dynamic? val = Activator.CreateInstance(mainLibClass);
-
-                        if (val is item)
+                        if (foundTypes.Length < 1)
+                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find any classes in script \"{file}\"", context));
+                        else if (foundTypes.Length == 1)
                         {
-                            value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
-                            if (result.shouldReturn()) return result;
+                            if (typeof(item).IsAssignableFrom(foundTypes[0]) && !foundTypes[0].IsAbstract)
+                            {
+                                dynamic? val;
+                                try
+                                {
+                                    val = Activator.CreateInstance(foundTypes[0]);
+                                }
+                                catch
+                                {
+                                    return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable classes in script \"{file}\"", context));
+                                }
+
+                                value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                                if (result.shouldReturn()) return result;
+
+                                context.symbolTable.set((!string.IsNullOrEmpty(nickname_)) ? nickname_ : foundTypes[0].Name, value);
+                            }
+                            else
+                                return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable classes in script \"{file}\"", context));
                         }
                         else
-                            return result.failure(new runtimeError(node.startPos, node.endPos, RT_UNDEFINED, $"Main library class in script \"{file}\" is not defined", context));
+                        {
+                            int foundClasses = 0;
+                            for (int i = 0; i < foundTypes.Length; i++)
+                            {
+                                if (typeof(item).IsAssignableFrom(foundTypes[i]) && !foundTypes[i].IsAbstract)
+                                {
+                                    dynamic? val;
+                                    try
+                                    {
+                                        val = Activator.CreateInstance(foundTypes[i]);
+                                    }
+                                    catch
+                                    {
+                                        continue;
+                                    }
+
+                                    value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
+                                    if (result.shouldReturn()) return result;
+
+                                    context.symbolTable.set(foundTypes[i].Name, value);
+                                    foundClasses++;
+                                }
+                            }
+
+                            if (foundClasses == 0)
+                                return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable classes in script \"{file}\"", context));
+                        }
                     }
                     catch (Exception exception)
                     {
@@ -3386,17 +3373,26 @@ namespace ezrSquared.Main
                 }
                 else
                 {
+                    string formattedFileName = LETTERS_UNDERSCORE.Contains(name[0]) ? name[0].ToString() : "_";
+                    for (int i = 1; i < name.Length; i++)
+                    {
+                        if (!ALPHANUM_UNDERSCORE.Contains(name[i]))
+                            formattedFileName += '_';
+                        else
+                            formattedFileName += name[i];
+                    }
+
                     string script;
                     try
                     {
-                        script = string.Join('\n', File.ReadAllLines(realFilepath));
+                        script = string.Join('\n', File.ReadAllLines(filepath));
                     }
                     catch (Exception exception)
                     {
                         return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Failed to load script \"{file}\"\n{exception.Message}", context));
                     }
 
-                    token[] tokens = new lexer(file, script).compileTokens(out error? error);
+                    token[] tokens = new lexer(filepath, script).compileTokens(out error? error);
                     if (error != null)
                         return result.failure(new runtimeRunError(node.startPos, node.endPos, $"Failed to execute script \"{file}\"", error.asString(), context));
 
@@ -3407,9 +3403,9 @@ namespace ezrSquared.Main
                     value = result.register(new @class(formattedFileName, null, parseResult.node, new string[0]).setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                     if (result.shouldReturn()) return result;
 
+                    context.symbolTable.set(formattedFileName, value);
                 }
 
-                context.symbolTable.set(formattedFileName, value);
                 return result.success(new nothing().setPosition(node.startPos, node.endPos).setContext(context));
             }
         }
@@ -3457,6 +3453,7 @@ namespace ezrSquared.Main
             }
         }
 
+        public static string STATICLIBPATH = Path.Join(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Libraries");
         public static List<string> LOCALLIBPATHS = new List<string>();
 
         public static error? easyRun(string file, string input, context runtimeContext, out item? result)
@@ -3465,19 +3462,6 @@ namespace ezrSquared.Main
             string fullFilePath = Path.GetDirectoryName(Path.GetFullPath(file));
             if (fullFilePath != Directory.GetCurrentDirectory())
                 LOCALLIBPATHS.Add(fullFilePath);
-
-            position pos = new position(0, 0, 0, "<main>", "");
-            _globalPredefinedContext.symbolTable.set("console", new console().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("file", new @file().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("folder", new folder().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("path", new path().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-
-            _globalPredefinedContext.symbolTable.set("integer", new integer_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("float", new float_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("string", new string_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-            _globalPredefinedContext.symbolTable.set("character_list", new character_list_class().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
-
-            _globalPredefinedContext.symbolTable.set("random", new random().setPosition(pos, pos).setContext(_globalPredefinedContext).execute(new item[0]).value);
 
             return simpleRun(file, input, runtimeContext, out result);
         }
