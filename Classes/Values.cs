@@ -369,7 +369,7 @@ namespace ezrSquared.Values
 
         public context generateContext()
         {
-            context newContext = new context($"<<{GetType().Name}> internal>", context, startPos, false);
+            context newContext = new context(GetType().Name, context, startPos, false);
             newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
             return newContext;
         }

@@ -1804,14 +1804,42 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
-                node file = result.register(expression());
-                if (result.error != null) return result;
+                node? class_ = null;
+                node file = null;
+                bool dump = false;
+
+                if (!currentToken.matchString(TOKENTYPE.KEY, "all"))
+                {
+                    file = result.register(expression());
+                    if (result.error != null) return result;
+                }
+                else
+                {
+                    dump = true;
+                    result.registerAdvance();
+                    advance();
+                }
+
+                if (currentToken.matchString(TOKENTYPE.KEY, "from"))
+                {
+                    result.registerAdvance();
+                    advance();
+
+                    class_ = file;
+                    file = result.register(expression());
+                    if (result.error != null) return result;
+                }
+                else if (file == null)
+                    return result.failure(new invalidGrammarError("Expected 'from'", currentToken.startPos, currentToken.endPos));
 
                 token? nickname = null;
                 if (currentToken.matchString(TOKENTYPE.KEY, "as"))
                 {
                     result.registerAdvance();
                     advance();
+
+                    if (dump)
+                        return result.failure(new invalidGrammarError("Cannot assign nickname when including all objects from script into active context.", currentToken.startPos, currentToken.endPos));
 
                     if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
@@ -1824,7 +1852,7 @@ namespace ezrSquared.Main
                     advance();
                 }
 
-                return result.success(new includeNode(file, nickname, startPos, currentToken.startPos.copy()));
+                return result.success(new includeNode(file, class_, dump, nickname, startPos, currentToken.startPos.copy()));
             }
 
             private parseResult quickSyntaxAtom()
@@ -2528,15 +2556,43 @@ namespace ezrSquared.Main
                 result.registerAdvance();
                 advance();
 
-                node file = result.register(expression());
-                if (result.error != null) return result;
+                node? class_ = null;
+                node file = null;
+                bool dump = false;
+
+                if (currentToken.type != TOKENTYPE.COMMA)
+                {
+                    file = result.register(expression());
+                    if (result.error != null) return result;
+                }
+                else
+                {
+                    dump = true;
+                    result.registerAdvance();
+                    advance();
+                }
+
+                if (currentToken.matchString(TOKENTYPE.QEY, "f"))
+                {
+                    result.registerAdvance();
+                    advance();
+
+                    class_ = file;
+                    file = result.register(expression());
+                    if (result.error != null) return result;
+                }
+                else if (file == null)
+                    return result.failure(new invalidGrammarError("Expected 'f'", currentToken.startPos, currentToken.endPos));
 
                 token? nickname = null;
                 if (currentToken.matchString(TOKENTYPE.QEY, "n"))
                 {
                     result.registerAdvance();
                     advance();
-                    
+
+                    if (dump)
+                        return result.failure(new invalidGrammarError("Cannot assign nickname when including all objects from script into active context.", currentToken.startPos, currentToken.endPos));
+
                     if (currentToken.type == TOKENTYPE.ID || currentToken.type == TOKENTYPE.QEY)
                     {
                         nickname = currentToken;
@@ -2548,7 +2604,7 @@ namespace ezrSquared.Main
                     advance();
                 }
 
-                return result.success(new includeNode(file, nickname, startPos, currentToken.startPos.copy()));
+                return result.success(new includeNode(file, class_, dump, nickname, startPos, currentToken.startPos.copy()));
             }
 
             private struct TypeValuePair
@@ -3226,6 +3282,17 @@ namespace ezrSquared.Main
                     return result.failure(new runtimeError(node.fileNode.startPos, node.fileNode.endPos, RT_TYPE, $"Filepath must be a string or character_list", context));
                 string filepath = (file is @string) ? ((@string)file).storedValue : string.Join("", ((character_list)file).storedValue);
 
+                string class_ = string.Empty;
+                if (node.classNode != null)
+                {
+                    item classItem = result.register(visit(node.classNode, context));
+                    if (result.shouldReturn()) return result;
+
+                    if (classItem is not @string && classItem is not character_list)
+                        return result.failure(new runtimeError(node.classNode.startPos, node.classNode.endPos, RT_TYPE, $"Class name must be a string or character_list", context));
+                    class_ = (classItem is @string) ? ((@string)classItem).storedValue : string.Join("", ((character_list)classItem).storedValue);
+                }
+
                 string[] localLibPaths = new string[LOCALLIBPATHS.Count];
                 for (int i = 0; i < LOCALLIBPATHS.Count; i++)
                     localLibPaths[i] = Path.Join(LOCALLIBPATHS[i], filepath);
@@ -3294,6 +3361,15 @@ namespace ezrSquared.Main
                     name = (filenameWithoutExtension != null) ? filenameWithoutExtension : filepath;
                 }
 
+                string formattedFileName = LETTERS_UNDERSCORE.Contains(name[0]) ? name[0].ToString() : "_";
+                for (int i = 1; i < name.Length; i++)
+                {
+                    if (!ALPHANUM_UNDERSCORE.Contains(name[i]))
+                        formattedFileName += '_';
+                    else
+                        formattedFileName += name[i];
+                }
+
                 string? extension = Path.GetExtension(filepath);
 
                 item value;
@@ -3317,7 +3393,7 @@ namespace ezrSquared.Main
                             return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find any classes in script \"{file}\"", context));
                         else if (foundTypes.Length == 1)
                         {
-                            if (typeof(item).IsAssignableFrom(foundTypes[0]) && !foundTypes[0].IsAbstract)
+                            if (typeof(item).IsAssignableFrom(foundTypes[0]) && !foundTypes[0].IsAbstract && (string.IsNullOrEmpty(class_) || foundTypes[0].Name == class_))
                             {
                                 dynamic? val;
                                 try
@@ -3332,17 +3408,37 @@ namespace ezrSquared.Main
                                 value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                                 if (result.shouldReturn()) return result;
 
-                                context.symbolTable.set((!string.IsNullOrEmpty(nickname_)) ? nickname_ : foundTypes[0].Name, value);
+                                if (node.dumpAll)
+                                    context.symbolTable.set(foundTypes[0].Name, value);
+                                else if (string.IsNullOrEmpty(class_))
+                                {
+                                    context newContext = new context(formattedFileName, context, node.startPos, false);
+                                    newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
+
+                                    newContext.symbolTable.set(foundTypes[0].Name, value);
+                                    context.symbolTable.set(formattedFileName, new @object(formattedFileName, newContext).setPosition(node.startPos, node.endPos).setContext(context));
+                                }
+                                else
+                                    context.symbolTable.set((!string.IsNullOrEmpty(nickname_)) ? nickname_ : foundTypes[0].Name, value);
                             }
+                            else if (!string.IsNullOrEmpty(class_))
+                                return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable class \"{class_}\" in script \"{file}\"", context));
                             else
                                 return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable classes in script \"{file}\"", context));
                         }
                         else
                         {
+                            context? newContext = null;
+                            if (!node.dumpAll)
+                            {
+                                newContext = new context(formattedFileName, context, node.startPos, false);
+                                newContext.symbolTable = new symbolTable(newContext.parent.symbolTable);
+                            }
+
                             int foundClasses = 0;
                             for (int i = 0; i < foundTypes.Length; i++)
                             {
-                                if (typeof(item).IsAssignableFrom(foundTypes[i]) && !foundTypes[i].IsAbstract)
+                                if (typeof(item).IsAssignableFrom(foundTypes[i]) && !foundTypes[i].IsAbstract && (string.IsNullOrEmpty(class_) || foundTypes[i].Name == class_))
                                 {
                                     dynamic? val;
                                     try
@@ -3357,13 +3453,27 @@ namespace ezrSquared.Main
                                     value = result.register(val.setPosition(node.startPos, node.endPos).setContext(context).execute(new item[0]));
                                     if (result.shouldReturn()) return result;
 
-                                    context.symbolTable.set(foundTypes[i].Name, value);
                                     foundClasses++;
+
+                                    if (node.dumpAll)
+                                        context.symbolTable.set(foundTypes[i].Name, value);
+                                    else if (string.IsNullOrEmpty(class_))
+                                        newContext.symbolTable.set(foundTypes[i].Name, value);
+                                    else
+                                    {
+                                        context.symbolTable.set((!string.IsNullOrEmpty(nickname_)) ? nickname_ : foundTypes[i].Name, value);
+                                        return result.success(new nothing().setPosition(node.startPos, node.endPos).setContext(context));
+                                    }
                                 }
                             }
 
-                            if (foundClasses == 0)
+                            if (foundClasses == 0 && !string.IsNullOrEmpty(class_))
+                                return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find class \"{class_}\" in script \"{file}\"", context));
+                            else if (foundClasses == 0)
                                 return result.failure(new runtimeError(node.startPos, node.endPos, RT_IO, $"Could not find suitable classes in script \"{file}\"", context));
+
+                            if (!node.dumpAll)
+                                context.symbolTable.set(formattedFileName, new @object(formattedFileName, newContext).setPosition(node.startPos, node.endPos).setContext(context));
                         }
                     }
                     catch (Exception exception)
@@ -3373,15 +3483,6 @@ namespace ezrSquared.Main
                 }
                 else
                 {
-                    string formattedFileName = LETTERS_UNDERSCORE.Contains(name[0]) ? name[0].ToString() : "_";
-                    for (int i = 1; i < name.Length; i++)
-                    {
-                        if (!ALPHANUM_UNDERSCORE.Contains(name[i]))
-                            formattedFileName += '_';
-                        else
-                            formattedFileName += name[i];
-                    }
-
                     string script;
                     try
                     {

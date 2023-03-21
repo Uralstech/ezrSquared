@@ -1,5 +1,9 @@
 CHANGELOG - What's new?
 
+* prerelease-1.5.0.0.0 - [21-03-23]
+    * More major changes to module/library system and `include` expression
+    * Context name of value-derived types now the name of the derived type
+
 * prerelease-1.4.0.1.0 - [20-03-23]
     * Windows-only functions in the IO library are now actually Windows-only
 
