@@ -1,5 +1,8 @@
 CHANGELOG - What's new?
 
+* prerelease-1.5.1.0.0 - [23-03-23]
+    * "all" keyword and ',' symbol now interchangeable in normal and QuickSyntax `include` expressions
+
 * prerelease-1.5.0.0.0 - [21-03-23]
     * More major changes to module/library system and `include` expression
     * Context name of value-derived types now the name of the derived type

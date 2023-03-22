@@ -231,7 +231,7 @@ end
 ```
 
 ### Iteration Control
-What if you want to stop a loop while it's running or want to skip an iteration on a condition? You can use the ***stop* and *skip* keywords to control the iterations of loops**. Let's code a simple example.
+What if you want to stop a loop while it's running or want to skip an iteration on a condition? You can **use the *stop* and *skip* keywords to control the iterations of loops**. **The *skip* keyword stops the current iteration and starts the next**. **The *stop* keyword just stops the loop**. Let's code a simple example.
 ```
 count to 10 as i do
 	if i = 5 do
@@ -246,7 +246,7 @@ count to 10 as i do
 end
 ```
 
-In this example, the iteration **is *skipped* when i = 5** and the loop is outright ***stopped* when i = 8**. **The *skip* keyword stops the current iteration and start the next**. **The *stop* keyword just stops the loop**.
+In this example, the iteration is *skipped* when i = 5 and the loop is outright *stopped* when i = 8.
 **The *skip* and *stop* keywords can also be used in while loops**.
 
 ### Arrays

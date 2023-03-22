@@ -1808,7 +1808,7 @@ namespace ezrSquared.Main
                 node file = null;
                 bool dump = false;
 
-                if (!currentToken.matchString(TOKENTYPE.KEY, "all"))
+                if (!currentToken.matchString(TOKENTYPE.KEY, "all") && currentToken.type != TOKENTYPE.COMMA )
                 {
                     file = result.register(expression());
                     if (result.error != null) return result;
@@ -2560,7 +2560,7 @@ namespace ezrSquared.Main
                 node file = null;
                 bool dump = false;
 
-                if (currentToken.type != TOKENTYPE.COMMA)
+                if (currentToken.type != TOKENTYPE.COMMA && !currentToken.matchString(TOKENTYPE.KEY, "all"))
                 {
                     file = result.register(expression());
                     if (result.error != null) return result;
