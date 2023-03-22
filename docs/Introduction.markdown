@@ -215,7 +215,7 @@ end
 ```
 
 ### While Loops
-***While loops* repeat the given code *till the given condition turns false***.
+***While loops* repeat the given code till the given condition turns false, and revaluate the condition every iteration**.
 ```
 item password: get("Enter password: ")
 while password ! "yeet" do
@@ -229,6 +229,25 @@ while true do
 	show("Hello, World!")
 end
 ```
+
+### Iteration Control
+What if you want to stop a loop while it's running or want to skip an iteration on a condition? You can use the ***stop* and *skip* keywords to control the iterations of loops**. Let's code a simple example.
+```
+count to 10 as i do
+	if i = 5 do
+		skip
+	end
+
+	if i = 8 do
+		stop
+	end
+
+	show("I = " + i.as_string())
+end
+```
+
+In this example, the iteration **is *skipped* when i = 5** and the loop is outright ***stopped* when i = 8**. **The *skip* keyword stops the current iteration and start the next**. **The *stop* keyword just stops the loop**.
+**The *skip* and *stop* keywords can also be used in while loops**.
 
 ### Arrays
 If you try the one-liner version of the count loop, like -
@@ -297,4 +316,5 @@ Here are all the list operators:
 
 You can **access the length of the list with the built-in `length` variable in the list**, just like with arrays.
 
-That's it for this tutorial! More coming soon!
+### TODO: Dictionaries, Globalization of Variables, Functions, Objects and Classes, Special Functions, Built-ins, Modules, IO and STD Libraries, QuickSyntax
+{: .no_toc }

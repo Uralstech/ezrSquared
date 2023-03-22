@@ -47,16 +47,16 @@ For more information check out the [*Introduction and Documentation page*](https
 
 Now, to install ezr² on your PC, follow these steps:
 
-### Windows
+### Windows (32 and 64 bit)
 {: .no_toc }
 
-1. Download the latest release of ezr² (`ezrSquared.Installer.Windows.32-bit.exe` or `ezrSquared.Installer.Windows.64-bit.exe`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
+1. Download the latest release of ezr² (`ezrSquared.Installer.Windows.32-bit.exe` for 32-bit systems or `ezrSquared.Installer.Windows.64-bit.exe` for 64-bit systems) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
 2. Run the installer and go through the installation.
 3. Add the folder where ezr² has been installed (`C:\Users\[USER]\AppData\Local\Programs\ezr²` or `C:\Program Files (x86)\ezr²` by default) to your PATH environment variable.
 4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
 5. Start coding!
 
-### Linux
+### Linux (64 bit)
 {: .no_toc }
 
 1. Download the latest release of ezr² (`ezrSquared.Linux.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
