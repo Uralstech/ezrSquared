@@ -1,4 +1,4 @@
-include "io"
+include "console" from "io"
 
 item origRow: (global item origCol: 0)
 
