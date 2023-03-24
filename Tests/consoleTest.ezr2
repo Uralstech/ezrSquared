@@ -8,33 +8,39 @@ function WriteAt with s, x, y do
         simple_show(s)
 end
 
-function Main do
+item posx: 0
+item posy: 0
+while true do
     clear()
 
     item currentPos: console.get_cursor_position()
     global item origRow: currentPos <= 1
     global item origCol: currentPos <= 0
 
-    WriteAt("+", 0, 0)
-    WriteAt("|", 0, 1)
-    WriteAt("|", 0, 2)
-    WriteAt("|", 0, 3)
-    WriteAt("+", 0, 4)
+    WriteAt("+", 0 + posx, 0 + posy)
+    WriteAt("|", 0 + posx, 1 + posy)
+    WriteAt("|", 0 + posx, 2 + posy)
+    WriteAt("|", 0 + posx, 3 + posy)
+    WriteAt("+", 0 + posx, 4 + posy)
 
-    WriteAt("-", 1, 4)
-    WriteAt("-", 2, 4)
-    WriteAt("-", 3, 4)
-    WriteAt("+", 4, 4)
+    WriteAt("-", 1 + posx, 4 + posy)
+    WriteAt("-", 2 + posx, 4 + posy)
+    WriteAt("-", 3 + posx, 4 + posy)
+    WriteAt("+", 4 + posx, 4 + posy)
 
-    WriteAt("|", 4, 3)
-    WriteAt("|", 4, 2)
-    WriteAt("|", 4, 1)
-    WriteAt("+", 4, 0)
+    WriteAt("|", 4 + posx, 3 + posy)
+    WriteAt("|", 4 + posx, 2 + posy)
+    WriteAt("|", 4 + posx, 1 + posy)
+    WriteAt("+", 4 + posx, 0 + posy)
 
-    WriteAt("-", 3, 0)
-    WriteAt("-", 2, 0)
-    WriteAt("-", 1, 0)
+    WriteAt("-", 3 + posx, 0 + posy)
+    WriteAt("-", 2 + posx, 0 + posy)
+    WriteAt("-", 1 + posx, 0 + posy)
 
-    WriteAt("All done!", 0, 6)
-    show("")
+    count to 1000 do
+        if console.is_key_pressed("W", false, false, false) do item posy:- 1
+        if console.is_key_pressed("S", false, false, false) do item posy:+ 1
+        if console.is_key_pressed("A", false, false, false) do item posx:- 1
+        if console.is_key_pressed("D", false, false, false) do item posx:+ 1
+    end
 end
