@@ -33,7 +33,7 @@ item wins: [[["n", "n", "n"],
              ["-", "-", "n"]]]
 
 @ Function to show game matrix in more readable form
-function SHOW_GAME do
+function show_game do
     count to game.length as i do
         item s: ""
         count to (game <= i).length as j do item s: s + (game <= i <= j) + " "
@@ -43,7 +43,7 @@ function SHOW_GAME do
 end
 
 @ Function for checking if the game is over, and who has won
-function Check_result do
+function check_result do
     item full: true
     count to wins.length as i do
         item x_pts: 0
@@ -70,7 +70,7 @@ function Check_result do
 end
 
 @ Function to register the players" current move
-function Move with position, char do
+function move with position, char do
     item y: if position <= 3 do 0 else if position <= 6 do 1 else if position <= 9 do 2 else do -1
     item x: if position <= 3 do position - 1 else if position <= 6 do position - 4 else if position <= 9 do position - 7 else do -1
     if ((y < 0) or (x < 0)) or (position <= 0) do return "INVALID POSITION"
@@ -89,7 +89,7 @@ end
 
 @ Showing the matrix
 show("\n")
-SHOW_GAME()
+show_game()
 
 @ Main gameloop
 item char: "x"
@@ -101,7 +101,7 @@ while true do
         skip
     end
 
-    item move: Move(move, char)
+    item move: move(move, char)
     if type_of(move) = "string" do
         show(move)
         skip
@@ -110,9 +110,9 @@ while true do
     end
 
     show("\n")
-    SHOW_GAME()
+    show_game()
 
-    item result: Check_result()
+    item result: check_result()
     if result = "1" do
         show("Draw!")
         stop

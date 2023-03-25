@@ -1,46 +1,38 @@
 include "console" from "io"
 
-item origRow: (global item origCol: 0)
+item original_row: (global item original_column: 0)
 
-function WriteAt with s, x, y do
-    
-        console.set_cursor_position((origCol + x, origRow + y))
-        simple_show(s)
+function write_at with text, x_offset, y_offset do
+    console.set_cursor_position((original_column + x_offset, original_row + y_offset))
+    simple_show(text)
 end
 
-item posx: 0
-item posy: 0
-while true do
+function main do
     clear()
 
-    item currentPos: console.get_cursor_position()
-    global item origRow: currentPos <= 1
-    global item origCol: currentPos <= 0
+    item current_position: console.get_cursor_position()
+    global item original_row: current_position <= 1
+    global item original_column: current_position <= 0
 
-    WriteAt("+", 0 + posx, 0 + posy)
-    WriteAt("|", 0 + posx, 1 + posy)
-    WriteAt("|", 0 + posx, 2 + posy)
-    WriteAt("|", 0 + posx, 3 + posy)
-    WriteAt("+", 0 + posx, 4 + posy)
+    write_at("+", 0, 0)
+    write_at("|", 0, 1)
+    write_at("|", 0, 2)
+    write_at("|", 0, 3)
+    write_at("+", 0, 4)
 
-    WriteAt("-", 1 + posx, 4 + posy)
-    WriteAt("-", 2 + posx, 4 + posy)
-    WriteAt("-", 3 + posx, 4 + posy)
-    WriteAt("+", 4 + posx, 4 + posy)
+    write_at("-", 1, 4)
+    write_at("-", 2, 4)
+    write_at("-", 3, 4)
+    write_at("+", 4, 4)
 
-    WriteAt("|", 4 + posx, 3 + posy)
-    WriteAt("|", 4 + posx, 2 + posy)
-    WriteAt("|", 4 + posx, 1 + posy)
-    WriteAt("+", 4 + posx, 0 + posy)
+    write_at("|", 4, 3)
+    write_at("|", 4, 2)
+    write_at("|", 4, 1)
+    write_at("+", 4, 0)
 
-    WriteAt("-", 3 + posx, 0 + posy)
-    WriteAt("-", 2 + posx, 0 + posy)
-    WriteAt("-", 1 + posx, 0 + posy)
+    write_at("-", 3, 0)
+    write_at("-", 2, 0)
+    write_at("-", 1, 0)
 
-    count to 1000 do
-        if console.is_key_pressed("W", false, false, false) do item posy:- 1
-        if console.is_key_pressed("S", false, false, false) do item posy:+ 1
-        if console.is_key_pressed("A", false, false, false) do item posx:- 1
-        if console.is_key_pressed("D", false, false, false) do item posx:+ 1
-    end
+    write_at("All done!\n", 0, 6)
 end

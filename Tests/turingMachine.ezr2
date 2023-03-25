@@ -19,7 +19,7 @@ item V: "V"
 item R: "R"
 item L: "L"
 item B: "B" 
-item oldtapehead: -1
+item old_tapehead: -1
 item accept: false
 
 function action with input_char, replace_with, move, new_state do
@@ -40,8 +40,8 @@ function action with input_char, replace_with, move, new_state do
     return false
 end
 
-while oldtapehead ! tapehead do
-    item oldtapehead: tapehead
+while old_tapehead ! tapehead do
+    item old_tapehead: tapehead
     simple_show(tape)
     simple_show(" with tapehead at index ")
     simple_show(tapehead)
