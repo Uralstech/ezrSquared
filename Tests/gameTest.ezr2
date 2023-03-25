@@ -1,0 +1,43 @@
+﻿include "console" from "io"
+include "console" from "io"
+
+object text_based_image with text do item image: text.split("\n")
+
+object integer2 with x, y do
+	if type_of(x) ! "integer" do item this.x: x.as_integer()
+	if type_of(y) ! "integer" do item this.y: y.as_integer()
+
+	special equals do other.x = x and other.y = y
+end
+
+object sprite with graphics, position do
+	function draw do
+		count to graphics.image.length as y do
+			count to (graphics.image <= y).length as x do
+				console.set_cursor_position((x + position.x, y + position.y))
+				simple_show(graphics.image <= y <= x)
+			end
+		end
+	end
+end
+
+function update do
+	if console.is_key_pressed("W", false, false, false) do item test_sprite.position.y:- 1
+    if console.is_key_pressed("S", false, false, false) do item test_sprite.position.y:+ 1
+    if console.is_key_pressed("A", false, false, false) do item test_sprite.position.x:- 3
+    if console.is_key_pressed("D", false, false, false) do item test_sprite.position.x:+ 3
+	
+	if test_sprite.position ! previous_position do
+		global item previous_position: integer2(test_sprite.position.x, test_sprite.position.y)
+	
+		clear()
+		test_sprite.draw()
+	end
+end
+
+item test_sprite: sprite(text_based_image("   0\n   |\\ /=\n/[]|[]\n |   |\n"), integer2(0, 0))
+item previous_position: integer2(-1, -1)
+
+while true do
+	update()
+end

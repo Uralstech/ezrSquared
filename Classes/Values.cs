@@ -2747,7 +2747,7 @@ namespace ezrSquared.Values
             item? func = internalContext.symbolTable.get("equals");
             if (func != null && func is special)
             {
-                item? output = getOutput(func, new item[0], out error);
+                item? output = getOutput(func, new item[1] { obj }, out error);
                 if (error != null) return false;
                 return output.isTrue(out error);
             }
