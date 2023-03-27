@@ -50,7 +50,7 @@ DialogFontSize=10
 
 [CustomMessages]
 WebDocumentation=%1 Online Documentation
-LocalDocumentation=%1 Local Documentation
+LocalDocumentation=%1 Offline Documentation
 
 [Types]
 Name: "full"; Description: "Full installation"
