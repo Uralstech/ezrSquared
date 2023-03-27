@@ -1,5 +1,4 @@
 ﻿include "console" from "io"
-include "console" from "io"
 
 object text_based_image with text do item image: text.split("\n")
 
@@ -14,8 +13,10 @@ object sprite with graphics, position do
 	function draw do
 		count to graphics.image.length as y do
 			count to (graphics.image <= y).length as x do
-				console.set_cursor_position((x + position.x, y + position.y))
-				simple_show(graphics.image <= y <= x)
+			    try do
+					console.set_cursor_position(x + position.x, y + position.y)
+					simple_show(graphics.image <= y <= x)
+				end
 			end
 		end
 	end
@@ -35,6 +36,7 @@ function update do
 	end
 end
 
+try do console.set_cursor_visibility(false)
 item test_sprite: sprite(text_based_image("   0\n   |\\ /=\n/[]|[]\n |   |\n"), integer2(0, 0))
 item previous_position: integer2(-1, -1)
 

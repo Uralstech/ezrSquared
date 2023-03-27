@@ -3,7 +3,7 @@ include "console" from "io"
 item original_row: (global item original_column: 0)
 
 function write_at with text, x_offset, y_offset do
-    console.set_cursor_position((original_column + x_offset, original_row + y_offset))
+    console.set_cursor_position(original_column + x_offset, original_row + y_offset)
     simple_show(text)
 end
 

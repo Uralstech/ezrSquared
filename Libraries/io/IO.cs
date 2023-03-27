@@ -372,7 +372,7 @@ namespace ezrSquared.Libraries.IO
             internalContext.symbolTable.set("set_foreground", new predefined_function("console_set_foreground", setConsoleForeground, new string[1] { "color" }));
             internalContext.symbolTable.set("reset_colors", new predefined_function("console_reset_colors", consoleResetColors, new string[0]));
             internalContext.symbolTable.set("get_cursor_position", new predefined_function("console_get_cursor_position", getCursorPosition, new string[0]));
-            internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[1] { "position" }));
+            internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[2] { "x_position", "y_position" }));
             internalContext.symbolTable.set("exit", new predefined_function("console_exit", stopApplication, new string[0]));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
@@ -427,25 +427,19 @@ namespace ezrSquared.Libraries.IO
         {
             runtimeResult result = new runtimeResult();
 
-            item pos = context.symbolTable.get("position");
-            if (pos is not array && pos is not list)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must be an array or list", context));
+            item xpos = context.symbolTable.get("x_position");
+            if (xpos is not integer && xpos is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "X_position must be an integer or float", context));
 
-            item[] posArray = (pos is array) ? ((array)pos).storedValue : ((list)pos).storedValue.ToArray();
-            if (posArray.Length != 2)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must be an array or list of length 2", context));
+            item ypos = context.symbolTable.get("y_position");
+            if (ypos is not integer && ypos is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Y_position must be an integer or float", context));
 
-            for (int i = 0; i < posArray.Length; i++)
-            {
-                if (posArray[i] is not integer && posArray[i] is not @float)
-                    return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Position must only contain integers or floats", context));
-            }
-
-            (int left, int top) = ((int)((value)posArray[0]).storedValue, (int)((value)posArray[1]).storedValue);
-            if (left < 0 || left > Console.BufferWidth)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Position X must be in range 0-{Console.BufferWidth}", context));
-            if (top < 0 || top > Console.BufferHeight)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Position Y must be in range 0-{Console.BufferHeight}", context));
+            (int left, int top) = ((int)((value)xpos).storedValue, (int)((value)ypos).storedValue);
+            if (left < 0 || left >= Console.BufferWidth)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X position must be in range 0-{Console.BufferWidth-1}", context));
+            if (top < 0 || top >= Console.BufferHeight)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y position must be in range 0-{Console.BufferHeight-1}", context));
 
             Console.SetCursorPosition(left, top);
             return result.success(new nothing());

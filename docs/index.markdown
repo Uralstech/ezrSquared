@@ -97,6 +97,9 @@ Meanwhile, check out some example programs in [***GitHub***](https://github.com/
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
+* **prerelease-1.5.1.1.0** - [27-03-23]
+    * `Console.set_cursor_position` in the IO library now accepts two seperate integers
+
 * **prerelease-1.5.1.0.1** - [25-03-23]
     * Fixed bug in special function `equals`
 
@@ -106,15 +109,6 @@ Meanwhile, check out some example programs in [***GitHub***](https://github.com/
 * **prerelease-1.5.0.0.0** - [21-03-23]
     * More major changes to module/library system and `include` expression
     * Context name of value-derived types now the name of the derived type
-
-* **prerelease-1.4.0.1.0** - [20-03-23]
-    * Windows-only functions in the IO library are now actually Windows-only
-
-* **prerelease-1.4.0.0.0** - [20-03-23]
-    * Overhaul of module/library system, including `include` expression
-    * Merged STD and Random libraries
-    * Error tags in `error` statements are now expressions
-    * Added character_list support for some built-in string functions
 
 ## Contributing
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.
