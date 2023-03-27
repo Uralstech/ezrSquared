@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "ezr²"
-#define MyAppVersion "prerelease-1.5.1.0.1"
+#define MyAppVersion "prerelease-1.5.1.1.0"
 #define MyAppPublisher "Uralstech"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
