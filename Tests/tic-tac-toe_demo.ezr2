@@ -2,9 +2,7 @@
 @ https://github.com/Uralstech/ezrlang
 
 @ Main game matrix
-item game: [["-", "-", "-"],
-            ["-", "-", "-"],
-            ["-", "-", "-"]]
+item game: [["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]
 
 @ Winning cases
 item wins: [[["n", "n", "n"],
@@ -70,7 +68,7 @@ function check_result do
 end
 
 @ Function to register the players" current move
-function move with position, char do
+function move_game with position, char do
     item y: if position <= 3 do 0 else if position <= 6 do 1 else if position <= 9 do 2 else do -1
     item x: if position <= 3 do position - 1 else if position <= 6 do position - 4 else if position <= 9 do position - 7 else do -1
     if ((y < 0) or (x < 0)) or (position <= 0) do return "INVALID POSITION"
@@ -101,7 +99,7 @@ while true do
         skip
     end
 
-    item move: move(move, char)
+    item move: move_game(move, char)
     if type_of(move) = "string" do
         show(move)
         skip
