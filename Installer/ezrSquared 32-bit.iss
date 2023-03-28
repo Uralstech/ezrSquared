@@ -86,7 +86,7 @@ Root: HKA; Subkey: "Software\Classes\Applications\{#MyAppExeName}\SupportedTypes
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-    if (CurStep = ssPostInstall) and IsTaskSelected('addtopath')
+    if (CurStep = ssPostInstall) and WizardIsTaskSelected('addtopath')
      then EnvAddPath(ExpandConstant('{app}'));
 end;
 
