@@ -2,7 +2,9 @@
 @ https://github.com/Uralstech/ezrlang
 
 @ Main game matrix
-item game: [["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]
+item game: [["-", "-", "-"],
+            ["-", "-", "-"],
+            ["-", "-", "-"]]
 
 @ Winning cases
 item wins: [[["n", "n", "n"],
