@@ -52,9 +52,8 @@ Now, to install ezr² on your PC, follow these steps:
 
 1. Download the latest release of ezr² (`ezrSquared.Installer.Windows.32-bit.exe` for 32-bit systems or `ezrSquared.Installer.Windows.64-bit.exe` for 64-bit systems) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
 2. Run the installer and go through the installation.
-3. Add the folder where ezr² has been installed (`C:\Users\[USER]\AppData\Local\Programs\ezr²` or `C:\Program Files (x86)\ezr²` by default) to your PATH environment variable.
-4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
-5. Start coding!
+3. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
+4. Start coding!
 
 ### Linux (64 bit)
 {: .no_toc }
@@ -95,6 +94,7 @@ The official documentation for ezr² is available in the [***Introduction and Do
 Meanwhile, check out some example programs in [***GitHub***](https://github.com/Uralstech/ezrSquared/tree/master/Tests).
 
 The offline version of the ezrSquared website was made possible with [***Jekyll Offline***](https://github.com/dohliam/jekyll-offline).
+The documentation is packaged with the Windows installer. For other OSes, download and extract `ezrSquared.Offline.Documentation.zip`, which is available for download with each release on GitHub.
 
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.

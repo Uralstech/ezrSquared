@@ -190,7 +190,7 @@
   },"27": {
     "doc": "The ezr² Programming Language",
     "title": "Windows (32 and 64 bit)",
-    "content": ". | Download the latest release of ezr² (ezrSquared.Installer.Windows.32-bit.exe for 32-bit systems or ezrSquared.Installer.Windows.64-bit.exe for 64-bit systems) from GitHub. | Run the installer and go through the installation. | Add the folder where ezr² has been installed (C:\\Users\\[USER]\\AppData\\Local\\Programs\\ezr² or C:\\Program Files (x86)\\ezr² by default) to your PATH environment variable. | Verify that ezr² is installed by running ezrSquared in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit). | Start coding! | . ",
+    "content": ". | Download the latest release of ezr² (ezrSquared.Installer.Windows.32-bit.exe for 32-bit systems or ezrSquared.Installer.Windows.64-bit.exe for 64-bit systems) from GitHub. | Run the installer and go through the installation. | Verify that ezr² is installed by running ezrSquared in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit). | Start coding! | . ",
     "url": "/#windows-32-and-64-bit",
     
     "relUrl": "/#windows-32-and-64-bit"
@@ -225,7 +225,7 @@
   },"32": {
     "doc": "The ezr² Programming Language",
     "title": "Documentation",
-    "content": "The official documentation for ezr² is available in the Introduction and Documentation page, but is still work in progress. Meanwhile, check out some example programs in GitHub. The offline version of the ezrSquared website was made possible with Jekyll Offline. ",
+    "content": "The official documentation for ezr² is available in the Introduction and Documentation page, but is still work in progress. Meanwhile, check out some example programs in GitHub. The offline version of the ezrSquared website was made possible with Jekyll Offline. The documentation is packaged with the Windows installer. For other OSes, download and extract ezrSquared.Offline.Documentation.zip, which is available for download with each release on GitHub. ",
     "url": "/#documentation",
     
     "relUrl": "/#documentation"

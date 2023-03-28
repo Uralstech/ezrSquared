@@ -63,8 +63,8 @@ Name: "libs"; Description: "Standard Libraries"; Types: full compact
 Name: "docs"; Description: "Documentation"; Types: full
 
 [Tasks]
-Name: "addtopath"; Description: "Add ezr² to PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "addtopath"; Description: "Add ezr² to PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Dirs]
 Name: "{app}\Libraries"
