@@ -72,8 +72,8 @@ Name: "{app}\Libraries"
 Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x86\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "D:\Code\csharp\ezrSquared\Offline Site\ezrSquared Offline\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: docs
-Source: "D:\Code\csharp\ezrSquared\Libraries\io\bin\Release\net7.0\io.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
-Source: "D:\Code\csharp\ezrSquared\Libraries\std\bin\Release\net7.0\std.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
+Source: "D:\Code\csharp\ezrSquared\Libraries\io\bin\Release\net7.0\win-x86\io.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
+Source: "D:\Code\csharp\ezrSquared\Libraries\std\bin\Release\net7.0\win-x86\std.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
