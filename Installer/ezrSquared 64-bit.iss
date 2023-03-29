@@ -70,6 +70,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "{app}\Libraries"
 
 [Files]
+Source: "D:\Code\csharp\ezrSquared\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "D:\Code\csharp\ezrSquared\Offline Site\ezrSquared Offline\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: docs
