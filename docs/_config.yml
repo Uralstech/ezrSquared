@@ -32,7 +32,7 @@ callouts:
     title: Warning
     color: yellow
 
-footer_content: "ezrSquared is licensed under the <a href=\"https://github.com/Uralstech/ezrSquared/blob/021e19ee7a136eabf00ddfb621a05d0d5bb6bc76/LICENSE.txt\">Apache License, Version 2.0</a>."
+footer_content: "ezrSquared is licensed under the <a href=\"https://github.com/Uralstech/ezrSquared/blob/master/LICENSE.txt\">Apache License, Version 2.0</a>."
 
 last_edit_timestamp: true
 last_edit_time_format: "%b %e %Y at %I:%M %p"
