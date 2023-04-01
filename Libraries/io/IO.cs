@@ -364,6 +364,18 @@ namespace ezrSquared.Libraries.IO
                 internalContext.symbolTable.set("set_cursor_size", new predefined_function("console_set_cursor_size", setCursorSize, new string[1] { "size" }));
                 internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", getCursorVisibility, new string[0]));
                 internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", setCursorVisibility, new string[1] { "visibility" }));
+                internalContext.symbolTable.set("set_buffer_size", new predefined_function("console_set_buffer_size", setBufferSize, new string[2] { "x_size", "y_size" }));
+            }
+            else
+            {
+                internalContext.symbolTable.set("is_numberlocked", new predefined_function("console_is_numberlocked", platformNotSupported, new string[0]));
+                internalContext.symbolTable.set("is_capslocked", new predefined_function("console_is_capslocked", platformNotSupported, new string[0]));
+
+                internalContext.symbolTable.set("get_cursor_size", new predefined_function("console_get_cursor_size", platformNotSupported, new string[0]));
+                internalContext.symbolTable.set("set_cursor_size", new predefined_function("console_set_cursor_size", platformNotSupported, new string[1] { "size" }));
+                internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", platformNotSupported, new string[0]));
+                internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", platformNotSupported, new string[1] { "visibility" }));
+                internalContext.symbolTable.set("set_buffer_size", new predefined_function("console_set_buffer_size", platformNotSupported, new string[2] { "x_size", "y_size" }));
             }
 
             internalContext.symbolTable.set("get_background", new predefined_function("console_get_background", getConsoleBackground, new string[0]));
@@ -373,9 +385,15 @@ namespace ezrSquared.Libraries.IO
             internalContext.symbolTable.set("reset_colors", new predefined_function("console_reset_colors", consoleResetColors, new string[0]));
             internalContext.symbolTable.set("get_cursor_position", new predefined_function("console_get_cursor_position", getCursorPosition, new string[0]));
             internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[2] { "x_position", "y_position" }));
+            internalContext.symbolTable.set("get_buffer_size", new predefined_function("console_get_buffer_size", getBufferSize, new string[0]));
             internalContext.symbolTable.set("exit", new predefined_function("console_exit", stopApplication, new string[0]));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
+        }
+
+        private runtimeResult platformNotSupported(context context, position[] positions)
+        {
+            return new runtimeResult().failure(new runtimeError(positions[0], positions[1], RT_IO, $"Function not supported on current platform", context));
         }
 
         private runtimeResult getCursorVisibility(context context, position[] positions)
@@ -416,6 +434,40 @@ namespace ezrSquared.Libraries.IO
             return result.success(new nothing());
         }
 
+        private runtimeResult getBufferSize(context context, position[] positions)
+        {
+            int width = Console.BufferWidth;
+            int height = Console.BufferHeight;
+
+            return new runtimeResult().success(new array(new item[2] { new integer(width).setPosition(positions[0], positions[1]).setContext(context), new integer(height).setPosition(positions[0], positions[1]).setContext(context) }));
+        }
+
+        private runtimeResult setBufferSize(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item xsize = context.symbolTable.get("x_size");
+            if (xsize is not integer && xsize is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "X_size must be an integer or float", context));
+
+            item ysize = context.symbolTable.get("y_size");
+            if (ysize is not integer && ysize is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Y_size must be an integer or float", context));
+
+            (int width, int height) = ((int)((value)xsize).storedValue, (int)((value)ysize).storedValue);
+
+            int minWidth = Console.WindowLeft + Console.WindowWidth;
+            int minHeight = Console.WindowTop + Console.WindowHeight;
+            if (width < minWidth || width >= Int16.MaxValue)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X size must be in range {minWidth}-{Int16.MaxValue-1}", context));
+            if (height < minHeight || height >= Int16.MaxValue)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y size must be in range {minHeight}-{Int16.MaxValue-1}", context));
+
+            Console.BufferWidth = width;
+            Console.BufferHeight = height;
+            return result.success(new nothing());
+        }
+
         private runtimeResult getCursorPosition(context context, position[] positions)
         {
             (int left, int top) = Console.GetCursorPosition();
@@ -437,9 +489,9 @@ namespace ezrSquared.Libraries.IO
 
             (int left, int top) = ((int)((value)xpos).storedValue, (int)((value)ypos).storedValue);
             if (left < 0 || left >= Console.BufferWidth)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X position must be in range 0-{Console.BufferWidth-1}", context));
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X position must be in range 0-{Console.BufferWidth - 1}", context));
             if (top < 0 || top >= Console.BufferHeight)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y position must be in range 0-{Console.BufferHeight-1}", context));
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y position must be in range 0-{Console.BufferHeight - 1}", context));
 
             Console.SetCursorPosition(left, top);
             return result.success(new nothing());

@@ -99,6 +99,10 @@ The documentation is packaged with the Windows installer. For other OSes, downlo
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
+* **prerelease-1.5.1.2.0** - [01-04-23]
+    * Added new functions `get_buffer_size` and `set_buffer_size` to `Console` class in the IO library
+    * Unsupported functions in `Console` class in the IO library will now show new error if called
+
 * **prerelease-1.5.1.1.0** - [27-03-23]
     * `Console.set_cursor_position` in the IO library now accepts two seperate integers
 
