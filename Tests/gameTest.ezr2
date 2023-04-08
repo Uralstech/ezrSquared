@@ -13,8 +13,12 @@ object sprite with graphics, position do
 	function draw do
 		count to graphics.image.length as y do
 			count to (graphics.image <= y).length as x do
-			    try do
-					console.set_cursor_position(x + position.x, y + position.y)
+				item xpos: x + position.x
+				item ypos: y + position.y
+				item buffer: console.get_buffer_size()
+
+			    if xpos < (buffer <= 0) and ypos < (buffer <= 1) and xpos >= 0 and ypos >= 0 do
+					console.set_cursor_position(xpos, ypos)
 					simple_show(graphics.image <= y <= x)
 				end
 			end
