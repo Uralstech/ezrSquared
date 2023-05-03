@@ -365,6 +365,8 @@ namespace ezrSquared.Libraries.IO
                 internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", getCursorVisibility, new string[0]));
                 internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", setCursorVisibility, new string[1] { "visibility" }));
                 internalContext.symbolTable.set("set_buffer_size", new predefined_function("console_set_buffer_size", setBufferSize, new string[2] { "x_size", "y_size" }));
+                internalContext.symbolTable.set("set_window_position", new predefined_function("console_set_window_position", setWindowPosition, new string[2] { "x_position", "y_position" }));
+                internalContext.symbolTable.set("set_window_size", new predefined_function("console_set_window_size", setWindowSize, new string[2] { "x_size", "y_size" }));
             }
             else
             {
@@ -376,6 +378,8 @@ namespace ezrSquared.Libraries.IO
                 internalContext.symbolTable.set("get_cursor_visibility", new predefined_function("console_get_cursor_visibility", platformNotSupported, new string[0]));
                 internalContext.symbolTable.set("set_cursor_visibility", new predefined_function("console_set_cursor_visibility", platformNotSupported, new string[1] { "visibility" }));
                 internalContext.symbolTable.set("set_buffer_size", new predefined_function("console_set_buffer_size", platformNotSupported, new string[2] { "x_size", "y_size" }));
+                internalContext.symbolTable.set("set_window_position", new predefined_function("console_set_window_position", platformNotSupported, new string[2] { "x_position", "y_position" }));
+                internalContext.symbolTable.set("set_window_size", new predefined_function("console_set_window_size", platformNotSupported, new string[2] { "x_size", "y_size" }));
             }
 
             internalContext.symbolTable.set("get_background", new predefined_function("console_get_background", getConsoleBackground, new string[0]));
@@ -386,6 +390,8 @@ namespace ezrSquared.Libraries.IO
             internalContext.symbolTable.set("get_cursor_position", new predefined_function("console_get_cursor_position", getCursorPosition, new string[0]));
             internalContext.symbolTable.set("set_cursor_position", new predefined_function("console_set_cursor_position", setCursorPosition, new string[2] { "x_position", "y_position" }));
             internalContext.symbolTable.set("get_buffer_size", new predefined_function("console_get_buffer_size", getBufferSize, new string[0]));
+            internalContext.symbolTable.set("get_window_position", new predefined_function("console_get_window_position", getWindowPosition, new string[0]));
+            internalContext.symbolTable.set("get_window_size", new predefined_function("console_get_window_size", getWindowSize, new string[0]));
             internalContext.symbolTable.set("exit", new predefined_function("console_exit", stopApplication, new string[0]));
 
             return new runtimeResult().success(new @object(name, internalContext).setPosition(startPos, endPos).setContext(context));
@@ -433,6 +439,69 @@ namespace ezrSquared.Libraries.IO
             Console.CursorSize = sizeValue;
             return result.success(new nothing());
         }
+        
+        private runtimeResult getWindowSize(context context, position[] positions)
+        {
+            int width = Console.WindowWidth;
+            int height = Console.WindowHeight;
+
+            return new runtimeResult().success(new array(new item[2] { new integer(width).setPosition(positions[0], positions[1]).setContext(context), new integer(height).setPosition(positions[0], positions[1]).setContext(context) }));
+        }
+
+        private runtimeResult setWindowSize(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item xsize = context.symbolTable.get("x_size");
+            if (xsize is not integer && xsize is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "X_size must be an integer or float", context));
+
+            item ysize = context.symbolTable.get("y_size");
+            if (ysize is not integer && ysize is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Y_size must be an integer or float", context));
+
+            (int width, int height) = ((int)((value)xsize).storedValue, (int)((value)ysize).storedValue);
+
+            int maxWindowHeight2 = height + Console.WindowTop;
+            if (width < 1 || width > Console.LargestWindowWidth)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X size must be in range 1-{Console.LargestWindowWidth}", context));
+            if (height < 1 || height > Console.LargestWindowHeight || maxWindowHeight2 >= Int16.MaxValue)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y size must be in range 1-{Console.LargestWindowHeight}", context));
+
+            Console.SetWindowSize(width, height);
+            return result.success(new nothing());
+        }
+
+        private runtimeResult getWindowPosition(context context, position[] positions)
+        {
+            int left = Console.WindowLeft;
+            int top = Console.WindowTop;
+
+            return new runtimeResult().success(new array(new item[2] { new integer(left).setPosition(positions[0], positions[1]).setContext(context), new integer(top).setPosition(positions[0], positions[1]).setContext(context) }));
+        }
+
+        private runtimeResult setWindowPosition(context context, position[] positions)
+        {
+            runtimeResult result = new runtimeResult();
+
+            item xposition = context.symbolTable.get("x_position");
+            if (xposition is not integer && xposition is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "X_position must be an integer or float", context));
+
+            item yposition = context.symbolTable.get("y_position");
+            if (yposition is not integer && yposition is not @float)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_TYPE, "Y_position must be an integer or float", context));
+
+            (int left, int top) = ((int)((value)xposition).storedValue, (int)((value)yposition).storedValue);
+
+            if (left < 0 || left + Console.WindowWidth > Console.BufferWidth)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X position must be in range 0-{Console.BufferWidth - Console.WindowWidth}", context));
+            if (top < 0 || top + Console.WindowHeight > Console.BufferHeight)
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y position must be in range 0-{Console.BufferHeight - Console.WindowHeight}", context));
+
+            Console.SetWindowPosition(left, top);
+            return result.success(new nothing());
+        }
 
         private runtimeResult getBufferSize(context context, position[] positions)
         {
@@ -459,12 +528,11 @@ namespace ezrSquared.Libraries.IO
             int minWidth = Console.WindowLeft + Console.WindowWidth;
             int minHeight = Console.WindowTop + Console.WindowHeight;
             if (width < minWidth || width >= Int16.MaxValue)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X size must be in range {minWidth}-{Int16.MaxValue-1}", context));
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"X size must be in range {minWidth}-{Int16.MaxValue - 1}", context));
             if (height < minHeight || height >= Int16.MaxValue)
-                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y size must be in range {minHeight}-{Int16.MaxValue-1}", context));
+                return result.failure(new runtimeError(positions[0], positions[1], RT_OVERFLOW, $"Y size must be in range {minHeight}-{Int16.MaxValue - 1}", context));
 
-            Console.BufferWidth = width;
-            Console.BufferHeight = height;
+            Console.SetBufferSize(width, height);
             return result.success(new nothing());
         }
 

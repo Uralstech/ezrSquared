@@ -99,6 +99,11 @@ The documentation is packaged with the Windows installer. For other OSes, downlo
 ## Latest Updates
 **For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
+* **prerelease-1.5.1.3.0** - [03-05-23]
+    * Added new functions `get_window_size`, `set_window_size`, `get_window_position` and `set_window_position` -
+        to `Console` class in the IO library
+    * Function `set_buffer_size` in `Console` class in the IO library now uses the `SetBufferSize` C# function
+
 * **prerelease-1.5.1.2.0** - [01-04-23]
     * Added new functions `get_buffer_size` and `set_buffer_size` to `Console` class in the IO library
     * Unsupported functions in `Console` class in the IO library will now show new error if called
