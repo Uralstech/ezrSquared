@@ -1,23 +1,4 @@
 CHANGELOG - What's new?
 
-* prerelease-1.5.1.3.0 - [03-05-23]
-    * Added new functions `get_window_size`, `set_window_size`, `get_window_position` and `set_window_position` -
-        to `Console` class in the IO library
-    * Function `set_buffer_size` in `Console` class in the IO library now uses the `SetBufferSize` C# function
-
-* prerelease-1.5.1.2.0 - [01-04-23]
-    * Added new functions `get_buffer_size` and `set_buffer_size` to `Console` class in the IO library
-    * Unsupported functions in `Console` class in the IO library will now show new error if called
-
-* prerelease-1.5.1.1.0 - [27-03-23]
-    * `Console.set_cursor_position` in the IO library now accepts two seperate integers
-
-* prerelease-1.5.1.0.1 - [25-03-23]
-    * Fixed bug in special function `equals`
-
-* prerelease-1.5.1.0.0 - [23-03-23]
-    * "all" keyword and ',' symbol now interchangeable in normal and QuickSyntax `include` expressions
-
-* prerelease-1.5.0.0.0 - [21-03-23]
-    * More major changes to module/library system and `include` expression
-    * Context name of value-derived types now the name of the derived type
+* ezr² Rewrite - Part 1 [10-05-23]
+	* Completed rewriting the Lexer and it's supporting components 

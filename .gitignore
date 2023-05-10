@@ -364,6 +364,6 @@ FodyWeavers.xsd
 
 # --------------------------------------------------
 
-Graphics/Visualization.png
-Offline\ Site/ezrSquared\ Offline/
-*.zip
+graphics/
+docs/offline/_site/
+docs/offline/ezrSquared.Offline.Documentation.zip

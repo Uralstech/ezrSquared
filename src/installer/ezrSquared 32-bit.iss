@@ -4,7 +4,7 @@
 #include "environment.iss"
 
 #define MyAppName "ezr²"
-#define MyAppVersion "prerelease-1.5.1.3.0"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "Uralstech"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
@@ -15,7 +15,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{0F1DF58D-F539-4FEB-8174-04F973E54F03}
+AppId={{2A507B20-D8C0-4E66-891F-13CFC590FCFA}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -27,7 +27,6 @@ DefaultDirName={autopf}\{#MyAppName}
 ChangesAssociations=yes
 ChangesEnvironment=yes
 MinVersion=6.1.7600
-ArchitecturesAllowed=x64
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=D:\Code\csharp\ezrSquared\LICENSE.txt
@@ -35,9 +34,9 @@ InfoAfterFile=D:\Code\csharp\ezrSquared\Changelog.txt
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=D:\Code\csharp\ezrSquared\Installer\bin
-OutputBaseFilename=ezrSquared Installer (Windows 64-bit)
-SetupIconFile=D:\Code\csharp\ezrSquared\Graphics\Icon.ico
+OutputDir=D:\Code\csharp\ezrSquared\bin\Installer\
+OutputBaseFilename=ezrSquared Installer (Windows 32-bit)
+SetupIconFile=D:\Code\csharp\ezrSquared\src\Icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -71,11 +70,11 @@ Name: "{app}\Libraries"
 
 [Files]
 Source: "D:\Code\csharp\ezrSquared\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x64\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Code\csharp\ezrSquared\bin\Release\net7.0\win-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Code\csharp\ezrSquared\Offline Site\ezrSquared Offline\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: docs
-Source: "D:\Code\csharp\ezrSquared\Libraries\io\bin\Release\net7.0\win-x64\io.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
-Source: "D:\Code\csharp\ezrSquared\Libraries\std\bin\Release\net7.0\win-x64\std.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
+Source: "D:\Code\csharp\ezrSquared\bin\ezrSquared\Release\net7.0-windows10.0.22621.0\win-x86\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Code\csharp\ezrSquared\bin\ezrSquared\Release\net7.0-windows10.0.22621.0\win-x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Code\csharp\ezrSquared\docs\offline\_site\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: docs
+Source: "D:\Code\csharp\ezrSquared\bin\Libraries\IO\Release\net7.0-windows10.0.22621.0\win-x86\IO.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
+Source: "D:\Code\csharp\ezrSquared\bin\Libraries\STD\Release\net7.0-windows10.0.22621.0\win-x86\STD.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
