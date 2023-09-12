@@ -82,7 +82,7 @@ namespace EzrSquared.EzrNodes
 
         public override string ToString()
         {
-            return $"ValueNode({Value.Value})";
+            return $"ValueNode({Value})";
         }
     }
 
@@ -149,7 +149,7 @@ namespace EzrSquared.EzrNodes
         {
             string[] keyValuePairs = new string[KeyValuePairs.Count];
             for (int i = 0; i < KeyValuePairs.Count; i++)
-                keyValuePairs[i] = $"{keyValuePairs[i][0]} : {keyValuePairs[i][1]}";
+                keyValuePairs[i] = $"{KeyValuePairs[i][0]} : {KeyValuePairs[i][1]}";
             return $"DictionaryNode([{string.Join(", ", keyValuePairs)}])";
         }
     }
@@ -259,7 +259,7 @@ namespace EzrSquared.EzrNodes
 
         public override string ToString()
         {
-            return $"VariableAccessNode({Name.Value}, {GlobalAccess})";
+            return $"VariableAccessNode({Name}, {GlobalAccess})";
         }
     }
 
@@ -355,7 +355,7 @@ namespace EzrSquared.EzrNodes
 
         public override string ToString()
         {
-            return $"TokenVariableAssignmentNode({Variable.Value}, {AssignmentOperator}, {Value}, {GlobalAssignment})";
+            return $"TokenVariableAssignmentNode({Variable}, {AssignmentOperator}, {Value}, {GlobalAssignment})";
         }
     }
 

@@ -159,6 +159,8 @@ namespace EzrSquared.EzrParser
             if (result.Error != null)
                 return result;
 
+            int toReverseTo = result.AdvanceCount;
+
             SkipNewLines(result);
             while (operators.Contains(_currentToken.Type))
             {
@@ -172,9 +174,14 @@ namespace EzrSquared.EzrParser
                     return result;
 
                 leftNode = new BinaryOperationNode(leftNode, rightNode, @operator, startPosition, _currentToken.EndPosition);
+                toReverseTo = result.AdvanceCount;
                 SkipNewLines(result);
             }
 
+
+            int reverseCount = result.AdvanceCount - toReverseTo;
+            Reverse(reverseCount);
+            result.Reverse(reverseCount);
             return result.Success(leftNode);
         }
 
@@ -312,7 +319,7 @@ namespace EzrSquared.EzrParser
                 if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
                 {
                     Reverse();
-                    result.ReverseAdvancement();
+                    result.Reverse();
 
                     Node variable = result.Register(Junction());
                     if (result.Error != null)
@@ -407,7 +414,7 @@ namespace EzrSquared.EzrParser
                     if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
                     {
                         Reverse();
-                        result.ReverseAdvancement();
+                        result.Reverse();
 
                         Node variable = result.Register(Junction());
                         if (result.Error != null)
@@ -536,6 +543,8 @@ namespace EzrSquared.EzrParser
             Node left = result.Register(BitwiseOr());
             if (result.Error != null)
                 return result;
+            
+            int toReverseTo = result.AdvanceCount;
 
             SkipNewLines(result);
             while (_currentToken.Type == TokenType.EqualSign
@@ -565,9 +574,14 @@ namespace EzrSquared.EzrParser
                     return result;
 
                 left = new BinaryOperationNode(left, rightNode, @operator, startPosition, _currentToken.EndPosition);
+                toReverseTo = result.AdvanceCount;
                 SkipNewLines(result);
             }
 
+
+            int reverseCount = result.AdvanceCount - toReverseTo;
+            Reverse(reverseCount);
+            result.Reverse(reverseCount);
             return result.Success(left);
         }
 
@@ -1228,6 +1242,10 @@ namespace EzrSquared.EzrParser
             result.RegisterAdvance();
             Advance();
 
+            to = result.Register(Expression());
+            if (result.Error != null)
+                return result;
+
             if (_currentToken.Type == TokenType.KeywordStep)
             {
                 result.RegisterAdvance();
@@ -1878,7 +1896,7 @@ namespace EzrSquared.EzrParser
         /// Reverses <paramref name="reverseCount"/> number of advancements.
         /// </summary>
         /// <param name="reverseCount">The number of advancements to reverse <see cref="AdvanceCount"/> by.</param>
-        public void ReverseAdvancement(int reverseCount = 1)
+        public void Reverse(int reverseCount = 1)
         {
             AdvanceCount -= reverseCount;
         }

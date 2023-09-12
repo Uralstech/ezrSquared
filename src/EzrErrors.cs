@@ -61,12 +61,12 @@ namespace EzrSquared.EzrErrors
         internal string StringWithUnderline()
         {
             string text = _startPosition.Script;
-            int start = Math.Max(text[0..((_startPosition.Index <= text.Length) ? _startPosition.Index : text.Length)].LastIndexOf('\n'), 0);
+            int start = Math.Max(text[0..((_startPosition.Index < text.Length) ? _startPosition.Index : text.Length)].LastIndexOf('\n'), 0);
             int end = text.IndexOf('\n', start + 1);
             if (end == -1)
                 end = text.Length;
 
-            return new StringBuilder(text[start..end]).Append('\n').Append(' ', _startPosition.Index).Append('~', _endPosition.Index - _startPosition.Index).Replace("\t", string.Empty).ToString();
+            return new StringBuilder(text[start..end]).Append('\n').Append(' ', _startPosition.Index - start).Append('~', _endPosition.Index - _startPosition.Index).Replace('\t', ' ').ToString();
         }
     }
 
@@ -75,6 +75,14 @@ namespace EzrSquared.EzrErrors
     /// </summary>
     internal class UnexpectedCharacterError : Error
     {
+        /// <summary>
+        /// Creates a new <see cref="UnexpectedCharacterError"/> object.
+        /// </summary>
+        /// <param name="character">The character that caused the <see cref="UnexpectedCharacterError"/>.</param>
+        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
+        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
+        public UnexpectedCharacterError(string character, Position startPosition, Position endPosition) : base("Unexpected character", character, startPosition, endPosition) { }
+
         /// <summary>
         /// Creates a new <see cref="UnexpectedCharacterError"/> object.
         /// </summary>

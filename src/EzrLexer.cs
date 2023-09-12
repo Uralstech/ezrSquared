@@ -83,11 +83,10 @@ namespace EzrSquared.EzrLexer
         /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
         /// <param name="error">Any <see cref="Error"/> that occurred in the lexing; <see langword="null"/> if none occurred.</param>
         /// <returns><see langword="true"/> if the lexing succeeded without any errors; otherwise <see langword="false"/>.</returns>
-        public bool Tokenize(out List<Token> tokens, out Error? error)
+        public Error? Tokenize(out List<Token> tokens)
         {
+            Error? error;
             tokens = new List<Token>();
-            error = null;
-        
             while (!_reachedEndFlag)
             {
                 switch (_currentChar)
@@ -95,6 +94,17 @@ namespace EzrSquared.EzrLexer
                     case '\t':
                     case ' ':
                         Advance();
+                        break;
+                    case '\r':
+                        Position startPosition = _position.Copy();
+                        Advance();
+
+                        if (_currentChar == '\n')
+                            Advance();
+                        else
+                            return new UnexpectedCharacterError("\\r", startPosition, _position);
+
+                        tokens.Add(new Token(TokenType.NewLine, TokenTypeGroup.Special, string.Empty, startPosition, _position.Copy()));
                         break;
                     case ';':
                     case '\n':
@@ -109,17 +119,17 @@ namespace EzrSquared.EzrLexer
                     case '"':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.String, out error));
                         if (error != null)
-                            return false;
+                            return error;
                         break;
                     case '`':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.Character, out error));
                         if (error != null)
-                            return false;
+                            return error;
                         break;
                     case '\'':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.CharacterList, out error));
                         if (error != null)
-                            return false;
+                            return error;
                         break;
                     case ':':
                         tokens.Add(CompileColon());
@@ -283,14 +293,13 @@ namespace EzrSquared.EzrLexer
                             char unknownCharacter = _currentChar;
                             Advance();
 
-                            error = new UnexpectedCharacterError(unknownCharacter, errorStartPosition, _position);
-                            return false;
+                            return new UnexpectedCharacterError(unknownCharacter, errorStartPosition, _position);
                         }
                 }
             }
 
             tokens.Add(new Token(TokenType.EndOfFile, TokenTypeGroup.Special, string.Empty, _position.Copy()));
-            return true;
+            return null;
         }
 
         /// <summary>
