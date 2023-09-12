@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace EzrSquared.EzrErrors
 {
@@ -61,12 +60,27 @@ namespace EzrSquared.EzrErrors
         internal string StringWithUnderline()
         {
             string text = _startPosition.Script;
-            int start = Math.Max(text[0..((_startPosition.Index < text.Length) ? _startPosition.Index : text.Length)].LastIndexOf('\n'), 0);
-            int end = text.IndexOf('\n', start + 1);
+            int start;
+            int end;
+
+            int indexOfLastNewLine = text[0..((_startPosition.Index < text.Length) ? _startPosition.Index : text.Length)].LastIndexOf('\n');
+            if (indexOfLastNewLine != -1 && indexOfLastNewLine != text.Length - 1)
+                start = indexOfLastNewLine + 1;
+            else if (indexOfLastNewLine == -1)
+                start = 0;
+            else
+                start = indexOfLastNewLine;
+
+            end = text.IndexOf('\n', start + 1);
             if (end == -1)
                 end = text.Length;
-
-            return new StringBuilder(text[start..end]).Append('\n').Append(' ', _startPosition.Index - start).Append('~', _endPosition.Index - _startPosition.Index).Replace('\t', ' ').ToString();
+        
+            return new StringBuilder(text[start..end])
+                .Replace('\t', ' ')
+                .Append('\n')
+                .Append(' ', _startPosition.Index - start)
+                .Append('~', _endPosition.Index - _startPosition.Index)
+                .ToString();
         }
     }
 

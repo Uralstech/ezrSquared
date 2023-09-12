@@ -9,7 +9,6 @@ namespace EzrSquared.EzrShell
     using EzrErrors;
     using EzrLexer;
     using EzrParser;
-    using System.Diagnostics.Metrics;
 
     /// <summary>
     /// The built-in shell for ezrSquared.

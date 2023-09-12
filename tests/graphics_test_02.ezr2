@@ -6,7 +6,7 @@ object integer2 with x, y do
 	if type_of(x) ! "integer" do item this.x: x.as_integer()
 	if type_of(y) ! "integer" do item this.y: y.as_integer()
 
-	special equals do other.x = x and other.y = y
+	function equals do other.x = x and other.y = y
 end
 
 object sprite with graphics, position do

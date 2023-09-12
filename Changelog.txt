@@ -1,4 +1,7 @@
 CHANGELOG - What's new?
+	
+* ezr² Rewrite - Part 2 [13-09-23]
+	* Completed rewriting the Parser (without QuickSyntax support) and its supporting components.
 
-* ezr� Rewrite - Part 1 [10-05-23]
-	* Completed rewriting the Lexer and it's supporting components 
+* ezr² Rewrite - Part 1 [10-05-23]
+	* Completed rewriting the Lexer and its supporting components.

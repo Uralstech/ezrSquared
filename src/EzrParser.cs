@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System;
 
 namespace EzrSquared.EzrParser
@@ -162,7 +161,7 @@ namespace EzrSquared.EzrParser
             int toReverseTo = result.AdvanceCount;
 
             SkipNewLines(result);
-            while (operators.Contains(_currentToken.Type))
+            while (Array.IndexOf(operators, _currentToken.Type) != -1)
             {
                 TokenType @operator = _currentToken.Type;
                 result.RegisterAdvance();
@@ -903,7 +902,7 @@ namespace EzrSquared.EzrParser
                 {
                     if (isArray)
                         return result.Failure(10, new InvalidGrammarError("Expected a comma or a right-parenthesis symbol! Commas seperate the elements of the array, while the right-parenthesis ends it.", _currentToken.StartPosition, _currentToken.EndPosition));
-                    return result.Failure(10, new InvalidGrammarError("Expected a comma or a right-parenthesis symbol! The comma is used to create an array and seperate it's elements, while the right-parenthesis declares the end of a parenthetical expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    return result.Failure(10, new InvalidGrammarError("Expected a comma or a right-parenthesis symbol! The comma is used to create an array and seperate its elements, while the right-parenthesis declares the end of a parenthetical expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 }
                 
                 endPosition = _currentToken.EndPosition;
@@ -1002,7 +1001,7 @@ namespace EzrSquared.EzrParser
                 
                 // NOTE: Breaking change - assignment symbols will break this.
                 if (_currentToken.Type != TokenType.Colon)
-                    return result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and it's value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    return result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                 result.RegisterAdvance();
                 Advance();
 
@@ -1027,7 +1026,7 @@ namespace EzrSquared.EzrParser
 
                     SkipNewLines(result);
                     if (_currentToken.Type != TokenType.Colon)
-                        return result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and it's value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        return result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                     result.RegisterAdvance();
                     Advance();
 
@@ -1041,7 +1040,7 @@ namespace EzrSquared.EzrParser
                 }
 
                 if (_currentToken.Type != TokenType.RightCurlyBracket)
-                    return result.Failure(10, new InvalidGrammarError("Expected a comma or right-curly-bracket symbol! Commas are used to seperate key-value pairs in the dictionary, and the right-curly-bracket declares it's end.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    return result.Failure(10, new InvalidGrammarError("Expected a comma or right-curly-bracket symbol! Commas are used to seperate key-value pairs in the dictionary, and the right-curly-bracket declares its end.", _currentToken.StartPosition, _currentToken.EndPosition));
                 endPosition = _currentToken.EndPosition;
                 result.RegisterAdvance();
                 Advance();
