@@ -364,7 +364,6 @@ FodyWeavers.xsd
 
 # --------------------------------------------------
 
-[Gg]raphics/
 [Ll]ibraries/
 docs/offline/_site/
 docs/offline/ezrSquared.Offline.Documentation.zip
