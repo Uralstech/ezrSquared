@@ -64,21 +64,22 @@ namespace EzrSquared.EzrErrors
             int end;
 
             int indexOfLastNewLine = text[0..((_startPosition.Index < text.Length) ? _startPosition.Index : text.Length)].LastIndexOf('\n');
-            if (indexOfLastNewLine != -1 && indexOfLastNewLine != text.Length - 1)
-                start = indexOfLastNewLine + 1;
-            else if (indexOfLastNewLine == -1)
-                start = 0;
-            else
+            if (indexOfLastNewLine != -1)
                 start = indexOfLastNewLine;
+            else
+                start = 0;
+
+            while (char.IsWhiteSpace(text[start]) && start < text.Length - 1)
+                start++;
 
             end = text.IndexOf('\n', start + 1);
             if (end == -1)
                 end = text.Length;
         
-            return new StringBuilder(text[start..end])
-                .Replace('\t', ' ')
+            return new StringBuilder("  ")
+                .Append(text[start..end])
                 .Append('\n')
-                .Append(' ', _startPosition.Index - start)
+                .Append(' ', (_startPosition.Index - start) + 2)
                 .Append('~', _endPosition.Index - _startPosition.Index)
                 .ToString();
         }
