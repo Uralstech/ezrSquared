@@ -1,4 +1,4 @@
-﻿namespace EzrSquared.EzrGeneral
+﻿namespace EzrSquared.EzrCommon
 {
     /// <summary>
     /// The representation of a position in the script.
@@ -61,11 +61,24 @@
             return new Position(Index, Line, File, Script);
         }
     }
-    
+
+    /// <summary>
+    /// The type group of a <see cref="Token"/>.
+    /// </summary>
+    public enum TokenTypeGroup : ushort
+    {
+        Value,
+        Keyword,
+        Qeyword,
+        AssignmentSymbol,
+        Symbol,
+        Special
+    }
+
     /// <summary>
     /// The identifying type of a <see cref="Token"/>.
     /// </summary>
-    public enum TokenType : int
+    public enum TokenType : ushort
     {
         // Values
         Integer,
@@ -73,12 +86,12 @@
         String,
         Character,
         CharacterList,
-        Identifier,
 
         // Keywords
         KeywordAnd,
         KeywordOr,
         KeywordInvert,
+        KeywordNot,
         KeywordIn,
         KeywordGlobal,
         KeywordItem,
@@ -121,7 +134,7 @@
         QeywordG,
         QeywordV,
 
-        // One-character types
+        // Symbols
         Plus,
         HyphenMinus,
         Asterisk,
@@ -132,7 +145,6 @@
         VerticalBar,
         Backslash,
         Tilde,
-        Colon,
         LeftParenthesis,
         RightParenthesis,
         LeftSquareBracket,
@@ -145,10 +157,14 @@
         GreaterThanSign,
         Comma,
         Period,
-
-        // Two-character types
         BitwiseLeftShift,
         BitwiseRightShift,
+        LessThanOrEqual,
+        GreaterThanOrEqual,
+        Arrow,
+
+        // Assignment symbols
+        Colon,
         AssignmentAddition,
         AssignmentSubtraction,
         AssignmentMultiplication,
@@ -160,17 +176,16 @@
         AssignmentBitwiseXOr,
         AssignmentBitwiseLeftShift,
         AssignmentBitwiseRightShift,
-        LessThanOrEqual,
-        GreaterThanOrEqual,
-        Arrow,
 
         // Special
+        Identifier,
         NewLine,
-        EndOfFile
+        EndOfFile,
+        Invalid
     }
 
     /// <summary>
-    /// The smallest component in the script, grouped together in Nodes (TODO) to from structures of code (math expressions, variable assignment, if statements, etc).
+    /// The smallest component in the script identified by the <see cref="TokenType"/>, grouped together into <see cref="EzrNodes.Node"/> objects to from source code constructs.
     /// </summary>
     public class Token
     {
@@ -178,6 +193,11 @@
         /// The identifying <see cref="TokenType"/> of the <see cref="Token"/>.
         /// </summary>
         public readonly TokenType Type;
+
+        /// <summary>
+        /// The <see cref="TokenTypeGroup"/> of the <see cref="Token"/>.
+        /// </summary>
+        public readonly TokenTypeGroup TypeGroup;
 
         /// <summary>
         /// The value of the <see cref="Token"/>; may be empty.
@@ -194,16 +214,23 @@
         /// </summary>
         public readonly Position EndPosition;
 
+        public static Token GetInvalidToken(Position startPosition, Position? endPosition)
+        {
+            return new Token(TokenType.Invalid, TokenTypeGroup.Special, string.Empty, startPosition, endPosition);
+        }
+
         /// <summary>
         /// Creates a new <see cref="Token"/> object.
         /// </summary>
         /// <param name="type">The identifying <see cref="TokenType"/> of the <see cref="Token"/>.</param>
+        /// <param name="typeGroup">The <see cref="TokenTypeGroup"/> of the <see cref="Token"/>.</param>
         /// <param name="value">The value of the <see cref="Token"/>; may be empty.</param>
         /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="Token"/> in the script.</param>
         /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="Token"/> in the script. If not given, copies <paramref name="startPosition"/> and advances it.</param>
-        public Token(TokenType type, string value, Position startPosition, Position? endPosition = null)
+        public Token(TokenType type, TokenTypeGroup typeGroup, string value, Position startPosition, Position? endPosition = null)
         {
             Type = type;
+            TypeGroup = typeGroup;
             Value = value;
 
             StartPosition = startPosition;
@@ -216,15 +243,9 @@
             }
         }
 
-        /// <summary>
-        /// Compares <see cref="Type"/> and <see cref="Value"/> with the given <paramref name="type"/> and <paramref name="value"/>.
-        /// </summary>
-        /// <param name="type">The value to compare to <see cref="Type"/>.</param>
-        /// <param name="value">The value to compare to <see cref="Value"/>.</param>
-        /// <returns><see langword="true"/> if both <paramref name="type"/> and <paramref name="value"/> match <see cref="Type"/> and <see cref="Value"/> respectively; otherwise <see langword="false"/>.</returns>
-        public bool CheckToken(TokenType type, string value)
+        public override string ToString()
         {
-            return Type == type && Value == value;
+            return $"Token({Type}, {TypeGroup}, \"{Value}\")";
         }
     }
 }

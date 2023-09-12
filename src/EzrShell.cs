@@ -5,54 +5,202 @@ using System.Collections.Generic;
 
 namespace EzrSquared.EzrShell
 {
-    using EzrGeneral;
+    using EzrCommon;
     using EzrErrors;
     using EzrLexer;
+    using EzrParser;
 
     /// <summary>
     /// The built-in shell for ezrSquared.
     /// </summary>
     internal class Shell
     {
-        private const string _ezrVersion = "0.1.0";
-        private const string _projectLink = "https://github.com/Uralstech/ezrSquared/";
-        private const string _documentationLink = "https://uralstech.github.io/ezrSquared/Introduction.html";
-        private const string _issuesLink = "https://github.com/Uralstech/ezrSquared/issues";
-        private const string _startUp = "                      ___  | ezr² v{0} Built-In Shell\n                     |_  ) | Online documentation:\n   ___   ____  _ __   / /  | {1}\n  / _ \\ |_  / | '__| /___| | Feature requests and bug reports:\n |  __/  / /  | |          | {2}\n  \\___| /___| |_|          | GitHub repository:\n___________________________| {3}";
+        private const string Version = "0.1.0";
 
-        private static void PrintLexerOutput(string file, string script)
+        private const string ConsoleGraphicsInfo = $"""
+                                      | ezr² v{Version}
+                                      | Online documentation:
+                                      | https://uralstech.github.io/ezrSquared/Introduction.html
+                                      | Feature requests and bug reports:
+                                      | https://github.com/Uralstech/ezrSquared/issues
+                                      | GitHub repository:
+            __________________________| https://github.com/Uralstech/ezrSquared/
+            """;
+
+        private const string ConsoleGraphicsLetterE = """
+            
+
+              ___
+             / _ \
+            |  __/
+             \___|
+            """;
+        private const string ConsoleGraphicsLetterZ = """
+
+            
+                    ____
+                   |_  /
+                    / /
+                   /___|
+            """;
+        private const string ConsoleGraphicsLetterR = """
+
+
+                          _ __ 
+                         | '__|
+                         | |
+                         |_|
+            """;
+        private const string ConsoleGraphicsSquaredSymbol = """
+                                 ___
+                                |_  )
+                                 / /
+                                /___|
+            
+            
+            """;
+
+        private static void PrintSmallConsoleGraphics()
         {
-            if (new Lexer(file, script).Tokenize(out List<Token> tokens, out Error? error))
-            {
-                for (int i = 0; i < tokens.Count; i++)
-                    Console.WriteLine($"( {tokens[i].Value}, {Enum.GetName(typeof(TokenType), tokens[i].Type)} )");
-            }
-            else if (error != null)
-                Console.WriteLine(error.ToString());
+            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.SetCursorPosition(0, 0);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write('e');
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write('z');
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write('r');
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write('²');
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine($" v{Version}");
         }
 
-        public static void Main()
+        private static void PrintBigConsoleGraphics()
         {
-            string filePath = string.Empty;
+            Console.Clear();
+            Console.BackgroundColor = ConsoleColor.Black;
 
+            Console.SetCursorPosition(0, 0);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(ConsoleGraphicsInfo);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.SetCursorPosition(0, 0);
+            Console.Write(ConsoleGraphicsSquaredSymbol);
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.SetCursorPosition(0, 0);
+            Console.Write(ConsoleGraphicsLetterR);
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.SetCursorPosition(0, 0);
+            Console.Write(ConsoleGraphicsLetterZ);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.SetCursorPosition(0, 0);
+            Console.Write(ConsoleGraphicsLetterE);
+            Console.Write("\n\n");
+        }
+
+        public static void Main(string[] args)
+        {
+            string filePath;
             string[] commandLineArguments = Environment.GetCommandLineArgs();
-            if (commandLineArguments.Length > 1 && File.Exists(commandLineArguments[1]))
+            if (commandLineArguments.Length == 1)
+                filePath = string.Empty;
+            else if (commandLineArguments.Length > 1 && File.Exists(commandLineArguments[1]))
             {
                 filePath = commandLineArguments[1];
-                PrintLexerOutput(filePath, File.ReadAllText(filePath));
+                //PrintLexerOutput(filePath, File.ReadAllText(filePath));
+
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                return;
             }
             else
             {
-                Console.OutputEncoding = Encoding.Unicode;
-                Console.WriteLine(string.Format(_startUp, _ezrVersion, _documentationLink, _issuesLink, _projectLink));
-                while (true)
-                {
-                    Console.Write(">>> ");
-                    string? input = Console.ReadLine();
+                ConsoleColor previousForegroundColor = Console.ForegroundColor;
+                ConsoleColor previousBackgroundColor = Console.BackgroundColor;
 
-                    if (!string.IsNullOrEmpty(input))
-                        PrintLexerOutput("ezr² Built-In Shell", input);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.WriteLine("Intended use (square brackets indicate optional arguments): ezrSquared [file.ezr2] [file.eout]");
+
+                Console.ForegroundColor = previousForegroundColor;
+                Console.BackgroundColor = previousBackgroundColor;
+                return;
+            }
+
+            Console.OutputEncoding = Encoding.Unicode;
+
+#if PLATFORM_WINDOWS
+            if (Console.WindowWidth > 84)
+                PrintBigConsoleGraphics();
+            else
+                PrintSmallConsoleGraphics();
+#else
+            PrintConsoleGraphic();
+#endif
+
+            while (true)
+            {
+                string? input = GetInput();
+
+                if (!string.IsNullOrEmpty(input))
+                {
+                    PrintLexerOutput("shell", input, out List<Token> tokens, out Error? error);
+                    if (error != null)
+                    {
+                        PrintError(error.ToString());
+                        continue;
+                    }
+
+                    ParseResult result = new Parser(tokens).Parse();
+                    if (result.Error != null)
+                    {
+                        PrintError(result.Error.ToString());
+                        continue;
+                    }
+
+                    PrintResult(result.Node.ToString());
                 }
+            }
+        }
+
+        private static void PrintError(string error)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(error);
+        }
+
+        private static void PrintResult(string result)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(result);
+        }
+
+        private static string? GetInput()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write(">>> ");
+
+            return Console.ReadLine();
+        }
+
+        private static void PrintLexerOutput(string file, string script, out List<Token> tokens, out Error? error)
+        {
+            if (new Lexer(file, script).Tokenize(out tokens, out error))
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                for (int i = 0; i < tokens.Count; i++)
+                    Console.WriteLine($"( '{tokens[i].Value}', {Enum.GetName(typeof(TokenType), tokens[i].Type)}, {Enum.GetName(typeof(TokenTypeGroup), tokens[i].TypeGroup)} )");
             }
         }
     }

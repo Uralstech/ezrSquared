@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace EzrSquared.EzrLexer
 {
-    using EzrGeneral;
+    using EzrCommon;
     using EzrErrors;
 
     /// <summary>
-    /// The ezrSquared Lexer or Tokenizer. The job of the Lexer is to convert the user input (code) into <see cref="Token"/> objects to be given as the input to the Parser (TODO).
+    /// The ezrSquared Lexer or Tokenizer. The job of the Lexer is to convert the user input (code) into <see cref="Token"/> objects to be given as the input to the <see cref="EzrParser.Parser"/>.
     /// </summary>
     public class Lexer
     {
@@ -18,7 +18,7 @@ namespace EzrSquared.EzrLexer
         private readonly string _file;
 
         /// <summary>
-        /// The script as text.
+        /// The script to be tokenized.
         /// </summary>
         private readonly string _script;
 
@@ -41,7 +41,7 @@ namespace EzrSquared.EzrLexer
         /// Creates a new <see cref="Lexer"/> object.
         /// </summary>
         /// <param name="file">The file name/path of the script.</param>
-        /// <param name="script">The script as text.</param>
+        /// <param name="script">The script to be tokenized.</param>
         public Lexer(string file, string script)
         {
             _file = file;
@@ -57,13 +57,11 @@ namespace EzrSquared.EzrLexer
         private void Advance()
         {
             _position.Advance(_currentChar);
+
             if (_position.Index < _script.Length)
                 _currentChar = _script[_position.Index];
             else
-            {
-                _currentChar = '\0';
                 _reachedEndFlag = true;
-            }
         }
 
         /// <summary>
@@ -83,7 +81,7 @@ namespace EzrSquared.EzrLexer
         /// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
         /// </summary>
         /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
-        /// <param name="error">Any <see cref="Error"/> that occured in the lexing; <see langword="null"/> if none occured.</param>
+        /// <param name="error">Any <see cref="Error"/> that occurred in the lexing; <see langword="null"/> if none occurred.</param>
         /// <returns><see langword="true"/> if the lexing succeeded without any errors; otherwise <see langword="false"/>.</returns>
         public bool Tokenize(out List<Token> tokens, out Error? error)
         {
@@ -100,8 +98,8 @@ namespace EzrSquared.EzrLexer
                         break;
                     case ';':
                     case '\n':
+                        tokens.Add(new Token(TokenType.NewLine, TokenTypeGroup.Special, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.NewLine, string.Empty, _position.Copy()));
                         break;
                     case '@':
                         Advance();
@@ -133,15 +131,15 @@ namespace EzrSquared.EzrLexer
                         if (_currentChar == '=')
                         {
                             Advance();
-                            tokens.Add(new Token(TokenType.LessThanOrEqual, string.Empty, lessThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.LessThanOrEqual, TokenTypeGroup.Symbol, string.Empty, lessThanTokenStartPosition, _position.Copy()));
                         }
                         else if (_currentChar == '<')
                         {
                             Advance();
-                            tokens.Add(new Token(TokenType.BitwiseLeftShift, string.Empty, lessThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.BitwiseLeftShift, TokenTypeGroup.Symbol, string.Empty, lessThanTokenStartPosition, _position.Copy()));
                         }
                         else
-                            tokens.Add(new Token(TokenType.LessThanSign, string.Empty, lessThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.LessThanSign, TokenTypeGroup.Symbol, string.Empty, lessThanTokenStartPosition, _position.Copy()));
                         break;
                     case '>':
                         Position greaterThanTokenStartPosition = _position.Copy();
@@ -150,15 +148,15 @@ namespace EzrSquared.EzrLexer
                         if (_currentChar == '=')
                         {
                             Advance();
-                            tokens.Add(new Token(TokenType.GreaterThanOrEqual, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.GreaterThanOrEqual, TokenTypeGroup.Symbol, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
                         }
                         else if (_currentChar == '>')
                         {
                             Advance();
-                            tokens.Add(new Token(TokenType.BitwiseRightShift, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.BitwiseRightShift, TokenTypeGroup.Symbol, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
                         }
                         else
-                            tokens.Add(new Token(TokenType.GreaterThanSign, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.GreaterThanSign, TokenTypeGroup.Symbol, string.Empty, greaterThanTokenStartPosition, _position.Copy()));
                         break;
                     case '-':
                         Position minusTokenStartPosition = _position.Copy();
@@ -167,86 +165,86 @@ namespace EzrSquared.EzrLexer
                         if (_currentChar == '>')
                         {
                             Advance();
-                            tokens.Add(new Token(TokenType.Arrow, string.Empty, minusTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.Arrow, TokenTypeGroup.Symbol, string.Empty, minusTokenStartPosition, _position.Copy()));
                         }
                         else
-                            tokens.Add(new Token(TokenType.HyphenMinus, string.Empty, minusTokenStartPosition, _position.Copy()));
+                            tokens.Add(new Token(TokenType.HyphenMinus, TokenTypeGroup.Symbol, string.Empty, minusTokenStartPosition, _position.Copy()));
                         break;
                     case '+':
+                        tokens.Add(new Token(TokenType.Plus, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Plus, string.Empty, _position.Copy()));
                         break;
                     case '*':
+                        tokens.Add(new Token(TokenType.Asterisk, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Asterisk, string.Empty, _position.Copy()));
                         break;
                     case '/':
+                        tokens.Add(new Token(TokenType.Slash, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Slash, string.Empty, _position.Copy()));
                         break;
                     case '%':
+                        tokens.Add(new Token(TokenType.PercentSign, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.PercentSign, string.Empty, _position.Copy()));
                         break;
                     case '^':
+                        tokens.Add(new Token(TokenType.Caret, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Caret, string.Empty, _position.Copy()));
                         break;
                     case '=':
+                        tokens.Add(new Token(TokenType.EqualSign, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.EqualSign, string.Empty, _position.Copy()));
                         break;
                     case '!':
+                        tokens.Add(new Token(TokenType.ExclamationMark, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.ExclamationMark, string.Empty, _position.Copy()));
                         break;
                     case ',':
+                        tokens.Add(new Token(TokenType.Comma, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Comma, string.Empty, _position.Copy()));
                         break;
                     case '.':
+                        tokens.Add(new Token(TokenType.Period, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Period, string.Empty, _position.Copy()));
                         break;
                     case '(':
+                        tokens.Add(new Token(TokenType.LeftParenthesis, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.LeftParenthesis, string.Empty, _position.Copy()));
                         break;
                     case ')':
+                        tokens.Add(new Token(TokenType.RightParenthesis, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.RightParenthesis, string.Empty, _position.Copy()));
                         break;
                     case '[':
+                        tokens.Add(new Token(TokenType.LeftSquareBracket, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.LeftSquareBracket, string.Empty, _position.Copy()));
                         break;
                     case ']':
+                        tokens.Add(new Token(TokenType.RightSquareBracket, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.RightSquareBracket, string.Empty, _position.Copy()));
                         break;
                     case '{':
+                        tokens.Add(new Token(TokenType.LeftCurlyBracket, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.LeftCurlyBracket, string.Empty, _position.Copy()));
                         break;
                     case '}':
+                        tokens.Add(new Token(TokenType.RightCurlyBracket, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.RightCurlyBracket, string.Empty, _position.Copy()));
                         break;
                     case '&':
+                        tokens.Add(new Token(TokenType.Ampersand, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Ampersand, string.Empty, _position.Copy()));
                         break;
                     case '|':
+                        tokens.Add(new Token(TokenType.VerticalBar, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.VerticalBar, string.Empty, _position.Copy()));
                         break;
                     case '\\':
+                        tokens.Add(new Token(TokenType.Backslash, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Backslash, string.Empty, _position.Copy()));
                         break;
                     case '~':
+                        tokens.Add(new Token(TokenType.Tilde, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                         Advance();
-                        tokens.Add(new Token(TokenType.Tilde, string.Empty, _position.Copy()));
                         break;
                     default:
                         if (char.IsLetter(_currentChar) || _currentChar == '_')
@@ -274,9 +272,9 @@ namespace EzrSquared.EzrLexer
                             }
 
                             if (hasPeriod)
-                                tokens.Add(new Token(TokenType.FloatingPoint, numberValue.ToString(), numberTokenStartPosition, _position.Copy()));
+                                tokens.Add(new Token(TokenType.FloatingPoint, TokenTypeGroup.Value, numberValue.ToString(), numberTokenStartPosition, _position.Copy()));
                             else
-                                tokens.Add(new Token(TokenType.Integer, numberValue.ToString(), numberTokenStartPosition, _position.Copy()));
+                                tokens.Add(new Token(TokenType.Integer, TokenTypeGroup.Value, numberValue.ToString(), numberTokenStartPosition, _position.Copy()));
                             break;
                         }
                         else
@@ -285,13 +283,13 @@ namespace EzrSquared.EzrLexer
                             char unknownCharacter = _currentChar;
                             Advance();
 
-                            error = new UnknownCharacterError($"'{unknownCharacter}'", errorStartPosition, _position);
+                            error = new UnexpectedCharacterError(unknownCharacter, errorStartPosition, _position);
                             return false;
                         }
                 }
             }
 
-            tokens.Add(new Token(TokenType.EndOfFile, string.Empty, _position.Copy()));
+            tokens.Add(new Token(TokenType.EndOfFile, TokenTypeGroup.Special, string.Empty, _position.Copy()));
             return true;
         }
 
@@ -300,7 +298,7 @@ namespace EzrSquared.EzrLexer
         /// </summary>
         /// <param name="enclosingChar">The value to enclose the stringlike.</param>
         /// <param name="type">The identifying <see cref="TokenType"/> of the <see cref="Token"/>.</param>
-        /// <param name="error">Any <see cref="Error"/> that occured in creating the stringlike; <see langword="null"/> if none occured.</param>
+        /// <param name="error">Any <see cref="Error"/> that occurred in creating the stringlike; <see langword="null"/> if none occurred.</param>
         /// <returns>The created <see cref="Token"/>.</returns>
         private Token CompileStringLike(char enclosingChar, TokenType type, out Error? error)
         {
@@ -429,7 +427,7 @@ namespace EzrSquared.EzrLexer
                 error = new InvalidGrammarError($"Expected '{enclosingChar}'", _position.Copy(), _position);
             
             Advance();
-            return new Token(type, toReturn.ToString(), startPosition, _position.Copy());
+            return new Token(type, TokenTypeGroup.Value, toReturn.ToString(), startPosition, _position.Copy());
         }
 
         /// <summary>
@@ -445,39 +443,39 @@ namespace EzrSquared.EzrLexer
             {
                 case '+':
                     Advance();
-                    return new Token(TokenType.AssignmentAddition, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentAddition, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '-':
                     Advance();
-                    return new Token(TokenType.AssignmentSubtraction, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentSubtraction, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '*':
                     Advance();
-                    return new Token(TokenType.AssignmentMultiplication, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentMultiplication, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '/':
                     Advance();
-                    return new Token(TokenType.AssignmentDivision, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentDivision, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '%':
                     Advance();
-                    return new Token(TokenType.AssignmentModulo, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentModulo, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '^':
                     Advance();
-                    return new Token(TokenType.AssignmentPower, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentPower, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '&':
                     Advance();
-                    return new Token(TokenType.AssignmentBitwiseAnd, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentBitwiseAnd, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '|':
                     Advance();
-                    return new Token(TokenType.AssignmentBitwiseOr, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentBitwiseOr, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '\\':
                     Advance();
-                    return new Token(TokenType.AssignmentBitwiseXOr, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentBitwiseXOr, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '<':
                     Advance();
-                    return new Token(TokenType.AssignmentBitwiseLeftShift, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentBitwiseLeftShift, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 case '>':
                     Advance();
-                    return new Token(TokenType.AssignmentBitwiseRightShift, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.AssignmentBitwiseRightShift, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
                 default:
-                    return new Token(TokenType.Colon, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.Colon, TokenTypeGroup.AssignmentSymbol, string.Empty, startPosition, _position.Copy());
             }
         }
 
@@ -500,91 +498,93 @@ namespace EzrSquared.EzrLexer
             switch (value)
             {
                 case "item":
-                    return new Token(TokenType.KeywordItem, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordItem, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "and":
-                    return new Token(TokenType.KeywordAnd, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordAnd, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "or":
-                    return new Token(TokenType.KeywordOr, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordOr, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "invert":
-                    return new Token(TokenType.KeywordInvert, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordInvert, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "if":
-                    return new Token(TokenType.KeywordIf, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordIf, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "else":
-                    return new Token(TokenType.KeywordElse, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordElse, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "do":
-                    return new Token(TokenType.KeywordDo, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordDo, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "count":
-                    return new Token(TokenType.KeywordCount, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordCount, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "from":
-                    return new Token(TokenType.KeywordFrom, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordFrom, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "as":
-                    return new Token(TokenType.KeywordAs, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordAs, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "to":
-                    return new Token(TokenType.KeywordTo, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordTo, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "step":
-                    return new Token(TokenType.KeywordStep, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordStep, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "while":
-                    return new Token(TokenType.KeywordWhile, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordWhile, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "function":
-                    return new Token(TokenType.KeywordFunction, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordFunction, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "special":
-                    return new Token(TokenType.KeywordSpecial, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordSpecial, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "with":
-                    return new Token(TokenType.KeywordWith, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordWith, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "end":
-                    return new Token(TokenType.KeywordEnd, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordEnd, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "return":
-                    return new Token(TokenType.KeywordReturn, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordReturn, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "skip":
-                    return new Token(TokenType.KeywordSkip, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordSkip, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "stop":
-                    return new Token(TokenType.KeywordStop, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordStop, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "try":
-                    return new Token(TokenType.KeywordTry, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordTry, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "error":
-                    return new Token(TokenType.KeywordError, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordError, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
+                case "not":
+                    return new Token(TokenType.KeywordNot, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "in":
-                    return new Token(TokenType.KeywordIn, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordIn, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "object":
-                    return new Token(TokenType.KeywordObject, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordObject, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "global":
-                    return new Token(TokenType.KeywordGlobal, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordGlobal, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "include":
-                    return new Token(TokenType.KeywordInclude, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordInclude, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "all":
-                    return new Token(TokenType.KeywordAll, string.Empty, startPosition, _position.Copy());
+                    return new Token(TokenType.KeywordAll, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy());
                 case "f":
-                    return new Token(TokenType.QeywordF, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordF, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "l":
-                    return new Token(TokenType.QeywordL, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordL, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "e":
-                    return new Token(TokenType.QeywordE, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordE, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "c":
-                    return new Token(TokenType.QeywordC, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordC, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "t":
-                    return new Token(TokenType.QeywordT, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordT, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "n":
-                    return new Token(TokenType.QeywordN, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordN, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "w":
-                    return new Token(TokenType.QeywordW, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordW, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "fd":
-                    return new Token(TokenType.QeywordFD, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordFD, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "sd":
-                    return new Token(TokenType.QeywordSD, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordSD, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "od":
-                    return new Token(TokenType.QeywordOD, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordOD, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "i":
-                    return new Token(TokenType.QeywordI, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordI, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "s":
-                    return new Token(TokenType.QeywordS, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordS, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "d":
-                    return new Token(TokenType.QeywordD, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordD, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "g":
-                    return new Token(TokenType.QeywordG, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordG, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 case "v":
-                    return new Token(TokenType.QeywordV, value, startPosition, _position.Copy());
+                    return new Token(TokenType.QeywordV, TokenTypeGroup.Qeyword, value, startPosition, _position.Copy());
                 default:
-                    return new Token(TokenType.Identifier, value, startPosition, _position.Copy());
+                    return new Token(TokenType.Identifier, TokenTypeGroup.Special, value, startPosition, _position.Copy());
             }
         }
     }

@@ -1,0 +1,157 @@
+ezrSquared syntax
+=================
+
+Definitions
+-----------
+
+'\n' : new line or semicolon character
+|    : or
++    : can have more than one instance of
+?    : optional
+''   : symbol(s)
+""   : qeyword or keyword
+[]   : not structure
+;    : comment
+
+Structures
+----------
+
+; 'statements' structures can contain multiple 'statement' structures
+statements:
+	statement
+	| (statement '\n')+
+
+; 'statement' structures can contain return, skip or stop expressions or 'expression' structures
+statement:
+	"return" expression?
+	| "skip"
+	| "stop"
+	| expression
+
+; 'expression' structures can contain item definition expressions or 'quick-expression' structures
+expression:
+	"global"? "item"? (([identifier] | [qeyword]) | comparison) (':' | ':+' | ':-' | ':*' | ':/' | ':%' | ':^' | ':&' | ':|' | ':\' | ':<' | ':>') expression
+	| quick-expression
+
+; 'quick-expression' structures can contain QuickSyntax item definition expressions or 'junction' structures
+quick-expression:
+	'!' "g"? "d"? (([identifier] | [qeyword]) | junction) (':' | ':+' | ':-' | ':*' | ':/' | ':%' | ':^' | ':&' | ':|' | ':\' | ':<' | ':>') expression
+	| junction
+
+; 'junction' structures can contain 'and' or 'or' comparison expressions or 'inversion' structures
+junction:
+	inversion ("and" | "or") inversion
+	| inversion
+
+; 'inversion' structures can contain inversion expressions or 'comparison' structures
+inversion:
+	'!' "v" expression
+	| "invert" expression
+	| comparison
+
+; 'comparison' structures can contain equality, inequality, lesser than, greater than, lesser than or equality, greater than or equality,
+; is-contained-in or not-contained-in comparison expressions or 'bitwise-or' structures
+comparison: 
+	bitwise-or ('=' | '!' | '<' | '>' | '<=' | '>=' | "not" "in" | "in") bitwise-or
+	| bitwise-or
+
+; 'bitwise-or' structures can contain bitwise-or expressions or 'bitwise-xor' structures
+bitwise-or:
+	bitwise-xor '|' bitwise-xor
+	| bitwise-xor
+	
+; 'bitwise-xor' structures can contain bitwise-xor expressions or 'bitwise-and' structures
+bitwise-xor:
+	bitwise-and '\' bitwise-and
+	| bitwise-and
+	
+; 'bitwise-and' structures can contain bitwise-and expressions or 'bitwise-shift' structures
+bitwise-and:
+	bitwise-shift '&' bitwise-shift
+	| bitwise-shift
+	
+; 'bitwise-shift' structures can contain bitwise-left-shift or bitwise-right-shift expressions or 'arithmetic-expression' structures
+bitwise-shift:
+	arithmetic-expression ('<<' | '>>') arithmetic-expression
+	| arithmetic-expression
+
+; 'arithmetic-expression' structures can contain addition or subtraction expressions or 'term' structures
+arithmetic-expression:
+	term ('+' | '-') term
+	| term
+
+; 'term' structures can contain multiplication, division or modulus expressions or 'factor' structures
+term:
+	factor ('*' | '/' | '%') factor
+	| factor
+
+; 'factor' structures can contain positive, negative or bitwise-inversion unary expressions or 'power' structures
+factor:
+	('+' | '-' | '~') factor
+	| power
+
+; 'power' structures can contain power expression or 'object-call' structures
+power:
+	object-call '^' object-call
+	| object-call
+
+; 'object-attribute-access' structures can contain object attribute access expressions or 'call' structures
+object-attribute-access:
+	call '.' object-call
+	| call
+
+; 'call' structures can contain function/object creation call expressions or 'atom' structures
+call:
+	atom '(' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)? ')'
+	| atom
+
+; 'atom' structures can contain literal value definition, variable access, parenthetical, array definition, list definition, dictionary definition expressions and 'if-expression' structures
+atom:
+	([integer] | [floating point] | [string] | [character] | [character list])
+	| "global"? ([identifier] | [qeyword])
+	| '(' '\n'+? expression '\n'+? ')'
+	| '(' '\n'+? (expression '\n'+? ',' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)?)? ')'
+	| '[' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)? ']'
+	| '{' '\n'+? (expression '\n'+? ':' '\n'+? expression '\n'+? (',' '\n'+? expression '\n'+? ':' '\n'+? expression '\n'+?)+?)? '}'
+	| if-expression
+	| count-expression
+	| while-expression
+	| try-expression
+	| function-definition-expression
+	| object-definition-expression
+	| include-expression
+
+; 'if-expression' structures contain declarations of conditional if-else-if-else expressions.
+if-expression:
+	"if" expression "do" statements ("else" "if" expression "do" statements)+? ("else" "do" statements)? "end"
+	| "if" expression "do" statement ("else" "if" expression "do" statement)+? ("else" "do" statement)?
+	
+; 'count-expression' structures contain declarations of count loops, which are like for loops in C#.
+count-expression:
+	"count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statements "end"
+	| "count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statement
+	
+; 'while-expression' structures contain declarations of while loops.
+while-expression:
+	"while" expression "do" statements "end"
+	| "while" expression "do" statement
+
+; 'try-expression' structures contain declarations of try-error blocks, which are like try-catch blocks in C#.
+try-expression:
+	"try" "do" statements ("error" expression ("as" expression)? "do" statements)+? ("error" ("as" expression)? "do" statements)? "end"
+	| "try" "do" statement ("error" expression ("as" expression)? "do" statement)+? ("error" ("as" expression)? "do" statement)?
+	
+; 'function-definition-expression' structures contain declarations of functions.
+function-definition-expression:
+	"function" expression? ("with" expression (',' expression)+?)? "do" statements "end"
+	| "function" expression? ("with" expression (',' expression)+?)? "do" statement
+	
+; 'object-definition-expression' structures contain declarations of objects.
+object-definition-expression:
+	"object" expression? ("with" expression (',' expression)+?)? ("from" expression (',' expression)+?)? "do" statements "end"
+	| "object" expression? ("with" expression (',' expression)+?)? ("from" expression (',' expression)+?)? "do" statement
+
+; 'include-expression' structures contain declarations of include expressions, which are like using statements in C#.
+include-expression:
+	"include" expression ("as" expression)?
+	| "include" expression "from" expression ("as" expression)?

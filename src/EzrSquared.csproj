@@ -21,4 +21,8 @@
 		<!--ONLY FOR X64 and ARM64-->
 		<PublishAot>true</PublishAot>
 	</PropertyGroup>
+	
+	<PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+		<DefineConstants>PLATFORM_WINDOWS</DefineConstants>
+	</PropertyGroup>
 </Project>

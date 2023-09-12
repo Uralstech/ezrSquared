@@ -3,20 +3,20 @@ using System.Text;
 
 namespace EzrSquared.EzrErrors
 {
-    using EzrGeneral;
+    using EzrCommon;
 
     /// <summary>
-    /// The base of all other, more specific, error classes. Only for inheritance!
+    /// The base of all other, more specific, error classes.
     /// </summary>
     public abstract class Error
     {
         /// <summary>
         /// The name of the <see cref="Error"/>.
         /// </summary>
-        internal readonly string _name;
+        internal readonly string _title;
 
         /// <summary>
-        /// The reason why the <see cref="Error"/> occured.
+        /// The reason why the <see cref="Error"/> occurred.
         /// </summary>
         internal readonly string _details;
 
@@ -33,13 +33,13 @@ namespace EzrSquared.EzrErrors
         /// <summary>
         /// Creates a new <see cref="Error"/> object.
         /// </summary>
-        /// <param name="name">The name of the <see cref="Error"/>.</param>
-        /// <param name="details">The reason why the <see cref="Error"/> occured.</param>
+        /// <param name="title">The title of the <see cref="Error"/>.</param>
+        /// <param name="details">The reason why the <see cref="Error"/> occurred.</param>
         /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="Error"/>.</param>
         /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="Error"/>.</param>
-        public Error(string name, string details, Position startPosition, Position endPosition)
+        public Error(string title, string details, Position startPosition, Position endPosition)
         {
-            _name = name;
+            _title = title;
             _details = details;
             _startPosition = startPosition;
             _endPosition = endPosition;
@@ -51,7 +51,7 @@ namespace EzrSquared.EzrErrors
         /// <returns>The formatted text.</returns>
         public override string ToString()
         {
-            return $"(error) {_name}: {_details} -> File \"{_startPosition.File}\", line {_startPosition.Line}\n{StringWithUnderline()}";
+            return $"{_title} in {_startPosition.File}, line {_startPosition.Line}: {_details}\n{StringWithUnderline()}";
         }
 
         /// <summary>
@@ -73,15 +73,15 @@ namespace EzrSquared.EzrErrors
     /// <summary>
     /// The <see cref="Error"/> returned when an unknown character is identified in the script.
     /// </summary>
-    internal class UnknownCharacterError : Error
+    internal class UnexpectedCharacterError : Error
     {
         /// <summary>
-        /// Creates a new <see cref="UnknownCharacterError"/> object.
+        /// Creates a new <see cref="UnexpectedCharacterError"/> object.
         /// </summary>
-        /// <param name="details">The reason why the <see cref="UnknownCharacterError"/> occured.</param>
-        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="UnknownCharacterError"/>.</param>
-        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="UnknownCharacterError"/>.</param>
-        public UnknownCharacterError(string details, Position startPosition, Position endPosition) : base("Unknown character", details, startPosition, endPosition) { }
+        /// <param name="character">The character that caused the <see cref="UnexpectedCharacterError"/>.</param>
+        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
+        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
+        public UnexpectedCharacterError(char character, Position startPosition, Position endPosition) : base("Unexpected character", $"{character}", startPosition, endPosition) { }
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ namespace EzrSquared.EzrErrors
         /// <summary>
         /// Creates a new <see cref="InvalidHexValueError"/> object.
         /// </summary>
-        /// <param name="details">The reason why the <see cref="InvalidHexValueError"/> occured.</param>
+        /// <param name="details">The reason why the <see cref="InvalidHexValueError"/> occurred.</param>
         /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="InvalidHexValueError"/>.</param>
         /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="InvalidHexValueError"/>.</param>
         public InvalidHexValueError(string details, Position startPosition, Position endPosition) : base("Invalid hexadecimal value", details, startPosition, endPosition) { }
@@ -106,9 +106,31 @@ namespace EzrSquared.EzrErrors
         /// <summary>
         /// Creates a new <see cref="InvalidGrammarError"/> object.
         /// </summary>
-        /// <param name="details">The reason why the <see cref="InvalidGrammarError"/> occured.</param>
+        /// <param name="details">The reason why the <see cref="InvalidGrammarError"/> occurred.</param>
         /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="InvalidGrammarError"/>.</param>
         /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="InvalidGrammarError"/>.</param>
         public InvalidGrammarError(string details, Position startPosition, Position endPosition) : base("Invalid grammar", details, startPosition, endPosition) { }
+    }
+
+    /// <summary>
+    /// The <see cref="Error"/> returned when multiple <see cref="Error"/> objects need to be returned to the user.
+    /// </summary>
+    internal class StackedError : Error
+    {
+        /// <summary>
+        /// Creates a new <see cref="StackedError"/> object.
+        /// </summary>
+        /// <param name="parent">The 'parent' error, or the error that occurred first.</param>
+        /// <param name="child">The 'child' error, or the error that occurred because of the <paramref name="parent"/>.</param>
+        public StackedError(Error parent, Error child) : base("Multiple errors", string.Join<Error>("\n\nDue to the above error, another one occurred:\n", new Error[2] { parent, child }), parent._startPosition, parent._endPosition) { }
+
+        /// <summary>
+        /// Creates the formatted text representation of the <see cref="StackedError"/>, which shows all child <see cref="Error"/> objects as the 'details'.
+        /// </summary>
+        /// <returns>The formatted text.</returns>
+        public override string ToString()
+        {
+            return _details;
+        }
     }
 }
