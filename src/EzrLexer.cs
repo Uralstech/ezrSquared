@@ -65,19 +65,6 @@ namespace EzrSquared.EzrLexer
         }
 
         /// <summary>
-        /// Peeks one character in front of the current <see cref="Position"/> in the script.
-        /// </summary>
-        /// <returns>The character in front of the current <see cref="Position"/>; <see langword="\0"/> if the next character is the end of the script.</returns>
-        private char Peek()
-        {
-            int peekIndex = _position.Index + 1;
-            if (peekIndex < _script.Length)
-                return _script[peekIndex];
-            else
-                return '\0';
-        }
-
-        /// <summary>
         /// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
         /// </summary>
         /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
@@ -271,7 +258,10 @@ namespace EzrSquared.EzrLexer
                             {
                                 if (_currentChar == '.')
                                 {
-                                    if (hasPeriod || !char.IsDigit(Peek()))
+                                    int peekIndex = _position.Index + 1;
+                                    char next = (peekIndex < _script.Length) ? _script[peekIndex] : '\0';
+
+                                    if (hasPeriod || !char.IsDigit(next))
                                         break;
                                     hasPeriod = true;
                                 }
