@@ -214,10 +214,7 @@
         /// </summary>
         public readonly Position EndPosition;
 
-        public static Token GetInvalidToken(Position startPosition, Position? endPosition)
-        {
-            return new Token(TokenType.Invalid, TokenTypeGroup.Special, string.Empty, startPosition, endPosition);
-        }
+        public static readonly Token Dummy = new Token(TokenType.Invalid, TokenTypeGroup.Special, string.Empty, new Position(int.MinValue, int.MinValue, string.Empty, string.Empty));
 
         /// <summary>
         /// Creates a new <see cref="Token"/> object.

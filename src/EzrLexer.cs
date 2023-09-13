@@ -81,8 +81,7 @@ namespace EzrSquared.EzrLexer
         /// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
         /// </summary>
         /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
-        /// <param name="error">Any <see cref="Error"/> that occurred in the lexing; <see langword="null"/> if none occurred.</param>
-        /// <returns><see langword="true"/> if the lexing succeeded without any errors; otherwise <see langword="false"/>.</returns>
+        /// <returns>Any <see cref="Error"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
         public Error? Tokenize(out List<Token> tokens)
         {
             Error? error;

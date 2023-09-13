@@ -90,14 +90,14 @@ factor:
 	('+' | '-' | '~') factor
 	| power
 
-; 'power' structures can contain power expression or 'object-call' structures
+; 'power' structures can contain power expression or 'object-attribute-access' structures
 power:
-	object-call '^' object-call
-	| object-call
+	object-attribute-access '^' object-attribute-access
+	| object-attribute-access
 
 ; 'object-attribute-access' structures can contain object attribute access expressions or 'call' structures
 object-attribute-access:
-	call '.' object-call
+	call '.' object-attribute-access
 	| call
 
 ; 'call' structures can contain function/object creation call expressions or 'atom' structures
