@@ -187,7 +187,7 @@ namespace EzrSquared.EzrShell
                 }
                 else
                 {
-                    ShowError("Intended use:\n\tezrSquared [file] [-i | --interactive] [-l | --lexer-output] [-p | --parser-output]");
+                    ShowError("Intended use:\n\tezrSquared [file] [-l | --lexer-output] [-p | --parser-output]");
                     return false;
                 }
             
