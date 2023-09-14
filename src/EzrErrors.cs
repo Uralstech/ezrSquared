@@ -71,7 +71,7 @@ namespace EzrSquared.EzrErrors
 
             while (char.IsWhiteSpace(text[start]) && start < text.Length - 1)
                 start++;
-
+            
             end = text.IndexOf('\n', start + 1);
             if (end == -1)
                 end = text.Length;
@@ -90,14 +90,6 @@ namespace EzrSquared.EzrErrors
     /// </summary>
     internal class UnexpectedCharacterError : Error
     {
-        /// <summary>
-        /// Creates a new <see cref="UnexpectedCharacterError"/> object.
-        /// </summary>
-        /// <param name="character">The character that caused the <see cref="UnexpectedCharacterError"/>.</param>
-        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
-        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="UnexpectedCharacterError"/>.</param>
-        public UnexpectedCharacterError(string character, Position startPosition, Position endPosition) : base("Unexpected character", character, startPosition, endPosition) { }
-
         /// <summary>
         /// Creates a new <see cref="UnexpectedCharacterError"/> object.
         /// </summary>

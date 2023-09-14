@@ -77,30 +77,20 @@ namespace EzrSquared.EzrLexer
             {
                 switch (_currentChar)
                 {
+                    case '\r':
                     case '\t':
                     case ' ':
                         Advance();
                         break;
-                    case '\r':
-                        Position startPosition = _position.Copy();
-                        Advance();
-
-                        if (_currentChar == '\n')
-                            Advance();
-                        else
-                            return new UnexpectedCharacterError("\\r", startPosition, _position);
-
-                        tokens.Add(new Token(TokenType.NewLine, TokenTypeGroup.Special, string.Empty, startPosition, _position.Copy()));
-                        break;
                     case ';':
                     case '\n':
-                        tokens.Add(new Token(TokenType.NewLine, TokenTypeGroup.Special, string.Empty, _position.Copy()));
-                        Advance();
+                        tokens.Add(CompileNewLines());
                         break;
                     case '@':
-                        Advance();
-                        while (!_reachedEndFlag && _currentChar != '\n')
+                        do
+                        {
                             Advance();
+                        } while (!_reachedEndFlag && _currentChar != '\n');
                         break;
                     case '"':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.String, out error));
@@ -289,6 +279,29 @@ namespace EzrSquared.EzrLexer
 
             tokens.Add(new Token(TokenType.EndOfFile, TokenTypeGroup.Special, string.Empty, _position.Copy()));
             return null;
+        }
+
+        /// <summary>
+        /// Goes through newline characters and creates a single <see cref="Token"/> object with <see cref="TokenType"/> <see cref="TokenType.NewLine"/>.
+        /// </summary>
+        /// <returns>The <see cref="Token"/> object.</returns>
+        private Token CompileNewLines()
+        {
+            Position startPosition = _position.Copy();
+            while ((char.IsWhiteSpace(_currentChar) || _currentChar == '\r' || _currentChar == ';') && !_reachedEndFlag)
+            {
+                Advance();
+
+                if (_currentChar == '@')
+                {
+                    do
+                    {
+                        Advance();
+                    } while (!_reachedEndFlag && _currentChar != '\n');
+                }
+            }
+
+            return new Token(TokenType.NewLine, TokenTypeGroup.Special, string.Empty, startPosition, _position.Copy());
         }
 
         /// <summary>

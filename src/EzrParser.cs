@@ -49,13 +49,15 @@ namespace EzrSquared.EzrParser
         public Parser(List<Token> tokens)
         {
             _tokens = tokens;
-            _currentToken = Token.Dummy;
-            _index = -1;
             _usingQuickSyntax = false;
             _wasUsingQuickSyntax = false;
             _result = new ParseResult();
 
-            Advance();
+            _index = 0;
+            if (tokens.Count > _index)
+                _currentToken = _tokens[_index];
+            else
+                _currentToken = Token.Dummy;
         }
 
         /// <summary>
@@ -64,8 +66,9 @@ namespace EzrSquared.EzrParser
         private void Advance()
         {
             _index++;
+            _result.AdvanceCount++;
 
-            if (_index >= 0 && _index < _tokens.Count)
+            if (_tokens.Count > _index)
                 _currentToken = _tokens[_index];
         }
 
@@ -76,9 +79,8 @@ namespace EzrSquared.EzrParser
         private void Reverse(int reverseCount = 1)
         {
             _index -= reverseCount;
-
-            if (_index >= 0 && _index < _tokens.Count)
-                _currentToken = _tokens[_index];
+            _result.AdvanceCount -= reverseCount;
+            _currentToken = _tokens[_index];
         }
 
         /// <summary>
@@ -112,21 +114,6 @@ namespace EzrSquared.EzrParser
         }
 
         /// <summary>
-        /// Advances through <see cref="TokenType.NewLine"/> <see cref="Token"/> objects until a <see cref="Token"/> object of any other <see cref="TokenType"/> has been reached.
-        /// </summary>
-        private void SkipNewLines()
-        {
-            if (_currentToken.Type != TokenType.NewLine)
-                return;
-
-            while (_currentToken.Type == TokenType.NewLine)
-            {
-                _result.RegisterAdvance();
-                Advance();
-            }
-        }
-
-        /// <summary>
         /// Parses the <see cref="Token"/> objects in <see cref="_tokens"/>.
         /// </summary>
         public ParseResult Parse()
@@ -153,15 +140,16 @@ namespace EzrSquared.EzrParser
                 return;
 
             int toReverseTo = _result.AdvanceCount;
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
 
-            SkipNewLines();
             while (Array.IndexOf(operators, _currentToken.Type) != -1)
             {
                 TokenType @operator = _currentToken.Type;
-                _result.RegisterAdvance();
                 Advance();
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
                 
                 right();
                 Node rightNode = _result.Node;
@@ -170,13 +158,13 @@ namespace EzrSquared.EzrParser
 
                 leftNode = new BinaryOperationNode(leftNode, rightNode, @operator, startPosition, _currentToken.EndPosition);
                 toReverseTo = _result.AdvanceCount;
-                SkipNewLines();
+
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
             }
 
 
-            int reverseCount = _result.AdvanceCount - toReverseTo;
-            Reverse(reverseCount);
-            _result.Reverse(reverseCount);
+            Reverse(_result.AdvanceCount - toReverseTo);
             _result.Success(leftNode);
         }
 
@@ -188,7 +176,8 @@ namespace EzrSquared.EzrParser
             List<Node> statements = new List<Node>();
             Position startPosition = _currentToken.StartPosition;
 
-            SkipNewLines();
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
 
             ParseStatement();
             Node statement = _result.Node;
@@ -201,9 +190,12 @@ namespace EzrSquared.EzrParser
                 // NOTE: Qeyword 'l' for 'else if' is deprecated, use Qeyword 'e' instead in format:
                 // 'e [check]: [statement(s)]'
 
-                int skipStart = _result.AdvanceCount;
-                SkipNewLines();
-                if (_result.AdvanceCount - skipStart == 0 || _currentToken.Type == TokenType.EndOfFile
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
+                else
+                    break;
+
+                if (_currentToken.Type == TokenType.EndOfFile
                     || _currentToken.Type == TokenType.KeywordEnd
                     || _currentToken.Type == TokenType.KeywordElse
                     || _currentToken.Type == TokenType.KeywordError
@@ -234,7 +226,6 @@ namespace EzrSquared.EzrParser
             if (_currentToken.Type == TokenType.KeywordReturn)
             {
                 Position possibleEndPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.Type == TokenType.NewLine
@@ -263,7 +254,6 @@ namespace EzrSquared.EzrParser
             {
                 Position endPosition = _currentToken.EndPosition;
                 TokenType currentTokenType = _currentToken.Type;
-                _result.RegisterAdvance();
                 Advance();
 
                 _result.Success(new NoValueNode(currentTokenType, startPosition, endPosition));
@@ -293,14 +283,12 @@ namespace EzrSquared.EzrParser
             if (_currentToken.Type == TokenType.KeywordGlobal)
             {
                 globalAssignment = true;
-                _result.RegisterAdvance();
                 Advance();
             }
             
             if (_currentToken.Type == TokenType.KeywordItem)
             {
                 usedItemKeyword = true;
-                _result.RegisterAdvance();
                 Advance();
             }
             else if (itemKeywordRequired)
@@ -317,13 +305,11 @@ namespace EzrSquared.EzrParser
             if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
             {
                 Token possibleVariable = _currentToken;
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
                 {
                     Reverse();
-                    _result.Reverse();
 
                     ParseJunction();
                     Node variable = _result.Node;
@@ -333,7 +319,6 @@ namespace EzrSquared.EzrParser
                     if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
                     {
                         TokenType assignmentOperator = _currentToken.Type;
-                        _result.RegisterAdvance();
                         Advance();
 
                         ParseExpression();
@@ -350,16 +335,11 @@ namespace EzrSquared.EzrParser
                         return;
                     }
                     else
-                    {
-                        int reverseCount = _result.AdvanceCount - startingAdvanceCount;
-                        Reverse(reverseCount);
-                        _result.Reverse(reverseCount);
-                    }
+                        Reverse(_result.AdvanceCount - startingAdvanceCount);
                 }
                 else
                 {
                     TokenType assignmentOperator = _currentToken.Type;
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseExpression();
@@ -377,11 +357,7 @@ namespace EzrSquared.EzrParser
                 return;
             }
             else
-            {
-                int reverseCount = _result.AdvanceCount - startingAdvanceCount;
-                Reverse(reverseCount);
-                _result.Reverse(reverseCount);
-            }
+                Reverse(_result.AdvanceCount - startingAdvanceCount);
 
             ParseQuickExpression();
             Node node = _result.Node;
@@ -401,7 +377,6 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.ExclamationMark)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 bool globalAssignment = false;
@@ -409,27 +384,23 @@ namespace EzrSquared.EzrParser
                 if (_currentToken.Type == TokenType.QeywordG)
                 {
                     globalAssignment = true;
-                    _result.RegisterAdvance();
                     Advance();
                 }
 
                 if (_currentToken.Type == TokenType.QeywordD)
                 {
                     usedItemKeyword = true;
-                    _result.RegisterAdvance();
                     Advance();
                 }
 
                 if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
                 {
                     Token possibleVariable = _currentToken;
-                    _result.RegisterAdvance();
                     Advance();
 
                     if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
                     {
                         Reverse();
-                        _result.Reverse();
 
                         ParseJunction();
                         Node variable = _result.Node;
@@ -439,7 +410,6 @@ namespace EzrSquared.EzrParser
                         if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
                         {
                             TokenType assignmentOperator = _currentToken.Type;
-                            _result.RegisterAdvance();
                             Advance();
 
                             ParseExpression();
@@ -456,16 +426,11 @@ namespace EzrSquared.EzrParser
                             return;
                         }
                         else
-                        {
-                            int reverseCount = _result.AdvanceCount - startingAdvanceCount;
-                            Reverse(reverseCount);
-                            _result.Reverse(reverseCount);
-                        }
+                            Reverse(_result.AdvanceCount - startingAdvanceCount);
                     }
                     else
                     {
                         TokenType assignmentOperator = _currentToken.Type;
-                        _result.RegisterAdvance();
                         Advance();
 
                         ParseExpression();
@@ -483,11 +448,7 @@ namespace EzrSquared.EzrParser
                     return;
                 }
                 else
-                {
-                    int reverseCount = _result.AdvanceCount - startingAdvanceCount;
-                    Reverse(reverseCount);
-                    _result.Reverse(reverseCount);
-                }
+                    Reverse(_result.AdvanceCount - startingAdvanceCount);
             }
 
             ParseJunction();
@@ -516,13 +477,11 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.ExclamationMark)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.Type == TokenType.QeywordV)
                 {
                     TokenType @operator = _currentToken.Type;
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseExpression();
@@ -534,16 +493,11 @@ namespace EzrSquared.EzrParser
                     return;
                 }
                 else
-                {
-                    int reverseCount = _result.AdvanceCount - startingAdvanceCount;
-                    Reverse(reverseCount);
-                    _result.Reverse(reverseCount);
-                }
+                    Reverse(_result.AdvanceCount - startingAdvanceCount);
             }
             else if (_currentToken.Type == TokenType.KeywordInvert)
             {
                 TokenType @operator = _currentToken.Type;
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -574,10 +528,11 @@ namespace EzrSquared.EzrParser
             Node left = _result.Node;
             if (_result.Error != null)
                 return;
-            
-            int toReverseTo = _result.AdvanceCount;
 
-            SkipNewLines();
+            int toReverseTo = _result.AdvanceCount;
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
+
             while (_currentToken.Type == TokenType.EqualSign
                 || _currentToken.Type == TokenType.ExclamationMark
                 || _currentToken.Type == TokenType.LessThanSign
@@ -588,10 +543,11 @@ namespace EzrSquared.EzrParser
                 || _currentToken.Type == TokenType.KeywordIn)
             {
                 TokenType @operator = _currentToken.Type;
-                _result.RegisterAdvance();
                 Advance();
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
+
                 if (@operator == TokenType.KeywordNot)
                 {
                     if (_currentToken.Type != TokenType.KeywordIn)
@@ -599,7 +555,6 @@ namespace EzrSquared.EzrParser
                         _result.Failure(10, new InvalidGrammarError("Expected the 'in' keyword! The 'in' keyword is the second part of a check-not-in operation.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
-                    _result.RegisterAdvance();
                     Advance();
                 }
 
@@ -610,13 +565,12 @@ namespace EzrSquared.EzrParser
 
                 left = new BinaryOperationNode(left, right, @operator, startPosition, _currentToken.EndPosition);
                 toReverseTo = _result.AdvanceCount;
-                SkipNewLines();
+
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
             }
 
-
-            int reverseCount = _result.AdvanceCount - toReverseTo;
-            Reverse(reverseCount);
-            _result.Reverse(reverseCount);
+            Reverse(_result.AdvanceCount - toReverseTo);
             _result.Success(left);
         }
 
@@ -678,7 +632,6 @@ namespace EzrSquared.EzrParser
             TokenType @operator = _currentToken.Type;
             if (@operator == TokenType.Plus || @operator == TokenType.HyphenMinus || @operator == TokenType.Tilde)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseFactor();
@@ -723,18 +676,18 @@ namespace EzrSquared.EzrParser
 
             if(_currentToken.Type == TokenType.LeftParenthesis)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 Position possibleErrorStartPosition = _currentToken.StartPosition;
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
+
                 Position endPosition;
                 List<Node> arguments = new List<Node>();
                 if (_currentToken.Type == TokenType.RightParenthesis)
                 {
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else
@@ -747,14 +700,17 @@ namespace EzrSquared.EzrParser
                         return;
                     }
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
+
                     while (_currentToken.Type == TokenType.Comma)
                     {
                         possibleErrorStartPosition = _currentToken.StartPosition;
-                        _result.RegisterAdvance();
                         Advance();
 
-                        SkipNewLines();
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
+
                         ParseExpression();
                         arguments.Add(_result.Node);
                         if (_result.Error != null)
@@ -762,7 +718,9 @@ namespace EzrSquared.EzrParser
                             _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorStartPosition, _currentToken.EndPosition)));
                             return;
                         }
-                        SkipNewLines();
+
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
                     }
 
                     if (_currentToken.Type != TokenType.RightParenthesis)
@@ -771,7 +729,6 @@ namespace EzrSquared.EzrParser
                         return;
                     }
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
 
@@ -791,7 +748,6 @@ namespace EzrSquared.EzrParser
             Token startToken = _currentToken;
             if(startToken.TypeGroup == TokenTypeGroup.Value)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 _result.Success(new ValueNode(startToken, startToken.StartPosition, startToken.EndPosition));
@@ -799,7 +755,6 @@ namespace EzrSquared.EzrParser
             }
             else if (startToken.Type == TokenType.Identifier || startToken.TypeGroup == TokenTypeGroup.Qeyword)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 _result.Success(new VariableAccessNode(startToken, false, startToken.StartPosition, startToken.EndPosition));
@@ -810,14 +765,12 @@ namespace EzrSquared.EzrParser
                 switch (startToken.Type)
                 {
                     case TokenType.KeywordGlobal:
-                        _result.RegisterAdvance();
                         Advance();
 
                         if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
                         {
                             Token variable = _currentToken;
                             Position endPosition = _currentToken.EndPosition;
-                            _result.RegisterAdvance();
                             Advance();
 
                             _result.Success(new VariableAccessNode(variable, true, startToken.StartPosition, endPosition));
@@ -908,19 +861,19 @@ namespace EzrSquared.EzrParser
         private void ParseArrayOrParentheticalExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Position possibleErrorStartPosition = _currentToken.StartPosition;
             List<Node> elements = new List<Node>();
             bool isArray = false;
 
-            SkipNewLines();
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
+
             Position endPosition;
             if (_currentToken.Type == TokenType.RightParenthesis)
             {
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
             else
@@ -933,15 +886,18 @@ namespace EzrSquared.EzrParser
                     return;
                 }
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
+
                 while (_currentToken.Type == TokenType.Comma)
                 {
                     isArray = true;
                     possibleErrorStartPosition = _currentToken.StartPosition;
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
+
                     if (_currentToken.Type == TokenType.RightParenthesis && elements.Count == 1)
                         break;
 
@@ -960,7 +916,8 @@ namespace EzrSquared.EzrParser
                     }
 
                     elements.Add(_result.Node);
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
                 }
 
                 if (_currentToken.Type != TokenType.RightParenthesis)
@@ -973,7 +930,6 @@ namespace EzrSquared.EzrParser
                 }
                 
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
 
@@ -989,18 +945,18 @@ namespace EzrSquared.EzrParser
         private void ParseList()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Position possibleErrorStartPosition = _currentToken.StartPosition;
 
-            SkipNewLines();
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
+
             Position endPosition;
             List<Node> elements = new List<Node>();
             if (_currentToken.Type == TokenType.RightSquareBracket)
             {
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
             else
@@ -1013,14 +969,16 @@ namespace EzrSquared.EzrParser
                     return;
                 }
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
+
                 while (_currentToken.Type == TokenType.Comma)
                 {
                     possibleErrorStartPosition = _currentToken.StartPosition;
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression();
                     elements.Add(_result.Node);
@@ -1029,7 +987,9 @@ namespace EzrSquared.EzrParser
                         _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorStartPosition, _currentToken.EndPosition)));
                         return;
                     }
-                    SkipNewLines();
+                    
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
                 }
 
                 if (_currentToken.Type != TokenType.RightSquareBracket)
@@ -1038,7 +998,6 @@ namespace EzrSquared.EzrParser
                     return;
                 }
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
 
@@ -1051,18 +1010,18 @@ namespace EzrSquared.EzrParser
         private void ParseDictionary()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Position possibleErrorStartPosition = _currentToken.StartPosition;
             List<Node[]> pairs = new List<Node[]>();
 
-            SkipNewLines();
+            if (_currentToken.Type == TokenType.NewLine)
+                Advance();
+
             Position endPosition;
             if (_currentToken.Type == TokenType.RightCurlyBracket)
             {
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
             else
@@ -1075,17 +1034,18 @@ namespace EzrSquared.EzrParser
                     return;
                 }
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
                 
                 if (_currentToken.Type != TokenType.Colon)
                 {
                     _result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
-                _result.RegisterAdvance();
                 Advance();
 
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
 
                 ParseExpression();
                 Node right = _result.Node;
@@ -1093,15 +1053,16 @@ namespace EzrSquared.EzrParser
                     return;
 
                 pairs.Add(new Node[2] { left, right });
-                SkipNewLines();
+                if (_currentToken.Type == TokenType.NewLine)
+                    Advance();
 
                 while (_currentToken.Type == TokenType.Comma)
                 {
                     possibleErrorStartPosition = _currentToken.StartPosition;
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression(true);
                     left = _result.Node;
@@ -1111,17 +1072,19 @@ namespace EzrSquared.EzrParser
                         return;
                     }
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
+
                     if (_currentToken.Type != TokenType.Colon)
                     {
                         _result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
 
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression();
                     right = _result.Node;
@@ -1129,7 +1092,8 @@ namespace EzrSquared.EzrParser
                         return;
 
                     pairs.Add(new Node[2] { left, right });
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
                 }
 
                 if (_currentToken.Type != TokenType.RightCurlyBracket)
@@ -1139,7 +1103,6 @@ namespace EzrSquared.EzrParser
                 }
 
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
 
@@ -1152,7 +1115,6 @@ namespace EzrSquared.EzrParser
         private void ParseIfExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             List<Node[]> cases = new List<Node[]>();
@@ -1169,13 +1131,11 @@ namespace EzrSquared.EzrParser
                 return;
             }
 
-            _result.RegisterAdvance();
             Advance();
 
             Node body;
             if (_currentToken.Type == TokenType.NewLine)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseStatements();
@@ -1188,14 +1148,12 @@ namespace EzrSquared.EzrParser
                 if (_currentToken.Type == TokenType.KeywordEnd)
                 {
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else if (_currentToken.Type == TokenType.KeywordElse)
                 {
                     while (_currentToken.Type == TokenType.KeywordElse)
                     {
-                        _result.RegisterAdvance();
                         Advance();
 
                         if (_currentToken.Type == TokenType.KeywordIf)
@@ -1206,7 +1164,6 @@ namespace EzrSquared.EzrParser
                                 return;
                             }
 
-                            _result.RegisterAdvance();
                             Advance();
 
                             ParseExpression();
@@ -1220,7 +1177,6 @@ namespace EzrSquared.EzrParser
                                 return;
                             }
 
-                            _result.RegisterAdvance();
                             Advance();
 
                             ParseStatements();
@@ -1243,7 +1199,6 @@ namespace EzrSquared.EzrParser
                                 return;
                             }
 
-                            _result.RegisterAdvance();
                             Advance();
 
                             ParseStatements();
@@ -1263,7 +1218,6 @@ namespace EzrSquared.EzrParser
                     }
 
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else
@@ -1284,7 +1238,6 @@ namespace EzrSquared.EzrParser
             cases.Add(new Node[2] { condition, body });
             while (_currentToken.Type == TokenType.KeywordElse)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.Type == TokenType.KeywordIf)
@@ -1295,7 +1248,6 @@ namespace EzrSquared.EzrParser
                         return;
                     }
 
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseExpression();
@@ -1309,7 +1261,6 @@ namespace EzrSquared.EzrParser
                         return;
                     }
 
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseStatement();
@@ -1332,7 +1283,6 @@ namespace EzrSquared.EzrParser
                         return;
                     }
 
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseStatement();
@@ -1351,7 +1301,6 @@ namespace EzrSquared.EzrParser
         private void ParseCountExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Node to = InvalidNode.StaticInvalidNode;
@@ -1361,7 +1310,6 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.KeywordFrom)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -1379,7 +1327,6 @@ namespace EzrSquared.EzrParser
                 return;
             }
 
-            _result.RegisterAdvance();
             Advance();
 
             ParseExpression();
@@ -1389,7 +1336,6 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.KeywordStep)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -1400,7 +1346,6 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.KeywordAs)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -1420,14 +1365,12 @@ namespace EzrSquared.EzrParser
                 return;
             }
 
-            _result.RegisterAdvance();
             Advance();
 
             Node body;
             Position endPosition;
             if (_currentToken.Type == TokenType.NewLine)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseStatements();
@@ -1442,7 +1385,6 @@ namespace EzrSquared.EzrParser
                 }
 
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
             else
@@ -1464,7 +1406,6 @@ namespace EzrSquared.EzrParser
         private void ParseWhileExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             ParseExpression();
@@ -1477,14 +1418,12 @@ namespace EzrSquared.EzrParser
                 _result.Failure(10, new InvalidGrammarError("Expected the 'do' keyword! The 'do' keyword declares the start of the body of the while loop.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
-            _result.RegisterAdvance();
             Advance();
 
             Node body;
             Position endPosition;
             if (_currentToken.Type == TokenType.NewLine)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseStatements();
@@ -1499,7 +1438,6 @@ namespace EzrSquared.EzrParser
                 }
 
                 endPosition = _currentToken.EndPosition;
-                _result.RegisterAdvance();
                 Advance();
             }
             else
@@ -1521,7 +1459,6 @@ namespace EzrSquared.EzrParser
         private void ParseTryExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Node block;
@@ -1534,13 +1471,11 @@ namespace EzrSquared.EzrParser
                 return;
             }
 
-            _result.RegisterAdvance();
             Advance();
 
             Node body;
             if (_currentToken.Type == TokenType.NewLine)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseStatements();
@@ -1552,14 +1487,12 @@ namespace EzrSquared.EzrParser
                 if (_currentToken.Type == TokenType.KeywordEnd)
                 {
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else if (_currentToken.Type == TokenType.KeywordError)
                 {
                     while (_currentToken.Type == TokenType.KeywordError)
                     {
-                        _result.RegisterAdvance();
                         Advance();
 
                         Node? error = null;
@@ -1578,7 +1511,6 @@ namespace EzrSquared.EzrParser
                             Node? @as = null;
                             if (isAsKeyword)
                             {
-                                _result.RegisterAdvance();
                                 Advance();
 
                                 ParseExpression();
@@ -1593,7 +1525,6 @@ namespace EzrSquared.EzrParser
                                 }
                             }
 
-                            _result.RegisterAdvance();
                             Advance();
 
                             ParseStatements();
@@ -1645,7 +1576,6 @@ namespace EzrSquared.EzrParser
                     }
 
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else
@@ -1665,7 +1595,6 @@ namespace EzrSquared.EzrParser
 
             while (_currentToken.Type == TokenType.KeywordError)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 Node? error = null;
@@ -1684,7 +1613,6 @@ namespace EzrSquared.EzrParser
                     Node? @as = null;
                     if (isAsKeyword)
                     {
-                        _result.RegisterAdvance();
                         Advance();
 
                         ParseExpression();
@@ -1699,7 +1627,6 @@ namespace EzrSquared.EzrParser
                         }
                     }
 
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseStatement();
@@ -1750,7 +1677,6 @@ namespace EzrSquared.EzrParser
         private void ParseFunctionDefinitionExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Node? name = null;
@@ -1766,30 +1692,33 @@ namespace EzrSquared.EzrParser
             {
                 if (isWithKeyword)
                 {
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression();
                     parameters.Add(_result.Node);
                     if (_result.Error != null)
                         return;
 
-                    SkipNewLines();
-                    while (_currentToken.Type == TokenType.Comma)
-                    {
-                        _result.RegisterAdvance();
+                    if (_currentToken.Type == TokenType.NewLine)
                         Advance();
 
-                        SkipNewLines();
+                    while (_currentToken.Type == TokenType.Comma)
+                    {
+                        Advance();
+
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
 
                         ParseExpression();
                         parameters.Add(_result.Node);
                         if (_result.Error != null)
                             return;
 
-                        SkipNewLines();
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
                     }
 
                     if (_currentToken.Type != TokenType.KeywordDo)
@@ -1799,12 +1728,10 @@ namespace EzrSquared.EzrParser
                     }
                 }
 
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.Type == TokenType.NewLine)
                 {
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseStatements();
@@ -1819,7 +1746,6 @@ namespace EzrSquared.EzrParser
                     }
 
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else
@@ -1866,7 +1792,6 @@ namespace EzrSquared.EzrParser
             // The parents of the object are now defined after the 'from' keyword like an array. The 'from' keyword must come before the 'do' keyword and after the 'with' keyword.
 
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Node? name = null;
@@ -1884,30 +1809,33 @@ namespace EzrSquared.EzrParser
             {
                 if (isWithKeyword)
                 {
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression();
                     parameters.Add(_result.Node);
                     if (_result.Error != null)
                         return;
 
-                    SkipNewLines();
-                    while (_currentToken.Type == TokenType.Comma)
-                    {
-                        _result.RegisterAdvance();
+                    if (_currentToken.Type == TokenType.NewLine)
                         Advance();
 
-                        SkipNewLines();
+                    while (_currentToken.Type == TokenType.Comma)
+                    {
+                        Advance();
+
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
 
                         ParseExpression();
                         parameters.Add(_result.Node);
                         if (_result.Error != null)
                             return;
 
-                        SkipNewLines();
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
                     }
 
                     isFromKeyword = _currentToken.Type == TokenType.KeywordFrom;
@@ -1920,30 +1848,33 @@ namespace EzrSquared.EzrParser
 
                 if (isFromKeyword)
                 {
-                    _result.RegisterAdvance();
                     Advance();
 
-                    SkipNewLines();
+                    if (_currentToken.Type == TokenType.NewLine)
+                        Advance();
 
                     ParseExpression();
                     parents.Add(_result.Node);
                     if (_result.Error != null)
                         return;
 
-                    SkipNewLines();
-                    while (_currentToken.Type == TokenType.Comma)
-                    {
-                        _result.RegisterAdvance();
+                    if (_currentToken.Type == TokenType.NewLine)
                         Advance();
 
-                        SkipNewLines();
+                    while (_currentToken.Type == TokenType.Comma)
+                    {
+                        Advance();
+
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
 
                         ParseExpression();
                         parents.Add(_result.Node);
                         if (_result.Error != null)
                             return;
 
-                        SkipNewLines();
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
                     }
 
                     if (_currentToken.Type != TokenType.KeywordDo)
@@ -1953,12 +1884,10 @@ namespace EzrSquared.EzrParser
                     }
                 }
 
-                _result.RegisterAdvance();
                 Advance();
 
                 if (_currentToken.Type == TokenType.NewLine)
                 {
-                    _result.RegisterAdvance();
                     Advance();
 
                     ParseStatements();
@@ -1973,7 +1902,6 @@ namespace EzrSquared.EzrParser
                     }
 
                     endPosition = _currentToken.EndPosition;
-                    _result.RegisterAdvance();
                     Advance();
                 }
                 else
@@ -2016,7 +1944,6 @@ namespace EzrSquared.EzrParser
         private void ParseIncludeExpression()
         {
             Position startPosition = _currentToken.StartPosition;
-            _result.RegisterAdvance();
             Advance();
 
             Node? subStructure = null;
@@ -2034,13 +1961,11 @@ namespace EzrSquared.EzrParser
             else
             {
                 isDumped = true;
-                _result.RegisterAdvance();
                 Advance();
             }
 
             if (_currentToken.Type == TokenType.KeywordFrom)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -2061,7 +1986,6 @@ namespace EzrSquared.EzrParser
         
             if (_currentToken.Type == TokenType.KeywordAs)
             {
-                _result.RegisterAdvance();
                 Advance();
 
                 ParseExpression();
@@ -2108,23 +2032,6 @@ namespace EzrSquared.EzrParser
             Node = InvalidNode.StaticInvalidNode;
             AdvanceCount = 0;
             ErrorPriority = 0;
-        }
-
-        /// <summary>
-        /// Registers an advancement by the <see cref="Parser"/>.
-        /// </summary>
-        public void RegisterAdvance()
-        {
-            AdvanceCount++;
-        }
-
-        /// <summary>
-        /// Reverses <paramref name="reverseCount"/> number of advancements.
-        /// </summary>
-        /// <param name="reverseCount">The number of advancements to reverse <see cref="AdvanceCount"/> by.</param>
-        public void Reverse(int reverseCount = 1)
-        {
-            AdvanceCount -= reverseCount;
         }
 
         /// <summary>
