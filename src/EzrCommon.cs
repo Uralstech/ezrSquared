@@ -44,12 +44,21 @@
         /// Advances the <see cref="Position"/> and increments <see cref="Index"/> by 1. If <paramref name="currentChar"/> is a new-line character, <see cref="Line"/> is also incremented by 1.
         /// </summary>
         /// <param name="currentChar">The character associated with the <see cref="Position"/> before advancing.</param>
-        public void Advance(char currentChar = '\0')
+        public void Advance(char currentChar)
         {
             Index++;
 
             if (currentChar == '\n')
                 Line++;
+        }
+
+
+        /// <summary>
+        /// Advances the <see cref="Position"/> and increments <see cref="Index"/> by 1.
+        /// </summary>
+        public void Advance()
+        {
+            Index++;
         }
 
         /// <summary>
@@ -231,7 +240,7 @@
             Value = value;
 
             StartPosition = startPosition;
-            if (endPosition != null)
+            if (endPosition is not null)
                 EndPosition = endPosition;
             else
             {

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 
 namespace EzrSquared.EzrLexer
 {
@@ -58,7 +58,7 @@ namespace EzrSquared.EzrLexer
         {
             _position.Advance(_currentChar);
 
-            if (_position.Index < _script.Length)
+            if (_script.Length > _position.Index)
                 _currentChar = _script[_position.Index];
             else
                 _reachedEndFlag = true;
@@ -94,17 +94,17 @@ namespace EzrSquared.EzrLexer
                         break;
                     case '"':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.String, out error));
-                        if (error != null)
+                        if (error is not null)
                             return error;
                         break;
                     case '`':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.Character, out error));
-                        if (error != null)
+                        if (error is not null)
                             return error;
                         break;
                     case '\'':
                         tokens.Add(CompileStringLike(_currentChar, TokenType.CharacterList, out error));
-                        if (error != null)
+                        if (error is not null)
                             return error;
                         break;
                     case ':':
@@ -244,7 +244,7 @@ namespace EzrSquared.EzrLexer
                             Position numberTokenStartPosition = _position.Copy();
                             bool hasPeriod = false;
 
-                            while(!_reachedEndFlag && (char.IsDigit(_currentChar) || _currentChar == '.'))
+                            while (!_reachedEndFlag && (char.IsDigit(_currentChar) || _currentChar == '.'))
                             {
                                 if (_currentChar == '.')
                                 {
@@ -314,7 +314,7 @@ namespace EzrSquared.EzrLexer
         private Token CompileStringLike(char enclosingChar, TokenType type, out Error? error)
         {
             error = null;
-        
+
             StringBuilder toReturn = new StringBuilder();
             Position startPosition = _position.Copy();
             bool escapeChar = false;
@@ -436,7 +436,7 @@ namespace EzrSquared.EzrLexer
 
             if (_reachedEndFlag || _currentChar != enclosingChar)
                 error = new InvalidGrammarError($"Expected '{enclosingChar}'", _position.Copy(), _position);
-            
+
             Advance();
             return new Token(type, TokenTypeGroup.Value, toReturn.ToString(), startPosition, _position.Copy());
         }

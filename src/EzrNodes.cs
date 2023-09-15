@@ -264,12 +264,12 @@ namespace EzrSquared.EzrNodes
     }
 
     /// <summary>
-    /// The <see cref="Node"/> structure for assigning a value to a <see cref="Node"/> variable in the context.
+    /// The <see cref="Node"/> structure for assigning a value to a variable in the context.
     /// </summary>
-    public class NodeVariableAssignmentNode : Node
+    public class VariableAssignmentNode : Node
     {
         /// <summary>
-        /// The <see cref="Node"/> variable to be assigned to.
+        /// The variable to be assigned to.
         /// </summary>
         public Node Variable;
 
@@ -279,7 +279,7 @@ namespace EzrSquared.EzrNodes
         public TokenType AssignmentOperator;
 
         /// <summary>
-        /// The <see cref="Node"/> value to be assigned to <see cref="Variable"/>.
+        /// The value to be assigned to <see cref="Variable"/>.
         /// </summary>
         public Node Value;
 
@@ -289,15 +289,15 @@ namespace EzrSquared.EzrNodes
         public bool GlobalAssignment;
 
         /// <summary>
-        /// Creates a new <see cref="NodeVariableAssignmentNode"/> object.
+        /// Creates a new <see cref="VariableAssignmentNode"/> object.
         /// </summary>
-        /// <param name="variable">The <see cref="Node"/> variable to be assigned to.</param>
+        /// <param name="variable">The variable to be assigned to.</param>
         /// <param name="assignmentOperator">The operation <see cref="TokenType"/>, if not <see cref="TokenType.Colon"/>, between the existing value of <paramref name="variable"/> and <paramref name="value"/>. The result of the operation will be assigned to <paramref name="variable"/>.</param>
-        /// <param name="value">The <see cref="Node"/> value to be assigned to <paramref name="variable"/>.</param>
+        /// <param name="value">The value to be assigned to <see cref="Variable"/>.</param>
         /// <param name="globalAssignment">The check for if the variable assignment is to the global or local context. Irrelevant if the variable to be assigned to is in a local context.</param>
-        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="NodeVariableAssignmentNode"/>.</param>
-        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="NodeVariableAssignmentNode"/>.</param>
-        public NodeVariableAssignmentNode(Node variable, TokenType assignmentOperator, Node value, bool globalAssignment, Position startPosition, Position endPosition) : base(startPosition, endPosition)
+        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="VariableAssignmentNode"/>.</param>
+        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="VariableAssignmentNode"/>.</param>
+        public VariableAssignmentNode(Node variable, TokenType assignmentOperator, Node value, bool globalAssignment, Position startPosition, Position endPosition) : base(startPosition, endPosition)
         {
             Variable = variable;
             AssignmentOperator = assignmentOperator;
@@ -307,55 +307,7 @@ namespace EzrSquared.EzrNodes
 
         public override string ToString()
         {
-            return $"NodeVariableAssignmentNode({Variable}, {AssignmentOperator}, {Value}, {GlobalAssignment})";
-        }
-    }
-
-    /// <summary>
-    /// The <see cref="Node"/> structure for assigning a value to a <see cref="Token"/> variable in the context.
-    /// </summary>
-    public class TokenVariableAssignmentNode : Node
-    {
-        /// <summary>
-        /// The <see cref="Token"/> variable to be assigned to.
-        /// </summary>
-        public Token Variable;
-
-        /// <summary>
-        /// The operation <see cref="TokenType"/>, if not <see cref="TokenType.Colon"/>, between the existing value of <see cref="Variable"/> and <see cref="Value"/>. The result of the operation will be assigned to <see cref="Variable"/>.
-        /// </summary>
-        public TokenType AssignmentOperator;
-
-        /// <summary>
-        /// The <see cref="Node"/> value to be assigned to <see cref="Variable"/>.
-        /// </summary>
-        public Node Value;
-
-        /// <summary>
-        /// The check for if the variable assignment is to the global or local context. Irrelevant if the variable to be assigned to is in a local context.
-        /// </summary>
-        public bool GlobalAssignment;
-
-        /// <summary>
-        /// Creates a new <see cref="TokenVariableAssignmentNode"/> object.
-        /// </summary>
-        /// <param name="variable">The <see cref="Token"/> variable to be assigned to.</param>
-        /// <param name="assignmentOperator">The operation <see cref="TokenType"/>, if not <see cref="TokenType.Colon"/>, between the existing value of <paramref name="variable"/> and <paramref name="value"/>. The result of the operation will be assigned to <paramref name="variable"/>.</param>
-        /// <param name="value">The <see cref="Node"/> value to be assigned to <paramref name="variable"/>.</param>
-        /// <param name="globalAssignment">The check for if the variable assignment is to the global or local context. Irrelevant if the variable to be assigned to is in a local context.</param>
-        /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="TokenVariableAssignmentNode"/>.</param>
-        /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="TokenVariableAssignmentNode"/>.</param>
-        public TokenVariableAssignmentNode(Token variable, TokenType assignmentOperator, Node value, bool globalAssignment, Position startPosition, Position endPosition) : base(startPosition, endPosition)
-        {
-            Variable = variable;
-            AssignmentOperator = assignmentOperator;
-            Value = value;
-            GlobalAssignment = globalAssignment;
-        }
-
-        public override string ToString()
-        {
-            return $"TokenVariableAssignmentNode({Variable}, {AssignmentOperator}, {Value}, {GlobalAssignment})";
+            return $"VariableAssignmentNode({Variable}, {AssignmentOperator}, {Value}, {GlobalAssignment})";
         }
     }
 
@@ -565,7 +517,7 @@ namespace EzrSquared.EzrNodes
             for (int i = 0; i < Cases.Count; i++)
                 cases[i] = $"({Cases[i][0]}, {Cases[i][1]}, {Cases[i][2]})";
 
-            return (EmptyCase != null) ? $"TryNode({Block}, [{string.Join(", ", cases)}], ({EmptyCase[0]}, {EmptyCase[1]}))" : $"TryNode({Block}, [{string.Join(", ", cases)}], )";
+            return (EmptyCase is not null) ? $"TryNode({Block}, [{string.Join(", ", cases)}], ({EmptyCase[0]}, {EmptyCase[1]}))" : $"TryNode({Block}, [{string.Join(", ", cases)}], )";
         }
     }
 

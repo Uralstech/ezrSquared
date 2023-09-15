@@ -71,11 +71,11 @@ namespace EzrSquared.EzrErrors
 
             while (char.IsWhiteSpace(text[start]) && start < text.Length - 1)
                 start++;
-            
+
             end = text.IndexOf('\n', start + 1);
             if (end == -1)
                 end = text.Length;
-        
+
             return new StringBuilder("  ")
                 .Append(text[start..end])
                 .Append('\n')

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EzrSquared.EzrParser
 {
     using EzrCommon;
-    using EzrNodes;
     using EzrErrors;
+    using EzrNodes;
 
     /// <summary>
     /// The ezrSquared Parser. The job of the Parser is to convert the input <see cref="Token"/> objects from the <see cref="EzrLexer.Lexer"/> into <see cref="Node"/> objects to be given as the input to the Interpreter (TODO).
@@ -119,7 +119,7 @@ namespace EzrSquared.EzrParser
         public ParseResult Parse()
         {
             ParseStatements();
-            if (_result.Error == null && _currentToken.Type != TokenType.EndOfFile)
+            if (_result.Error is null && _currentToken.Type != TokenType.EndOfFile)
                 _result.Failure(10, new InvalidGrammarError("Did not expect this!", _currentToken.StartPosition, _currentToken.EndPosition));
             return _result;
         }
@@ -132,28 +132,40 @@ namespace EzrSquared.EzrParser
         /// <param name="operators">The operator <see cref="TokenType"/> object(s).</param>
         private void BinaryOperation(Action left, Action right, params TokenType[] operators)
         {
+            bool CurrentTokenInOperators()
+            {
+                int length = operators.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    if (_currentToken.Type == operators[i])
+                        return true;
+                }
+
+                return false;
+            }
+
             Position startPosition = _currentToken.StartPosition;
 
             left();
             Node leftNode = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             int toReverseTo = _result.AdvanceCount;
             if (_currentToken.Type == TokenType.NewLine)
                 Advance();
 
-            while (Array.IndexOf(operators, _currentToken.Type) != -1)
+            while (CurrentTokenInOperators())
             {
                 TokenType @operator = _currentToken.Type;
                 Advance();
 
                 if (_currentToken.Type == TokenType.NewLine)
                     Advance();
-                
+
                 right();
                 Node rightNode = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 leftNode = new BinaryOperationNode(leftNode, rightNode, @operator, startPosition, _currentToken.EndPosition);
@@ -181,7 +193,7 @@ namespace EzrSquared.EzrParser
 
             ParseStatement();
             Node statement = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
             statements.Add(statement);
 
@@ -207,7 +219,7 @@ namespace EzrSquared.EzrParser
 
                 ParseStatement();
                 statement = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
                 statements.Add(statement);
             }
@@ -244,7 +256,7 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 expression = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 _result.Success(new ReturnNode(expression, startPosition, _currentToken.EndPosition));
@@ -262,7 +274,7 @@ namespace EzrSquared.EzrParser
 
             ParseExpression();
             expression = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 _result.Failure(4, new InvalidGrammarError("Expected a statement!", _currentToken.StartPosition, _currentToken.EndPosition));
             else
                 _result.Success(expression);
@@ -285,7 +297,7 @@ namespace EzrSquared.EzrParser
                 globalAssignment = true;
                 Advance();
             }
-            
+
             if (_currentToken.Type == TokenType.KeywordItem)
             {
                 usedItemKeyword = true;
@@ -295,7 +307,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseQuickExpression();
                 Node node_ = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     _result.Failure(4, new InvalidGrammarError("Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
                 else
                     _result.Success(node_);
@@ -304,52 +316,31 @@ namespace EzrSquared.EzrParser
 
             if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
             {
-                Token possibleVariable = _currentToken;
-                Advance();
+                ParseJunction();
+                Node variable = _result.Node;
+                if (_result.Error is not null)
+                    return;
 
-                if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
-                {
-                    Reverse();
-
-                    ParseJunction();
-                    Node variable = _result.Node;
-                    if (_result.Error != null)
-                        return;
-
-                    if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
-                    {
-                        TokenType assignmentOperator = _currentToken.Type;
-                        Advance();
-
-                        ParseExpression();
-                        Node value = _result.Node;
-                        if (_result.Error != null)
-                            return;
-
-                        _result.Success(new NodeVariableAssignmentNode(variable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
-                        return;
-                    }
-                    else if (usedItemKeyword)
-                    {
-                        _result.Failure(10, new InvalidGrammarError("Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
-                        return;
-                    }
-                    else
-                        Reverse(_result.AdvanceCount - startingAdvanceCount);
-                }
-                else
+                if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
                 {
                     TokenType assignmentOperator = _currentToken.Type;
                     Advance();
-
+                
                     ParseExpression();
                     Node value = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
-
-                    _result.Success(new TokenVariableAssignmentNode(possibleVariable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
+                
+                    _result.Success(new VariableAssignmentNode(variable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
                     return;
                 }
+                else if (usedItemKeyword)
+                {
+                    _result.Failure(10, new InvalidGrammarError("Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    return;
+                }
+                else
+                    Reverse(_result.AdvanceCount - startingAdvanceCount);
             }
             else if (usedItemKeyword)
             {
@@ -361,7 +352,7 @@ namespace EzrSquared.EzrParser
 
             ParseQuickExpression();
             Node node = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 _result.Failure(4, new InvalidGrammarError("Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
             else
                 _result.Success(node);
@@ -395,52 +386,31 @@ namespace EzrSquared.EzrParser
 
                 if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
                 {
-                    Token possibleVariable = _currentToken;
-                    Advance();
+                    ParseJunction();
+                    Node variable = _result.Node;
+                    if (_result.Error is not null)
+                        return;
 
-                    if (_currentToken.TypeGroup != TokenTypeGroup.AssignmentSymbol)
-                    {
-                        Reverse();
-
-                        ParseJunction();
-                        Node variable = _result.Node;
-                        if (_result.Error != null)
-                            return;
-
-                        if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
-                        {
-                            TokenType assignmentOperator = _currentToken.Type;
-                            Advance();
-
-                            ParseExpression();
-                            Node value = _result.Node;
-                            if (_result.Error != null)
-                                return;
-
-                            _result.Success(new NodeVariableAssignmentNode(variable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
-                            return;
-                        }
-                        else if (usedItemKeyword)
-                        {
-                            _result.Failure(10, new InvalidGrammarError("Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
-                            return;
-                        }
-                        else
-                            Reverse(_result.AdvanceCount - startingAdvanceCount);
-                    }
-                    else
+                    if (_currentToken.TypeGroup == TokenTypeGroup.AssignmentSymbol)
                     {
                         TokenType assignmentOperator = _currentToken.Type;
                         Advance();
 
                         ParseExpression();
                         Node value = _result.Node;
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                             return;
 
-                        _result.Success(new TokenVariableAssignmentNode(possibleVariable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
+                        _result.Success(new VariableAssignmentNode(variable, assignmentOperator, value, globalAssignment, startPosition, _currentToken.EndPosition));
                         return;
                     }
+                    else if (usedItemKeyword)
+                    {
+                        _result.Failure(10, new InvalidGrammarError("Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        return;
+                    }
+                    else
+                        Reverse(_result.AdvanceCount - startingAdvanceCount);
                 }
                 else if (usedItemKeyword)
                 {
@@ -453,7 +423,7 @@ namespace EzrSquared.EzrParser
 
             ParseJunction();
             Node node = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 _result.Failure(4, new InvalidGrammarError("Expected a QuickSyntax expression!", _currentToken.StartPosition, _currentToken.EndPosition));
             else
                 _result.Success(node);
@@ -474,8 +444,21 @@ namespace EzrSquared.EzrParser
         {
             Position startPosition = _currentToken.StartPosition;
             int startingAdvanceCount = _result.AdvanceCount;
+            
+            if (_currentToken.Type == TokenType.KeywordInvert)
+            {
+                TokenType @operator = _currentToken.Type;
+                Advance();
 
-            if (_currentToken.Type == TokenType.ExclamationMark)
+                ParseExpression();
+                Node operand = _result.Node;
+                if (_result.Error is not null)
+                    return;
+
+                _result.Success(new UnaryOperationNode(operand, @operator, startPosition, _currentToken.EndPosition));
+                return;
+            }
+            else if (_currentToken.Type == TokenType.ExclamationMark)
             {
                 Advance();
 
@@ -486,7 +469,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     Node operand = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     _result.Success(new UnaryOperationNode(operand, @operator, startPosition, _currentToken.EndPosition));
@@ -495,23 +478,10 @@ namespace EzrSquared.EzrParser
                 else
                     Reverse(_result.AdvanceCount - startingAdvanceCount);
             }
-            else if (_currentToken.Type == TokenType.KeywordInvert)
-            {
-                TokenType @operator = _currentToken.Type;
-                Advance();
-
-                ParseExpression();
-                Node operand = _result.Node;
-                if (_result.Error != null)
-                    return;
-
-                _result.Success(new UnaryOperationNode(operand, @operator, startPosition, _currentToken.EndPosition));
-                return;
-            }
 
             ParseComparison();
             Node node = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 _result.Failure(4, new InvalidGrammarError("Expected an inversion expression!", _currentToken.StartPosition, _currentToken.EndPosition));
             else
                 _result.Success(node);
@@ -526,7 +496,7 @@ namespace EzrSquared.EzrParser
 
             ParseBitwiseOr();
             Node left = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             int toReverseTo = _result.AdvanceCount;
@@ -560,7 +530,7 @@ namespace EzrSquared.EzrParser
 
                 ParseBitwiseOr();
                 Node right = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 left = new BinaryOperationNode(left, right, @operator, startPosition, _currentToken.EndPosition);
@@ -636,7 +606,7 @@ namespace EzrSquared.EzrParser
 
                 ParseFactor();
                 Node operand = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 _result.Success(new UnaryOperationNode(operand, @operator, startPosition, _currentToken.EndPosition));
@@ -671,10 +641,10 @@ namespace EzrSquared.EzrParser
 
             ParseAtom();
             Node node = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
-            if(_currentToken.Type == TokenType.LeftParenthesis)
+            if (_currentToken.Type == TokenType.LeftParenthesis)
             {
                 Advance();
 
@@ -694,7 +664,7 @@ namespace EzrSquared.EzrParser
                 {
                     ParseExpression();
                     arguments.Add(_result.Node);
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                     {
                         _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorStartPosition, _currentToken.EndPosition)));
                         return;
@@ -713,7 +683,7 @@ namespace EzrSquared.EzrParser
 
                         ParseExpression();
                         arguments.Add(_result.Node);
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                         {
                             _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorStartPosition, _currentToken.EndPosition)));
                             return;
@@ -735,7 +705,7 @@ namespace EzrSquared.EzrParser
                 _result.Success(new CallNode(node, arguments, startPosition, endPosition));
                 return;
             }
-            
+
             _result.Success(node);
         }
 
@@ -746,112 +716,110 @@ namespace EzrSquared.EzrParser
         {
 
             Token startToken = _currentToken;
-            if(startToken.TypeGroup == TokenTypeGroup.Value)
+            switch (startToken.Type)
             {
-                Advance();
+                case TokenType.KeywordGlobal:
+                    Advance();
 
-                _result.Success(new ValueNode(startToken, startToken.StartPosition, startToken.EndPosition));
-                return;
-            }
-            else if (startToken.Type == TokenType.Identifier || startToken.TypeGroup == TokenTypeGroup.Qeyword)
-            {
-                Advance();
-
-                _result.Success(new VariableAccessNode(startToken, false, startToken.StartPosition, startToken.EndPosition));
-                return;
-            }
-            else
-            {
-                switch (startToken.Type)
-                {
-                    case TokenType.KeywordGlobal:
+                    if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
+                    {
+                        Token variable = _currentToken;
+                        Position endPosition = _currentToken.EndPosition;
                         Advance();
 
-                        if (_currentToken.Type == TokenType.Identifier || _currentToken.TypeGroup == TokenTypeGroup.Qeyword)
-                        {
-                            Token variable = _currentToken;
-                            Position endPosition = _currentToken.EndPosition;
-                            Advance();
+                        _result.Success(new VariableAccessNode(variable, true, startToken.StartPosition, endPosition));
+                        return;
+                    }
+                    _result.Failure(10, new InvalidGrammarError("Expected a variable name or the 'item' keyword! The variable name is used to access a global variable in a global variable access expression and the 'item' keyword is used to assign to a global variable in a global variable assignment expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    break;
+                case TokenType.LeftParenthesis:
+                    ParseArrayOrParentheticalExpression();
+                    Node arrayNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(arrayNode);
+                    break;
+                case TokenType.LeftSquareBracket:
+                    ParseList();
+                    Node encapsulatedListNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(encapsulatedListNode);
+                    break;
+                case TokenType.LeftCurlyBracket:
+                    ParseDictionary();
+                    Node dictionaryNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(dictionaryNode);
+                    break;
+                case TokenType.KeywordIf:
+                    ParseIfExpression();
+                    Node ifNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(ifNode);
+                    break;
+                case TokenType.KeywordCount:
+                    ParseCountExpression();
+                    Node countNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(countNode);
+                    break;
+                case TokenType.KeywordWhile:
+                    ParseWhileExpression();
+                    Node whileNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(whileNode);
+                    break;
+                case TokenType.KeywordTry:
+                    ParseTryExpression();
+                    Node tryNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(tryNode);
+                    break;
+                case TokenType.KeywordFunction:
+                    ParseFunctionDefinitionExpression();
+                    Node functionDefinitionNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(functionDefinitionNode);
+                    break;
+                case TokenType.KeywordObject:
+                    ParseObjectDefinitionExpression();
+                    Node objectDefinitionNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(objectDefinitionNode);
+                    break;
+                case TokenType.KeywordInclude:
+                    ParseIncludeExpression();
+                    Node includeNode = _result.Node;
+                    if (_result.Error is not null)
+                        return;
+                    _result.Success(includeNode);
+                    break;
+                default:
+                    if (startToken.TypeGroup == TokenTypeGroup.Value)
+                    {
+                        Advance();
 
-                            _result.Success(new VariableAccessNode(variable, true, startToken.StartPosition, endPosition));
-                            return;
-                        }
-                        _result.Failure(10, new InvalidGrammarError("Expected a variable name or the 'item' keyword! The variable name is used to access a global variable in a global variable access expression and the 'item' keyword is used to assign to a global variable in a global variable assignment expression.", _currentToken.StartPosition, _currentToken.EndPosition));
-                        break;
-                    case TokenType.LeftParenthesis:
-                        ParseArrayOrParentheticalExpression();
-                        Node arrayNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(arrayNode);
-                        break;
-                    case TokenType.LeftSquareBracket:
-                        ParseList();
-                        Node encapsulatedListNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(encapsulatedListNode);
-                        break;
-                    case TokenType.LeftCurlyBracket:
-                        ParseDictionary();
-                        Node dictionaryNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(dictionaryNode);
-                        break;
-                    case TokenType.KeywordIf:
-                        ParseIfExpression();
-                        Node ifNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(ifNode);
-                        break;
-                    case TokenType.KeywordCount:
-                        ParseCountExpression();
-                        Node countNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(countNode);
-                        break;
-                    case TokenType.KeywordWhile:
-                        ParseWhileExpression();
-                        Node whileNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(whileNode);
-                        break;
-                    case TokenType.KeywordTry:
-                        ParseTryExpression();
-                        Node tryNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(tryNode);
-                        break;
-                    case TokenType.KeywordFunction:
-                        ParseFunctionDefinitionExpression();
-                        Node functionDefinitionNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(functionDefinitionNode);
-                        break;
-                    case TokenType.KeywordObject:
-                        ParseObjectDefinitionExpression();
-                        Node objectDefinitionNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(objectDefinitionNode);
-                        break;
-                    case TokenType.KeywordInclude:
-                        ParseIncludeExpression();
-                        Node includeNode = _result.Node;
-                        if (_result.Error != null)
-                            return;
-                        _result.Success(includeNode);
-                        break;
-                    default:
-                        _result.Failure(4, new InvalidGrammarError("Expected an integer, float, string, character, character list, identifier, 'if' expression, 'count' expression, 'while' expression and so on.", _currentToken.StartPosition, _currentToken.EndPosition));
-                        break;
-                }
+                        _result.Success(new ValueNode(startToken, startToken.StartPosition, startToken.EndPosition));
+                        return;
+                    }
+                    else if (startToken.Type == TokenType.Identifier || startToken.TypeGroup == TokenTypeGroup.Qeyword)
+                    {
+                        Advance();
+
+                        _result.Success(new VariableAccessNode(startToken, false, startToken.StartPosition, startToken.EndPosition));
+                        return;
+                    }
+
+                    _result.Failure(4, new InvalidGrammarError("Expected an integer, float, string, character, character list, identifier, 'if' expression, 'count' expression, 'while' expression and so on.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    break;
             }
         }
 
@@ -880,7 +848,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression();
                 elements.Add(_result.Node);
-                if (_result.Error != null)
+                if (_result.Error is not null)
                 {
                     _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-parenthesis symbol! An array/parenthetical expression must end with a right-parenthesis.", possibleErrorStartPosition, _currentToken.EndPosition)));
                     return;
@@ -902,7 +870,7 @@ namespace EzrSquared.EzrParser
                         break;
 
                     ParseExpression();
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                     {
                         if (elements.Count > 1)
                         {
@@ -928,7 +896,7 @@ namespace EzrSquared.EzrParser
                         _result.Failure(10, new InvalidGrammarError("Expected a comma or a right-parenthesis symbol! The comma is used to create an array and seperate its elements, while the right-parenthesis declares the end of a parenthetical expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
-                
+
                 endPosition = _currentToken.EndPosition;
                 Advance();
             }
@@ -963,7 +931,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression();
                 elements.Add(_result.Node);
-                if (_result.Error != null)
+                if (_result.Error is not null)
                 {
                     _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorStartPosition, _currentToken.EndPosition)));
                     return;
@@ -982,12 +950,12 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     elements.Add(_result.Node);
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                     {
                         _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorStartPosition, _currentToken.EndPosition)));
                         return;
                     }
-                    
+
                     if (_currentToken.Type == TokenType.NewLine)
                         Advance();
                 }
@@ -1028,7 +996,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression(true);
                 Node left = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                 {
                     _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorStartPosition, _currentToken.EndPosition)));
                     return;
@@ -1036,7 +1004,7 @@ namespace EzrSquared.EzrParser
 
                 if (_currentToken.Type == TokenType.NewLine)
                     Advance();
-                
+
                 if (_currentToken.Type != TokenType.Colon)
                 {
                     _result.Failure(10, new InvalidGrammarError("Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
@@ -1049,7 +1017,7 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 Node right = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 pairs.Add(new Node[2] { left, right });
@@ -1066,7 +1034,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression(true);
                     left = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                     {
                         _result.Failure(10, new StackedError(_result.Error, new InvalidGrammarError("Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorStartPosition, _currentToken.EndPosition)));
                         return;
@@ -1088,7 +1056,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     right = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     pairs.Add(new Node[2] { left, right });
@@ -1122,7 +1090,7 @@ namespace EzrSquared.EzrParser
 
             ParseExpression();
             Node condition = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             if (_currentToken.Type != TokenType.KeywordDo)
@@ -1140,7 +1108,7 @@ namespace EzrSquared.EzrParser
 
                 ParseStatements();
                 body = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 Position endPosition;
@@ -1158,7 +1126,7 @@ namespace EzrSquared.EzrParser
 
                         if (_currentToken.Type == TokenType.KeywordIf)
                         {
-                            if (elseCase != null)
+                            if (elseCase is not null)
                             {
                                 _result.Failure(10, new InvalidGrammarError("The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                                 return;
@@ -1168,7 +1136,7 @@ namespace EzrSquared.EzrParser
 
                             ParseExpression();
                             condition = _result.Node;
-                            if (_result.Error != null)
+                            if (_result.Error is not null)
                                 return;
 
                             if (_currentToken.Type != TokenType.KeywordDo)
@@ -1181,7 +1149,7 @@ namespace EzrSquared.EzrParser
 
                             ParseStatements();
                             body = _result.Node;
-                            if (_result.Error != null)
+                            if (_result.Error is not null)
                                 return;
 
                             cases.Add(new Node[2] { condition, body });
@@ -1193,7 +1161,7 @@ namespace EzrSquared.EzrParser
                         }
                         else
                         {
-                            if (elseCase != null)
+                            if (elseCase is not null)
                             {
                                 _result.Failure(10, new InvalidGrammarError("There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                                 return;
@@ -1203,14 +1171,14 @@ namespace EzrSquared.EzrParser
 
                             ParseStatements();
                             elseCase = _result.Node;
-                            if (_result.Error != null)
+                            if (_result.Error is not null)
                                 return;
                         }
                     }
 
                     if (_currentToken.Type != TokenType.KeywordEnd)
                     {
-                        if (elseCase == null)
+                        if (elseCase is null)
                             _result.Failure(10, new InvalidGrammarError("Expected the 'else' or 'end' keywords! The 'else' keyword defines the start of an \"else\" or \"else if\" expression, and the 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         else
                             _result.Failure(10, new InvalidGrammarError("Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
@@ -1232,7 +1200,7 @@ namespace EzrSquared.EzrParser
 
             ParseStatement();
             body = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             cases.Add(new Node[2] { condition, body });
@@ -1242,7 +1210,7 @@ namespace EzrSquared.EzrParser
 
                 if (_currentToken.Type == TokenType.KeywordIf)
                 {
-                    if (elseCase != null)
+                    if (elseCase is not null)
                     {
                         _result.Failure(10, new InvalidGrammarError("The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                         return;
@@ -1252,7 +1220,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     condition = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type != TokenType.KeywordDo)
@@ -1265,7 +1233,7 @@ namespace EzrSquared.EzrParser
 
                     ParseStatement();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     cases.Add(new Node[2] { condition, body });
@@ -1277,7 +1245,7 @@ namespace EzrSquared.EzrParser
                 }
                 else
                 {
-                    if (elseCase != null)
+                    if (elseCase is not null)
                     {
                         _result.Failure(10, new InvalidGrammarError("There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                         return;
@@ -1287,7 +1255,7 @@ namespace EzrSquared.EzrParser
 
                     ParseStatement();
                     elseCase = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
                 }
             }
@@ -1314,13 +1282,13 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 from = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
 
             if (_currentToken.Type != TokenType.KeywordTo)
             {
-                if (from == null)
+                if (from is null)
                     _result.Failure(10, new InvalidGrammarError("Expected the 'to' or 'from' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop, and the optional 'from' keyword and the following expression is the amount to count from.", _currentToken.StartPosition, _currentToken.EndPosition));
                 else
                     _result.Failure(10, new InvalidGrammarError("Expected the 'to' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
@@ -1331,7 +1299,7 @@ namespace EzrSquared.EzrParser
 
             ParseExpression();
             to = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             if (_currentToken.Type == TokenType.KeywordStep)
@@ -1340,7 +1308,7 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 step = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
 
@@ -1350,15 +1318,15 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 @as = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
 
             if (_currentToken.Type != TokenType.KeywordDo)
             {
-                if (step == null && @as == null)
+                if (step is null && @as is null)
                     _result.Failure(10, new InvalidGrammarError("Expected the 'do', 'step' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, the optional 'step' keyword and the following expression is the increment, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
-                else if (@as == null)    
+                else if (@as is null)
                     _result.Failure(10, new InvalidGrammarError("Expected the 'do' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
                 else
                     _result.Failure(10, new InvalidGrammarError("Expected the 'do' keyword! The 'do' keyword declares the start of the body of the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
@@ -1375,7 +1343,7 @@ namespace EzrSquared.EzrParser
 
                 ParseStatements();
                 body = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 if (_currentToken.Type != TokenType.KeywordEnd)
@@ -1391,7 +1359,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseStatement();
                 body = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 endPosition = PeekPrevious().EndPosition;
@@ -1410,7 +1378,7 @@ namespace EzrSquared.EzrParser
 
             ParseExpression();
             Node condition = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             if (_currentToken.Type != TokenType.KeywordDo)
@@ -1428,7 +1396,7 @@ namespace EzrSquared.EzrParser
 
                 ParseStatements();
                 body = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 if (_currentToken.Type != TokenType.KeywordEnd)
@@ -1444,7 +1412,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseStatement();
                 body = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 endPosition = PeekPrevious().EndPosition;
@@ -1480,7 +1448,7 @@ namespace EzrSquared.EzrParser
 
                 ParseStatements();
                 block = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 Position endPosition;
@@ -1502,7 +1470,7 @@ namespace EzrSquared.EzrParser
                         bool isAsKeyword = _currentToken.Type == TokenType.KeywordAs;
                         if (_currentToken.Type == TokenType.KeywordDo || isAsKeyword)
                         {
-                            if (emptyCase != null)
+                            if (emptyCase is not null)
                             {
                                 _result.Failure(10, new InvalidGrammarError("There should only be one empty \"error\" expression! You cannot have multiple \"error\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                                 return;
@@ -1515,7 +1483,7 @@ namespace EzrSquared.EzrParser
 
                                 ParseExpression();
                                 @as = _result.Node;
-                                if (_result.Error != null)
+                                if (_result.Error is not null)
                                     return;
 
                                 if (_currentToken.Type != TokenType.KeywordDo)
@@ -1529,17 +1497,17 @@ namespace EzrSquared.EzrParser
 
                             ParseStatements();
                             body = _result.Node;
-                            if (_result.Error != null)
+                            if (_result.Error is not null)
                                 return;
 
-                            if (error != null)
+                            if (error is not null)
                                 cases.Add(new Node?[3] { error, @as, body });
                             else
                                 emptyCase = new Node?[2] { @as, body };
                         }
                         else if (isErrorNull && _currentToken.Type != TokenType.EndOfFile && _currentToken.Type != TokenType.NewLine)
                         {
-                            if (emptyCase != null)
+                            if (emptyCase is not null)
                             {
                                 Token previous = PeekPrevious();
                                 _result.Failure(10, new InvalidGrammarError("There can't be any \"error\" expressions after an empty \"error\" expression!", previous.StartPosition, previous.EndPosition));
@@ -1548,7 +1516,7 @@ namespace EzrSquared.EzrParser
 
                             ParseExpression();
                             error = _result.Node;
-                            if (_result.Error != null)
+                            if (_result.Error is not null)
                                 return;
 
                             isErrorNull = false;
@@ -1568,7 +1536,7 @@ namespace EzrSquared.EzrParser
 
                     if (_currentToken.Type != TokenType.KeywordEnd)
                     {
-                        if (emptyCase == null)
+                        if (emptyCase is null)
                             _result.Failure(10, new InvalidGrammarError("Expected the 'error' or 'end' keywords! The 'error' keyword defines the start of an \"error\" expression, and the 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         else
                             _result.Failure(10, new InvalidGrammarError("Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
@@ -1590,7 +1558,7 @@ namespace EzrSquared.EzrParser
 
             ParseStatement();
             block = _result.Node;
-            if (_result.Error != null)
+            if (_result.Error is not null)
                 return;
 
             while (_currentToken.Type == TokenType.KeywordError)
@@ -1604,7 +1572,7 @@ namespace EzrSquared.EzrParser
                 bool isAsKeyword = _currentToken.Type == TokenType.KeywordAs;
                 if (_currentToken.Type == TokenType.KeywordDo || isAsKeyword)
                 {
-                    if (emptyCase != null)
+                    if (emptyCase is not null)
                     {
                         _result.Failure(10, new InvalidGrammarError("There should only be one empty \"error\" expression! You cannot have multiple \"error\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                         return;
@@ -1617,7 +1585,7 @@ namespace EzrSquared.EzrParser
 
                         ParseExpression();
                         @as = _result.Node;
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                             return;
 
                         if (_currentToken.Type != TokenType.KeywordDo)
@@ -1631,17 +1599,17 @@ namespace EzrSquared.EzrParser
 
                     ParseStatement();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
-                    if (error != null)
+                    if (error is not null)
                         cases.Add(new Node?[3] { error, @as, body });
                     else
                         emptyCase = new Node?[2] { @as, body };
                 }
                 else if (isErrorNull && _currentToken.Type != TokenType.EndOfFile && _currentToken.Type != TokenType.NewLine)
                 {
-                    if (emptyCase != null)
+                    if (emptyCase is not null)
                     {
                         Token previous = PeekPrevious();
                         _result.Failure(10, new InvalidGrammarError("There can't be any \"error\" expressions after an empty \"error\" expression!", previous.StartPosition, previous.EndPosition));
@@ -1650,7 +1618,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     error = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     isErrorNull = false;
@@ -1699,7 +1667,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     parameters.Add(_result.Node);
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type == TokenType.NewLine)
@@ -1714,7 +1682,7 @@ namespace EzrSquared.EzrParser
 
                         ParseExpression();
                         parameters.Add(_result.Node);
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                             return;
 
                         if (_currentToken.Type == TokenType.NewLine)
@@ -1736,7 +1704,7 @@ namespace EzrSquared.EzrParser
 
                     ParseStatements();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type != TokenType.KeywordEnd)
@@ -1752,7 +1720,7 @@ namespace EzrSquared.EzrParser
                 {
                     ParseStatement();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     endPosition = PeekPrevious().EndPosition;
@@ -1762,7 +1730,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression();
                 name = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 isNameNull = false;
@@ -1816,7 +1784,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     parameters.Add(_result.Node);
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type == TokenType.NewLine)
@@ -1831,7 +1799,7 @@ namespace EzrSquared.EzrParser
 
                         ParseExpression();
                         parameters.Add(_result.Node);
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                             return;
 
                         if (_currentToken.Type == TokenType.NewLine)
@@ -1855,7 +1823,7 @@ namespace EzrSquared.EzrParser
 
                     ParseExpression();
                     parents.Add(_result.Node);
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type == TokenType.NewLine)
@@ -1870,7 +1838,7 @@ namespace EzrSquared.EzrParser
 
                         ParseExpression();
                         parents.Add(_result.Node);
-                        if (_result.Error != null)
+                        if (_result.Error is not null)
                             return;
 
                         if (_currentToken.Type == TokenType.NewLine)
@@ -1892,7 +1860,7 @@ namespace EzrSquared.EzrParser
 
                     ParseStatements();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     if (_currentToken.Type != TokenType.KeywordEnd)
@@ -1908,7 +1876,7 @@ namespace EzrSquared.EzrParser
                 {
                     ParseStatement();
                     body = _result.Node;
-                    if (_result.Error != null)
+                    if (_result.Error is not null)
                         return;
 
                     endPosition = PeekPrevious().EndPosition;
@@ -1918,7 +1886,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression();
                 name = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
 
                 isNameNull = false;
@@ -1955,7 +1923,7 @@ namespace EzrSquared.EzrParser
             {
                 ParseExpression();
                 subStructure = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
             else
@@ -1970,10 +1938,10 @@ namespace EzrSquared.EzrParser
 
                 ParseExpression();
                 script = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
-            else if (subStructure != null)
+            else if (subStructure is not null)
             {
                 script = subStructure;
                 subStructure = null;
@@ -1983,14 +1951,14 @@ namespace EzrSquared.EzrParser
                 _result.Failure(10, new InvalidGrammarError("Expected the 'from' keyword! If a specific object being included from a script (when the object's name is provided after the 'include' keyword) or if the whole script is added to the script (using the 'all' keyword or a comma symbol after the 'include' keyword), the 'from' keyword followed by an expression declaring the script's name or path must be provided.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
-        
+
             if (_currentToken.Type == TokenType.KeywordAs)
             {
                 Advance();
 
                 ParseExpression();
                 nickname = _result.Node;
-                if (_result.Error != null)
+                if (_result.Error is not null)
                     return;
             }
 
@@ -2056,7 +2024,7 @@ namespace EzrSquared.EzrParser
         /// <returns>The same <see cref="ParseResult"/> object.</returns>
         public void Failure(int priority, Error error)
         {
-            if (Error == null || ErrorPriority <= priority || AdvanceCount == 0)
+            if (Error is null || ErrorPriority <= priority || AdvanceCount == 0)
             {
                 ErrorPriority = priority;
                 Error = error;
