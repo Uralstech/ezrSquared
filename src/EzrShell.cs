@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Collections.Generic;
 
 namespace EzrSquared.EzrShell
 {
@@ -62,14 +62,12 @@ namespace EzrSquared.EzrShell
 
         private struct Settings
         {
-            public bool IsInteractive;
             public bool ShowLexerOutput;
             public bool ShowParserOutput;
             public string File;
 
             public Settings()
             {
-                IsInteractive = false;
                 ShowLexerOutput = false;
                 ShowParserOutput = false;
                 File = string.Empty;
@@ -190,7 +188,7 @@ namespace EzrSquared.EzrShell
                     ShowError("Intended use:\n\tezrSquared [file] [-l | --lexer-output] [-p | --parser-output]");
                     return false;
                 }
-            
+
                 isFirstArgument = false;
             }
 
@@ -214,11 +212,10 @@ namespace EzrSquared.EzrShell
             Console.Write("File to read (press the 'enter' key to enter interactive mode): ");
             string? filePath = Console.ReadLine();
 
-            if (string.IsNullOrEmpty(filePath))
-                settings.IsInteractive = true;
-            else if (File.Exists(filePath))
+
+            if (File.Exists(filePath))
                 settings.File = filePath;
-            else
+            else if (!string.IsNullOrEmpty(filePath))
             {
                 ShowError($"File not found: \"{filePath}\"");
 
@@ -231,7 +228,7 @@ namespace EzrSquared.EzrShell
 
             if (!string.IsNullOrEmpty(settings.File))
                 ExecuteFile(settings);
-            else if (settings.IsInteractive)
+            else
                 InteractiveMode(settings);
 
             Console.BackgroundColor = s_previousBackgroundColor;
@@ -249,7 +246,7 @@ namespace EzrSquared.EzrShell
                     ShowVerbose($" - {tokens[i]}");
             }
 
-            if (error != null)
+            if (error is not null)
             {
                 ShowError(error.ToString());
                 return;
@@ -257,7 +254,7 @@ namespace EzrSquared.EzrShell
 
             Parser parser = new Parser(tokens);
             ParseResult result = parser.Parse();
-            if (result.Error != null)
+            if (result.Error is not null)
             {
                 ShowError(result.Error.ToString());
                 return;
@@ -296,7 +293,7 @@ namespace EzrSquared.EzrShell
                             ShowVerbose($" - {tokens[i]}");
                     }
 
-                    if (error != null)
+                    if (error is not null)
                     {
                         ShowError(error.ToString());
                         continue;
@@ -304,7 +301,7 @@ namespace EzrSquared.EzrShell
 
                     Parser parser = new Parser(tokens);
                     ParseResult result = parser.Parse();
-                    if (result.Error != null)
+                    if (result.Error is not null)
                     {
                         ShowError(result.Error.ToString());
                         continue;
