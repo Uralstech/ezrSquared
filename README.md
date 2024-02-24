@@ -7,7 +7,7 @@ More information and documentation about ezr² is available at ***https://uralst
 ezrSquared is being rewritten from the ground up! Expect more features, better performance and better code documentation!
 
 ## Update!
-The development status of ezr² is now available [***here!***](https://github.com/users/Uralstech/projects/3)
+The development status of ezr² is now available on [***the ezr² project***](https://github.com/users/Uralstech/projects/3) and [***my blog***](https://uralstech.github.io/).
 
 ## Contributing
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.
