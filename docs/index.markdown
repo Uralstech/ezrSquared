@@ -1,14 +1,14 @@
 ---
 layout: default
 title: The ezr² Programming Language
-nav_order: 1
+nav_order: 2
 ---
 
 # The `ezr²` Programming Language
 {: .no_toc }
 
 **ezr², or ezrSquared when you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
-For more information check out the [*Introduction and Documentation page*](https://uralstech.github.io/ezrSquared/Introduction).**
+For more information check out the [*Learn ezr²*](https://uralstech.github.io/ezrSquared/Learn-ezrSquared) page.**
 
 <details open markdown="block">
   <summary>
@@ -21,61 +21,49 @@ For more information check out the [*Introduction and Documentation page*](https
 
 ## Advantages
 
-- High-level
-- Interpreted
-- As close to "natural" language as possible while being practical
+- As close to natural language as possible while being practical, with [***planned multilingual features***](https://uralstech.github.io/ezrSquared/Multilingual-ezrSquared)
+- Easily extendible through C# Assisted ezr² Libraries
 - Easily embeddable
-- Easily extensible through C#
-- Free and open source
 
-## Features (Existing and Planned)
+## PC Installation
 
-- Interactive shell
-- Dynamic typing
-- Object-oriented programming
-- Error handling
-- Rich set of operators
-- Support for modules
-- Support for C# through CSAELS
-- Multiple paradigms
-- Automatic memory management
+To install ezr² on your PC, follow these steps:
 
-## Installation
+#### Windows (x86 and x64)
 
-{: .warning }
-**BEFORE YOU START CODING:** ezr² is still in **pre-release** status. That means **ezr² might get backwards-incompatible updates every now and then**.
+* Download the appropriate installer from the [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on any of the download links.
+* Run the installer and go through the installation.
+<br/><br/>
 
-Now, to install ezr² on your PC, follow these steps:
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Windows%20x64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.64-bit.exe)
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Windows%20x86)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.32-bit.exe)
 
-### Windows (32 and 64 bit)
-{: .no_toc }
+#### Linux (x64, ARM64 and ARM)
 
-1. Download the latest release of ezr² (`ezrSquared.Installer.Windows.32-bit.exe` for 32-bit systems or `ezrSquared.Installer.Windows.64-bit.exe` for 64-bit systems) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
-2. Run the installer and go through the installation.
-3. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
-4. Start coding!
+* Download the appropriate `tar.xz` archive from the [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on any of the download links.
+* Extract the `tar.xz` file to a folder of your choice.
+* Optionally, add the folder to your PATH environment variable.
+<br/><br/>
 
-### Linux (64 bit)
-{: .no_toc }
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20x64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-x64.tar.gz)
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20ARM64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm64.tar.gz)
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20ARM)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm.tar.gz)
 
-1. Download the latest release of ezr² (`ezrSquared.Linux.tar.xz`) from [***GitHub***](https://github.com/Uralstech/ezrSquared/releases).
-2. Extract the `tar.xz` file to a folder of your choice.
-3. Add the folder to your PATH environment variable.
-4. Verify that ezr² is installed by running `ezrSquared` in a terminal - the ezr² biShell (built-in shell) should open (press Ctrl+C to exit).
-5. Start coding!
+### Check the installation
 
-### Android
-{: .no_toc }
+---
+* Run the `ezrSquared` command in a terminal (PowerShell, CMD, Bash, etc.) and the ezr² Shell should open. You can press Ctrl+C to exit.
+* Start coding!
 
-Check out [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter), an interpreter made with the help of
-[***ezr² Net4.8***](https://github.com/Uralstech/ezrSquaredNet4.8) in [***Unity***](https://unity.com/)!
+## Android Installation
 
-### Other
-{: .no_toc }
+Download [***ezr² Portable Interpreter on Google Play***](https://play.google.com/store/apps/details?id=com.Uralstech.ezrSquaredPortableInterpreter).
 
-For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build. If you're a contributor, feel free to add the build to the latest [***release***](https://github.com/Uralstech/ezrSquared/releases).
+If you are interested in how ezr² was embedded to the portable interpreter (a Unity app), check out the [***C# and ezr² page***](https://uralstech.github.io/ezrSquared/CSharp-and-ezrSquared).
 
-If you are interested in how ezr² was embedded to the portable interpreter, check out the [***C# in ezr² page***](https://uralstech.github.io/ezrSquared/CSAELs).
+## Other Operating Systems
+
+For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build. If you're a contributor, feel free to add the build to the latest release.
 
 ## Usage
 
@@ -83,45 +71,26 @@ An ezr² script has the extension `.ezr2`. To run an ezr² script, use the `ezrS
 
 ```cmd
 > ezrSquared hello.ezr2
-Use the "ezrSquared" command without any arguments to start the biShell:
-
-> ezrSquared
-You can type any valid ezr² expression in the shell and see its result.
 ```
 
 ## Documentation
-The official documentation for ezr² is available in the [***Introduction and Documentation page***](https://uralstech.github.io/ezrSquared/Introduction), but is still **work in progress**.
+
+The official documentation for ezr² is available in the [***Learn ezr² page***](https://uralstech.github.io/ezrSquared/Learn-ezrSquared), but is still **work in progress**.
 Meanwhile, check out some example programs in [***GitHub***](https://github.com/Uralstech/ezrSquared/tree/master/Tests).
 
 The offline version of the ezrSquared website was made possible with [***Jekyll Offline***](https://github.com/dohliam/jekyll-offline).
-The documentation is packaged with the Windows installer. For other OSes, download and extract `ezrSquared.Offline.Documentation.zip`, which is available for download with each release on GitHub.
+The documentation is packaged with the Windows installer. For other OSes, download and extract the `zip` archive from [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on the link below:
+
+[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20Documentation-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Offline.Documentation.zip)
 
 ## Latest Updates
-**For those confused by the versioning: 1st place -> Major; 2nd place -> Feature; 3rd place -> Quality of Life; 4th place -> Library; 5th place -> Patch**. I plan to switch to [***Semantic Versioning 2.0.0***](https://semver.org/) for the first stable release.
 
-* **prerelease-1.5.1.3.0** - [03-05-23]
-    * Added new functions `get_window_size`, `set_window_size`, `get_window_position` and `set_window_position` -
-        to `Console` class in the IO library
-    * Function `set_buffer_size` in `Console` class in the IO library now uses the `SetBufferSize` C# function
-
-* **prerelease-1.5.1.2.0** - [01-04-23]
-    * Added new functions `get_buffer_size` and `set_buffer_size` to `Console` class in the IO library
-    * Unsupported functions in `Console` class in the IO library will now show new error if called
-
-* **prerelease-1.5.1.1.0** - [27-03-23]
-    * `Console.set_cursor_position` in the IO library now accepts two seperate integers
-
-* **prerelease-1.5.1.0.1** - [25-03-23]
-    * Fixed bug in special function `equals`
-
-* **prerelease-1.5.1.0.0** - [23-03-23]
-    * "all" keyword and ',' symbol now interchangeable in normal and QuickSyntax `include` expressions
-
-* **prerelease-1.5.0.0.0** - [21-03-23]
-    * More major changes to module/library system and `include` expression
-    * Context name of value-derived types now the name of the derived type
+ezr² now uses [***Semantic Versioning 2.0.0***](https://semver.org/) for new releases. ezr² development updates will be posted on [***my blog***](https://uralstech.github.io/).
 
 ## Contributing
+
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.
 
 If you want to contribute to ezr², please contact Uralstech at `info@uralstech.in`.
+
+The contribution requirements will be revamped for the full release.

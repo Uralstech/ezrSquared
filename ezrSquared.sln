@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EzrSquared", "src\EzrSquared.csproj", "{C2192D60-CF75-4781-B016-116E6709A76C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shell", "src\Shell\Shell.csproj", "{6F16EE16-DA61-47F9-9CAC-6E127A02DA2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C2192D60-CF75-4781-B016-116E6709A76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2192D60-CF75-4781-B016-116E6709A76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2192D60-CF75-4781-B016-116E6709A76C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F16EE16-DA61-47F9-9CAC-6E127A02DA2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F16EE16-DA61-47F9-9CAC-6E127A02DA2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F16EE16-DA61-47F9-9CAC-6E127A02DA2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F16EE16-DA61-47F9-9CAC-6E127A02DA2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

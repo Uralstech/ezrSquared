@@ -1,81 +1,119 @@
-@ This is still todo.
-show("----item test----")
-    item a: 2
-    show(a)
-    item a: 3
-    show(a)
-    a: 4
-    show(a)
-    a: 2
-    show(a)
+\editor
 
-show("----and/or test----")
-    show(a and 6)
-    show(a and 0)
-    show(a or 6)
-    show(a or 0)
+@ Example Test Script for ezrSquared
 
-show("----invert test----")
-    show(invert a)
-    show(invert true)
-    show(invert 0)
-    show(invert 65)
+@ Variable Assignments
+item a : 10
+item b : 20
+item c : a + b
+item d : a * b
 
-show("----if test----")
-    if a do
-        show("sds")
-    else do
-        show("sd")
-    end
-    
-    if invert a do
-        show("sds")
-    else do
-        show("sd")
-    end
-    
-    if invert a do
-        show("sds")
-    else if invert 1 do
-        show("sd")
-    else do
-        show("dssdf")
-    end
+@ Assert variable assignments
+assert(a = 10)
+assert(b = 20)
+assert(c = 30)
+assert(d = 200)
 
-show("----count test----")
-    count from 0 to 10 as i do
-        show("sd")
-    end
+@ Condition Checking
+item isEqual : (a = b)
+item isGreater : (a > b)
+item isLess : (a < b)
 
-    count from 0 to 10 step 2 as i do
-        show("sd_")
-    end
+@ Assert condition checking
+assert(isEqual = false)    @ a is not equal to b
+assert(isGreater = false)  @ a is not greater than b
+assert(isLess = true)      @ a is less than b
 
-    count from 0 to 10 as i do
-        if i = 5 do
-            skip
-        end
-        
-        show("sd" + i.as_string())
-    end
+@ Logical Operators
+item andCondition : (a < b) and (b > 15)
+item orCondition : (a < b) or (b < 10)
 
-    count from 0 to 10 as i do
-        if i = 5 do
-            stop
-        end
-    
-        show("sd2" + i.as_string())
-    end
+@ Assert logical operations
+assert(andCondition = true)   @ a < b is true, and b > 15 is true
+assert(orCondition = true)    @ a < b is true, but b < 10 is false
+
+@ Negations
+item notCondition : not (a = b)
+
+@ Assert negation
+assert(notCondition = true)   @ a is not equal to b
+
+@ Complex Expressions
+item complexExpression : (a + b > 25) and (d / a = b)
+
+@ Assert complex expressions
+assert(complexExpression = true) @ (a + b > 25) is true and (d / a = b) is true
+
+@ Nested Assertions
+item x : 5
+item y : 10
+item z : x + y
+
+assert(x = 5 and y = 10 and z = 15) @ All conditions must be true
+
+@ If-Else Logic Simulation
+item result : ""
+
+if (a < b) do
+    result : "a is less than b"
+else if (a = b) do
+    result : "a is equal to b"
+else do
+    result : "a is not less than b and not equal to b"
+end
+
+@ Assert if-else logic
+assert(result = "a is less than b")
+
+@ Loops
+@ Shortest version
+item sum : 0
+count to 5 do
+    sum : sum + 1
+end
+
+@ Assert shortest loop result
+assert(sum = 5) @ Loop counts from 1 to 5, summing up to 5
+
+@ Full version
+item total : 0
+count from 1 to 5 step 1 as i do
+    total : total + i
+end
+
+@ Assert full loop result
+assert(total = 10) @ Sum of numbers from 1 to 4 is 10
+
+@ Functions
+@ Function without parameters
+function add do
+    return 5 + 7
+end
+
+item functionResult : add()
+
+@ Assert function result
+assert(functionResult = 12) @ Function add returns 12
+
+@ Function with parameters
+function addNumbers with a, b do
+    return a + b
+end
+
+item sumResult : addNumbers(5, 7)
+
+@ Assert function with parameters
+assert(sumResult = 12) @ 5 + 7 should be 12
 
 show("----while test----")
     while a do
         show(a)
-        item a: a - 1
+        a:- 1
     end
     
     item a: 30
     while a do
-        item a: a - 1
+        a:- 1
         if a = 20 do
             skip
         end
@@ -85,30 +123,13 @@ show("----while test----")
     
     item a: 30
     while a do
-        item a: a - 1
+        item a:- 1
         if a = 20 do
             stop
         end
     
         show(a)
     end
-
-show("----function test----")
-    function name with args do
-        show(args)
-    end
-    
-    function nameno do
-        show("noargs")
-    end
-    
-    function retu do
-        return 2
-    end
-    
-    show(name("fdgffdf"))
-    show(nameno())
-    show(retu())
 
 show("----try test----")
     try do
@@ -117,47 +138,47 @@ show("----try test----")
     
     try do
         1/0
-    error do
+    catch do
         show("errrrr")
     end
     
     try do
         1/0
-    error "math-error" do
+    catch math_error do
         show("errrrr")
-    error do
+    catch do
         show("sdfsdf")
     end
     
     try do
         1/0
-    error "MAH" do
+    catch illegal_operation_error do
         show("errrrr")
-    error do
+    catch do
         show("sdfsdf")
     end
 
-show("----include test----")
-    include "time.py"
-    show(time.time())
-    show(time.localTime(time.time()))
-    show(time.localTime(time.time()).readableTime())
-    include "time.py" as t
-    show(t.time())
-    show(t.localTime(t.time()))
-    show(t.localTime(t.time()).readableTime())
+@ show("----include test----")
+@     include "time.py"
+@     show(time.time())
+@     show(time.localTime(time.time()))
+@     show(time.localTime(time.time()).readableTime())
+@     include "time.py" as t
+@     show(t.time())
+@     show(t.localTime(t.time()))
+@     show(t.localTime(t.time()).readableTime())
 
 show("----global test----")
     function ChangeA with NewA do
-        show("a: " + a.as_string())
+        show("a: " + a)
         
         function localChangeA with localNewA do
             function local2ChangeA with local2NewA do
-                global item a: local2NewA
+                global a: local2NewA
             end
             
             local2ChangeA(localNewA)
-            show("a: " + a.as_string())
+            show("a: " + a)
         end
 
         localChangeA(NewA)
@@ -180,7 +201,7 @@ show("----array test----")
     show((1))
     show((1,))
     show((1,2,3))
-    show((1,2,3)<=1)
+    show((1,2,3)<1)
     show((1,2,3)*6)
     show(((1,2,3)*6)/2)
 
@@ -194,7 +215,7 @@ show("----list test----")
     show(a)
     a + [3,[3,4],4]
     show(a)
-    show(a<=5<=1)
+    show(a<=5<1)
     a - 5
     show(a)
     show(a*2)
@@ -227,19 +248,26 @@ show("----dict test----")
 
 show("----object test----")
     object obj do
-        item a: 4
-        
+
+        constant function initialize do
+            this.a: 4
+        end
+
         function name with args do
             show("obj")
             show(args)
         end
     end
 
-    object objtoo with args do
-        item a: args
+    object objtoo do
+
+        constant function initialize with args do
+            this.a: args
+        end
+
         function name do
             show("obj")
-            show(args)
+            show(this.a)
         end
     end
 
@@ -251,3 +279,6 @@ show("----object test----")
     show(objtoo("dsfsfdfdsfsd").name())
 
 show("----test complete----")
+
+\run
+

@@ -1,0 +1,249 @@
+﻿using EzrSquared.Runtime.Types.Core;
+using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.Core.Text;
+using System;
+
+namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+
+public abstract class EzrSharpCompatibilityWrapper : EzrObject
+{
+    /// <inheritdoc/>
+    public override string TypeName { get; protected internal set; } = "csharp wrapper";
+
+    /// <inheritdoc/>
+    public override string Tag { get; protected internal set; } = "ezrSquared.CSharpWrapper";
+
+    public EzrSharpCompatibilityWrapper(Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition) { }
+
+    protected internal object? EzrObjectToPrimitive(IEzrObject value, TypeCode typeCode, RuntimeResult result)
+    {
+        switch (typeCode)
+        {
+            case TypeCode.Int16:
+                if (value is EzrInteger integer16Value)
+                    if (integer16Value.TryGetIntRepresentation(out int output))
+                        if (output is < short.MinValue or > short.MaxValue)
+                            result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (short)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Int32:
+                if (value is EzrInteger integer32Value)
+                    if (integer32Value.TryGetIntRepresentation(out int output))
+                        return output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Int64:
+                if (value is EzrInteger integer64Value)
+                    if (integer64Value.TryGetLongRepresentation(out long output))
+                        return output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.UInt16:
+                if (value is EzrInteger unsignedInteger16Value)
+                    if (unsignedInteger16Value.TryGetIntRepresentation(out int output))
+                        if (output < 0)
+                            result.Failure(new EzrValueOutOfRangeError($"Expected integer of value greater than or equal to 0, but got {output}!", Context, value.StartPosition, value.EndPosition));
+                        else if (output > ushort.MaxValue)
+                            result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (ushort)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.UInt32:
+                if (value is EzrInteger unsignedInteger32Value)
+                    if (unsignedInteger32Value.TryGetIntRepresentation(out int output))
+                        if (output < 0)
+                            result.Failure(new EzrValueOutOfRangeError($"Expected integer of value greater than or equal to 0, but got {output}!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (uint)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.UInt64:
+                if (value is EzrInteger unsignedInteger64Value)
+                    if (unsignedInteger64Value.TryGetLongRepresentation(out long output))
+                        if (output < 0)
+                            result.Failure(new EzrValueOutOfRangeError($"Expected integer of value greater than or equal to 0, but got {output}!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (ulong)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Byte:
+                if (value is EzrInteger byteValue)
+                    if (byteValue.TryGetIntRepresentation(out int output))
+                        if (output < 0)
+                            result.Failure(new EzrValueOutOfRangeError($"Expected integer of value greater than or equal to 0, but got {output}!", Context, value.StartPosition, value.EndPosition));
+                        else if (output > byte.MaxValue)
+                            result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (byte)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.SByte:
+                if (value is EzrInteger signedByteValue)
+                    if (signedByteValue.TryGetIntRepresentation(out int output))
+                        if (output is < sbyte.MinValue or > sbyte.MaxValue)
+                            result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                        else
+                            return (sbyte)output;
+                    else
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected integer, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Single:
+                if (value is EzrFloat floatValue)
+                {
+                    double output = floatValue.Value;
+                    if (output is < float.MinValue or > float.MaxValue)
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                    else
+                        return (float)output;
+                }
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Double:
+                if (value is EzrFloat doubleValue)
+                    return doubleValue.Value;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Boolean:
+                if (value is EzrBoolean booleanValue)
+                    return booleanValue.Value;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected boolean, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Char:
+                if (value is EzrCharacter characterValue)
+                    return characterValue.Value;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected character, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.String:
+                if (value is EzrString stringValue)
+                    return stringValue.Value;
+                else if (value is EzrCharacterList characterListValue)
+                    return characterListValue.StringValue;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected string or character list, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            case TypeCode.Empty:
+                if (value is EzrNothing)
+                    return null;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected type nothing, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
+            default:
+                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted from to CSharp type!", Context, value.StartPosition, value.EndPosition));
+                break;
+        }
+
+        return 0;
+    }
+
+    protected internal void PrimitiveToEzrObject(object? value, TypeCode typeCode, RuntimeResult result)
+    {
+        if (value is null)
+        {
+            result.Success(NewNothingConstant());
+            return;
+        }
+
+        switch (typeCode)
+        {
+            case TypeCode.Int16:
+                result.Success(NewIntegerConstant((short)value));
+                break;
+            case TypeCode.Int32:
+                result.Success(NewIntegerConstant((int)value));
+                break;
+            case TypeCode.Int64:
+                result.Success(NewIntegerConstant((long)value));
+                break;
+            case TypeCode.UInt16:
+                result.Success(NewIntegerConstant((ushort)value));
+                break;
+            case TypeCode.UInt32:
+                result.Success(NewIntegerConstant((uint)value));
+                break;
+            case TypeCode.UInt64:
+                result.Success(NewIntegerConstant((ulong)value));
+                break;
+            case TypeCode.Byte:
+                result.Success(NewIntegerConstant((byte)value));
+                break;
+            case TypeCode.SByte:
+                result.Success(NewIntegerConstant((sbyte)value));
+                break;
+            case TypeCode.Single:
+                result.Success(NewFloatConstant((float)value));
+                break;
+            case TypeCode.Double:
+                result.Success(NewFloatConstant((double)value));
+                break;
+            case TypeCode.Boolean:
+                result.Success(NewBooleanConstant((bool)value));
+                break;
+            case TypeCode.Char:
+                result.Success(NewCharacterConstant((char)value));
+                break;
+            case TypeCode.String:
+                result.Success(NewStringConstant((string)value));
+                break;
+            default:
+                result.Failure(new EzrUnsupportedWrappingError($"CSharp type \"{value.GetType().Name}\" cannot be converted to EzrSquared type!", Context, StartPosition, EndPosition));
+                break;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void ComparisonEqual(IEzrObject other, RuntimeResult result)
+    {
+        bool equal = StrictEquals(other, result);
+        if (result.ShouldReturn)
+            return;
+
+        result.Success(NewBooleanConstant(equal));
+    }
+
+    /// <inheritdoc/>
+    public override void ComparisonNotEqual(IEzrObject other, RuntimeResult result)
+    {
+        bool equal = StrictEquals(other, result);
+        if (result.ShouldReturn)
+            return;
+
+        result.Success(NewBooleanConstant(!equal));
+    }
+
+    /// <inheritdoc/>
+    public override bool EvaluateBoolean(RuntimeResult result)
+    {
+        return true;
+    }
+}

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+		<Platforms>AnyCPU;x64;arm64</Platforms>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>12</LangVersion>
+		
+		<ImplicitUsings>Disable</ImplicitUsings>
+		<Nullable>Enable</Nullable>
+	
+		<StartupObject>EzrSquaredCli.Shell</StartupObject>
+
+		<PublishReadyToRun>True</PublishReadyToRun>
+		
+		<SelfContained>True</SelfContained>
+		<IsPublishable>True</IsPublishable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>ezrSquaredShell</PackageId>
+		<AssemblyName>ezrSquared</AssemblyName>
+		
+		<Title>The ezrSquared Command Line Interface</Title>
+		<Description>The Command Line Interface for the ezrSquared programming language.</Description>
+		
+		<Version>0.1.0</Version>
+		
+		<Authors>Udayshankar Ravikumar</Authors>
+		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
+		<Copyright>© 2022 - 2024 URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Copyright>
+
+		<NeutralLanguage>en</NeutralLanguage>
+		
+		<ApplicationIcon>..\..\Graphics\Icon.ico</ApplicationIcon>
+		
+		<RepositoryUrl>https://github.com/uralstech/ezrSquared</RepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'arm64' ">
+		<PublishAot>True</PublishAot>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+	  <Reference Include="ezrSquared-lib">
+	    <HintPath>..\..\Binaries\ezrSquared\Release\net8.0\ezrSquared-lib.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<ProjectReference Include="..\EzrSquared.csproj" />
+	</ItemGroup>
+</Project>

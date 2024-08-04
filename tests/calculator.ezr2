@@ -1,0 +1,95 @@
+\editor
+
+function get_input with message: "", skip_spaces: true do
+    raw_input: get(message)
+
+    input_components: []
+
+    index: 0
+
+    number: 0
+    was_previous_number: false
+
+    while true do
+        try do
+            char: raw_input < index
+        catch value_out_of_range_error do
+            if was_previous_number do input_components + number
+
+            stop
+        catch as other_error do
+            throw_error(other_error)
+        end
+
+        if char >= 48 and char <= 57 do
+            if not was_previous_number do number: 0
+
+            number: (number * 10) + (char - 48)
+            was_previous_number: true
+        else do
+            if was_previous_number do input_components + number
+
+            was_previous_number: false
+
+            if char ! ` ` or not skip_spaces do input_components + char
+        end
+
+        index :+ 1
+    end
+
+    return input_components
+end
+
+function calculate with input_components do
+    result: nothing
+
+    index: 0
+
+    number: 0
+    operator: nothing
+
+    while true do
+        try do
+            component: input_components < index
+        catch value_out_of_range_error do
+            stop
+        catch as other_error do
+            throw_error(other_error)
+        end
+
+        if type_name_of(component) = "integer" do
+            if result = nothing do result: component else do number: component
+
+            if operator ! nothing do
+                if operator = `+` do
+                    result :+ number
+                else if operator = `-` do
+                    result :- number
+                else if operator = `x` do
+                    result :* number
+                else if operator = `/` do
+                    result :/ number
+                end
+
+                operator = nothing
+            end
+        else do
+            operator: component
+        end
+
+        index:+ 1
+    end
+
+    return result
+end
+
+while true do
+    input: get_input("Enter calculation: ")
+    try do
+        if input < 0 = `q` do stop
+    end
+
+    show(calculate(input))
+end
+
+\run
