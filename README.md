@@ -4,7 +4,7 @@
 More information and documentation about ezr² is available at ***https://uralstech.github.io/ezrSquared***!
 
 ## What's the 'ezrSquared-re' branch?
-ezr� is being rewritten from the ground up! Expect more features, better performance and better code documentation!
+ezr² is being rewritten from the ground up! Expect more features, better performance and better code documentation!
 
 ## Update!
 The development status of ezr² is now available on [***the ezr² project***](https://github.com/users/Uralstech/projects/3) and [***my blog***](https://uralstech.github.io/).
