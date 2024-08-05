@@ -1,5 +1,13 @@
 CHANGELOG - What's new?
-	
+
+* ezr² RE - v0.1.1 [05-08-24]
+	* Updated documentation and some graphics.
+
+* ezr² RE - Part 3 [04-08-24]
+	* Almost completed rewriting the Interpreter and its supporting components.
+	* Fixed a ton of bugs in the Lexer, Parser and their supporting components.
+	* Added an improved Shell as a separate project from the main ezr² stuff.
+
 * ezr² Rewrite - Part 2 [13-09-23]
 	* Completed rewriting the Parser (without QuickSyntax support) and its supporting components.
 

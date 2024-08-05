@@ -7,7 +7,7 @@ nav_order: 2
 # The `ezr²` Programming Language
 {: .no_toc }
 
-**ezr², or ezrSquared when you can't use the `²` symbol - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
+**ezr² is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
 For more information check out the [*Learn ezr²*](https://uralstech.github.io/ezrSquared/Learn-ezrSquared) page.**
 
 <details open markdown="block">
@@ -31,23 +31,23 @@ To install ezr² on your PC, follow these steps:
 
 #### Windows (x86 and x64)
 
-* Download the appropriate installer from the [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on any of the download links.
+* Download the appropriate installer from down below.
 * Run the installer and go through the installation.
 <br/><br/>
 
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Windows%20x64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.64-bit.exe)
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Windows%20x86)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.32-bit.exe)
+[ezr² Pre-release v1.5.1.3.0 for 32-bit Windows](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.64-bit.exe){: .btn }<br/>
+[ezr² Pre-release v1.5.1.3.0 for 64-bit Windows](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Installer.Windows.32-bit.exe){: .btn }
 
 #### Linux (x64, ARM64 and ARM)
 
-* Download the appropriate `tar.xz` archive from the [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on any of the download links.
+* Download the appropriate build from down below.
 * Extract the `tar.xz` file to a folder of your choice.
 * Optionally, add the folder to your PATH environment variable.
 <br/><br/>
 
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20x64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-x64.tar.gz)
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20ARM64)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm64.tar.gz)
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20(Linux%20ARM)-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm.tar.gz)
+[ezr² Pre-release v1.5.1.3.0 for Linux x64](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-x64.tar.gz){: .btn }<br/>
+[ezr² Pre-release v1.5.1.3.0 for Linux ARM64](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm64.tar.gz){: .btn }<br/>
+[ezr² Pre-release v1.5.1.3.0 for Linux ARM](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared-linux-arm.tar.gz){: .btn }
 
 ### Check the installation
 
@@ -79,11 +79,16 @@ The official documentation for ezr² is available in the [***Learn ezr² page***
 Meanwhile, check out some example programs in [***GitHub***](https://github.com/Uralstech/ezrSquared/tree/master/Tests).
 
 The offline version of the ezrSquared website was made possible with [***Jekyll Offline***](https://github.com/dohliam/jekyll-offline).
-The documentation is packaged with the Windows installer. For other OSes, download and extract the `zip` archive from [***GitHub Releases page***](https://github.com/uralstech/ezrSquared/releases), or, click on the link below:
+The documentation is packaged with the Windows installer. For other OSes, download and extract the `zip` archive from here:
 
-[![Badge](https://img.shields.io/badge/pr--1.5.1.3.0%20Documentation-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Offline.Documentation.zip)
+[ezr² Offline Documentation](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Offline.Documentation.zip){: .btn }
 
 ## Latest Updates
+
+The latest version of ezr² ***RE*** has been released! ezr² ***RE***, or ***REwrite***, is the project's initiative to rewrite ezr². The latest working version of ezr² ***RE***
+has many more features than the latest version of ezr²! But, it is still in development, has some essential features missing. Like the `include` expression, or any built-in object
+methods like `"a string".length` or `["a", "list"].insert`. If you want to help in testing it out and fixing bugs, feel free to download the latest version of ezr² ***RE*** from
+the ezr² GitHub releases page and compiling it using the .NET SDK and/or Visual Studio. 
 
 ezr² now uses [***Semantic Versioning 2.0.0***](https://semver.org/) for new releases. ezr² development updates will be posted on [***my blog***](https://uralstech.github.io/).
 

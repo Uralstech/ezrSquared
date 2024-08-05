@@ -3,8 +3,8 @@
 
 #include "environment.iss"
 
-#define MyAppName "ezr²"
-#define MyAppVersion "0.1.0"
+#define MyAppName "ezrÂ²"
+#define MyAppVersion "0.1.1"
 #define MyAppPublisher "Uralstech"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
@@ -35,7 +35,7 @@ InfoAfterFile=D:\Code\csharp\ezrSquared\Changelog.txt
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=D:\Code\csharp\ezrSquared\Binaries\Installer\
-OutputBaseFilename=ezr² Installer (Windows 32-bit)
+OutputBaseFilename=ezrÂ² Installer (Windows 32-bit)
 SetupIconFile=D:\Code\csharp\ezrSquared\src\Icon.ico
 Compression=lzma
 SolidCompression=yes
@@ -58,12 +58,12 @@ Name: "bareMinimum"; Description: "The bare minimum - Excludes the standard libr
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "main"; Description: "ezr² Code Executor"; Types: full compact bareMinimum custom; Flags: fixed
-Name: "libs"; Description: "ezr² Standard Libraries"; Types: full compact
-Name: "docs"; Description: "ezr² Documentation"; Types: full
+Name: "main"; Description: "ezrÂ² Code Executor"; Types: full compact bareMinimum custom; Flags: fixed
+Name: "libs"; Description: "ezrÂ² Standard Libraries"; Types: full compact
+Name: "docs"; Description: "ezrÂ² Documentation"; Types: full
 
 [Tasks]
-Name: "addtopath"; Description: "Add ezr² to PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
+Name: "addtopath"; Description: "Add ezrÂ² to PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Dirs]
