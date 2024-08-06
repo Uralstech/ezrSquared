@@ -1,9 +1,3 @@
----
-layout: default
-title: "Multilingual ezr²"
-nav_order: 3
----
-
 # Multilingual ezr²
 
 ## Why?

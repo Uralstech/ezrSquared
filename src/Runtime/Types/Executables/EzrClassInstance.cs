@@ -15,79 +15,79 @@ public class EzrClassInstance : EzrObject, IEzrMutableObject
     /// <summary>Special function name for initializer (constructor).</summary>
     public const string InitializationFunction = "initialize";
 
-    /// <summary>Special function name for 'this = other' operator.</summary>
+    /// <summary>Special function name for 'this = other' operation.</summary>
     public const string IsEqualFunction = "is_equal";
 
-    /// <summary>Special function name for 'this ! other' operator.</summary>
+    /// <summary>Special function name for 'this ! other' operation.</summary>
     public const string IsNotEqualFunction = "is_inequal";
 
-    /// <summary>Special function name for 'this &lt; other' operator.</summary>
+    /// <summary>Special function name for 'this &lt; other' operation.</summary>
     public const string IsLessThanFunction = "is_less_than";
 
-    /// <summary>Special function name for 'this &gt; other' operator.</summary>
+    /// <summary>Special function name for 'this &gt; other' operation.</summary>
     public const string IsGreaterThanFunction = "is_greater_than";
 
-    /// <summary>Special function name for 'this &lt;= other' operator.</summary>
+    /// <summary>Special function name for 'this &lt;= other' operation.</summary>
     public const string IsLessThanOrEqualFunction = "is_less_than_or_equal";
 
-    /// <summary>Special function name for 'this &gt;= other' operator.</summary>
+    /// <summary>Special function name for 'this &gt;= other' operation.</summary>
     public const string IsGreaterThanOrEqualFunction = "is_greater_than_or_equal";
 
-    /// <summary>Special function name for 'this + other' operator.</summary>
+    /// <summary>Special function name for 'this + other' operation.</summary>
     public const string AdditionFunction = "addition";
 
-    /// <summary>Special function name for 'this - other' operator.</summary>
+    /// <summary>Special function name for 'this - other' operation.</summary>
     public const string SubtractionFunction = "subtraction";
 
-    /// <summary>Special function name for 'this * other' operator.</summary>
+    /// <summary>Special function name for 'this * other' operation.</summary>
     public const string MultiplicationFunction = "multiplication";
 
-    /// <summary>Special function name for 'this / other' operator.</summary>
+    /// <summary>Special function name for 'this / other' operation.</summary>
     public const string DivisionFunction = "division";
 
-    /// <summary>Special function name for 'this % other' operator.</summary>
+    /// <summary>Special function name for 'this % other' operation.</summary>
     public const string ModuloFunction = "modulo";
 
-    /// <summary>Special function name for 'this ^ other' operator.</summary>
+    /// <summary>Special function name for 'this ^ other' operation.</summary>
     public const string PowerFunction = "power";
 
-    /// <summary>Special function name for '-this' operator.</summary>
+    /// <summary>Special function name for '-this' operation.</summary>
     public const string NegationFunction = "negation";
 
-    /// <summary>Special function name for '+this' operator.</summary>
+    /// <summary>Special function name for '+this' operation.</summary>
     public const string AffirmationFunction = "affirmation";
 
-    /// <summary>Special function name for 'this | other' operator.</summary>
+    /// <summary>Special function name for 'this | other' operation.</summary>
     public const string BitwiseOrFunction = "bitwise_or";
 
-    /// <summary>Special function name for 'this \ other' operator.</summary>
+    /// <summary>Special function name for 'this \ other' operation.</summary>
     public const string BitwiseXOrFunction = "bitwise_xor";
 
-    /// <summary>Special function name for 'this &amp; other' operator.</summary>
+    /// <summary>Special function name for 'this &amp; other' operation.</summary>
     public const string BitwiseAndFunction = "bitwise_and";
 
-    /// <summary>Special function name for 'this &lt;&lt; other' operator.</summary>
+    /// <summary>Special function name for 'this &lt;&lt; other' operation.</summary>
     public const string BitwiseLeftShiftunction = "bitwise_left_shift";
 
-    /// <summary>Special function name for 'this &gt;&gt; other' operator.</summary>
+    /// <summary>Special function name for 'this &gt;&gt; other' operation.</summary>
     public const string BitwiseRightShiftFunction = "bitwise_right_shift";
 
-    /// <summary>Special function name for '~this' operator.</summary>
+    /// <summary>Special function name for '~this' operation.</summary>
     public const string BitwiseNegationFunction = "bitwise_negation";
 
-    /// <summary>Special function name for 'other in this' operator.</summary>
+    /// <summary>Special function name for 'other in this' operation.</summary>
     public const string ContainsFunction = "contains";
 
-    /// <summary>Special function name for 'other not in this' operator.</summary>
+    /// <summary>Special function name for 'other not in this' operation.</summary>
     public const string DoesNotContainFunction = "does_not_contain";
 
-    /// <summary>Special function name for 'invert this' operator.</summary>
+    /// <summary>Special function name for 'invert this' operation.</summary>
     public const string InversionFunction = "inversion";
 
     /// <summary>Special function name for evaluation of the 'this' into a boolean.</summary>
     public const string EvaluateBooleanFunction = "evaluate_boolean";
 
-    /// <summary>Special function name for 'this(arguments)' operator.</summary>
+    /// <summary>Special function name for 'this(arguments)' operation.</summary>
     public const string CalledFunction = "call_received";
 
     /// <summary>Special function name for strict equality checking of 'this' and 'other'.</summary>

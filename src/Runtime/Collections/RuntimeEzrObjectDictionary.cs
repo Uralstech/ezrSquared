@@ -6,7 +6,10 @@ namespace EzrSquared.Runtime.Collections;
 /// <summary>
 /// A Dictionary for <see cref="IEzrObject"/>s.
 /// </summary>
-/// \bug If the keys can be access and are mutable objects, they can still be changed.
+/// <remarks>
+/// > [!IMPORTANT]
+/// > BUG: If the keys can be access and are mutable objects, they can still be changed.
+/// </remarks>
 public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
 {
     /// <summary>

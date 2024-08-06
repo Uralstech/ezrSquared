@@ -1,0 +1,6 @@
+pdf: false
+items:
+- name: QuickStart and Documentation
+  href: docsrc/
+- name: API Reference
+  href: api/

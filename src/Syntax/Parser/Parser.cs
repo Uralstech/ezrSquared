@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace EzrSquared.Syntax;
 
 /// <summary>
-/// The ezr² Parser. The job of the Parser is to convert the input <see cref="Token"/> objects from the <see cref="Lexer"/> into <see cref="Node"/> objects to be given as the input to the <see cref="Runtime.Interpreter.Interpreter"/>.
+/// The ezr² Parser. The job of the Parser is to convert the input <see cref="Token"/> objects from the <see cref="Lexer"/> into <see cref="Node"/> objects to be given as the input to the <see cref="Runtime.Interpreter"/>.
 /// </summary>
 public class Parser
 {

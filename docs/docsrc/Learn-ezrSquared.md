@@ -1,20 +1,4 @@
----
-layout: default
-title: "Learn ezr²"
-nav_order: 2
----
-
 # Learn ezr²
-{: .no_toc }
-
-<details open markdown="block">
-  <summary>
-    Table of contents
-  </summary>
-  {: .text-delta }
-- TOC
-{:toc}
-</details>
 
 ## Why Learn ezr²?
 
@@ -332,5 +316,6 @@ Here are all the list operators:
 
 You can **access the length of the list with the built-in `length` variable in the list**, just like with arrays.
 
-### TODO: Dictionaries, Globalization of Variables, Functions, Objects and Classes, Special Functions, Built-ins, Modules, IO and STD Libraries, QuickSyntax
-{: .no_toc }
+---
+
+TODO: Dictionaries, Globalization of Variables, Functions, Objects and Classes, Special Functions, Built-ins, Modules, IO and STD Libraries, QuickSyntax

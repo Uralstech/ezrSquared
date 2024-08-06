@@ -113,8 +113,6 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    /// 
-    /// \bug The name given to the parents is problematic, as two parents could have the same executable name.
     public EzrClass(string? name, Node body, (string Name, Node Node)[] parameters, (Position StartPosition, Position EndPosition, string Name)? keywordArguments, EzrClass[] parents, Reference[] staticParentReferences, bool isReadOnly, bool isStatic, Context staticContext, Context parentContext, Position startPosition, Position endPosition) : base(name, body, parameters, keywordArguments, parentContext, startPosition, endPosition, staticContext)
     {
         Parents = parents;
@@ -123,6 +121,10 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
         StaticParentReferences = staticParentReferences;
     }
 
+    /// <remarks>
+    /// > [!IMPORTANT]
+    /// > BUG: The name given to the parents is problematic, as two parents could have the same executable name.
+    /// </remarks>
     private void AddStaticParents(RuntimeResult result)
     {
         Context.SetNewLinkedContexts(Parents.Length);
@@ -163,7 +165,10 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
         }
     }
 
-    /// \bug The name given to the parents is problematic, as two parents could have the same executable name.
+    /// <remarks>
+    /// > [!IMPORTANT]
+    /// > BUG: The name given to the parents is problematic, as two parents could have the same executable name.
+    /// </remarks>
     private Reference[] AddParents(Reference[] arguments, Context context, Interpreter interpreter, RuntimeResult result)
     {
         List<Reference> parentReferences = [];
