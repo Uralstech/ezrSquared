@@ -30,6 +30,8 @@ jobs:
       with:
         dotnet-version: 8.x
 
+    - run: dotnet build ezrSquared.sln -c Release
+
     - run: dotnet tool update -g docfx
     - run: docfx docs/docfx.json
 

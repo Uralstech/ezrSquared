@@ -32,7 +32,7 @@
 
 		<NeutralLanguage>en</NeutralLanguage>
 		
-		<ApplicationIcon>..\..\Graphics\Icon.ico</ApplicationIcon>
+		<ApplicationIcon>..\..\graphics\Icon.ico</ApplicationIcon>
 		
 		<RepositoryUrl>https://github.com/uralstech/ezrSquared</RepositoryUrl>
 	</PropertyGroup>
@@ -40,7 +40,7 @@
 	<PropertyGroup Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'arm64' ">
 		<PublishAot>True</PublishAot>
 	</PropertyGroup>
-
+	
 	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <Reference Include="ezrSquared-lib">
 	    <HintPath>..\..\Binaries\ezrSquared\Release\net8.0\ezrSquared-lib.dll</HintPath>
