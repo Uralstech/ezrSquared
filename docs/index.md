@@ -5,7 +5,7 @@ layout: landing
 # The `ezr²` Programming Language
 
 **ezr² is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!
-For more information check out the [*Learn ezr²*](docsrc/Learn-ezrSquared.md) page.**
+For more information, check out the [*learn ezr² page*](docsrc/Learn-ezrSquared.md).**
 
 ## Advantages
 
@@ -73,17 +73,27 @@ The documentation is packaged with the Windows installer. For other OSes, downlo
 
 ## Latest Updates
 
+More frequent development updates will be posted on [***my blog***](https://uralstech.github.io/).
+
+### New website
+
+The website has been updated! Now, this website also contains the reference documentation! Please note that the reference documentation is only for ezr² ***RE***, not for older versions.
+
+### ezr² ***RE*** Release
+
 The latest version of ezr² ***RE*** has been released! ezr² ***RE***, or ***REwrite***, is the project's initiative to rewrite ezr². The latest working version of ezr² ***RE***
 has many more features than the latest version of ezr²! But, it is still in development, has some essential features missing. Like the `include` expression, or any built-in object
 methods like `"a string".length` or `["a", "list"].insert`. If you want to help in testing it out and fixing bugs, feel free to download the latest version of ezr² ***RE*** from
 the ezr² GitHub releases page and compiling it using the .NET SDK and/or Visual Studio. 
 
-ezr² now uses [***Semantic Versioning 2.0.0***](https://semver.org/) for new releases. ezr² development updates will be posted on [***my blog***](https://uralstech.github.io/).
+### New Versioning Format
+
+ezr² now uses [***Semantic Versioning 2.0.0***](https://semver.org/) for new releases.
 
 ## Contributing
 
+> [!NOTE]
+> The contribution requirements will be revamped for the full ezr² ***RE*** release.
+
 ezr² is an open source project and welcomes contributions from anyone who wants to improve it.
-
 If you want to contribute to ezr², please contact Uralstech at `info@uralstech.in`.
-
-The contribution requirements will be revamped for the full release.

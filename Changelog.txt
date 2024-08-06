@@ -1,8 +1,8 @@
 CHANGELOG - What's new?
 
 * ezr² RE - v0.1.2 [06-08-24]
-	* Updated documentation.
-	* Added new documentation website.
+	* Updated build dependencies.
+	* Updated documentation and website.
 
 * ezr² RE - v0.1.1 [05-08-24]
 	* Updated documentation and some graphics.
