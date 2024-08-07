@@ -73,10 +73,10 @@ public class Reference(IEzrObject? @object = null, AccessMod accessibilityModifi
     {
         Object = @object ?? EzrRuntimeInvalidObject.s_instance;
         AccessibilityModifiers = accessibilityModifiers;
-        
+
         Name = name;
         IsEmpty = @object is null;
-        
+
         RegisteredContext = null;
         RegisteredIn = 0;
 

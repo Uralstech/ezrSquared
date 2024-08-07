@@ -1,8 +1,8 @@
-﻿using EzrSquared.Runtime.Types.Collections;
+﻿using EzrSquared.Runtime.Collections;
+using EzrSquared.Runtime.Nodes;
+using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.Collections;
-using EzrSquared.Runtime.Nodes;
 using EzrSquared.Util;
 using System;
 
@@ -125,7 +125,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
 
             // Is the key already exist?
             bool hasKey = isValidIndex && context.IsDefined(key);
-            
+
             // If parameterIndex is out of bounds, or the key is already defined and the argument is a keyword argument, or if all the arguments have already been set:
             if (!isValidIndex || (hasKey && (isKeywordArgument || parameterIndex + 1 >= Parameters.Length)))
             {
@@ -234,7 +234,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
         string[] paramterNames = Array.ConvertAll(Parameters, parameter => parameter.Name);
         return (Parameters.Length > 0, IsAnonymous) switch
         {
-            (true, true)  => $"<{TypeName} {ExecutableName}, with \"{string.Join("\", \"", paramterNames)}\">",
+            (true, true) => $"<{TypeName} {ExecutableName}, with \"{string.Join("\", \"", paramterNames)}\">",
             (true, false) => $"<{TypeName} \"{ExecutableName}\", with \"{string.Join("\", \"", paramterNames)}\">",
 
             (false, true) => $"<{TypeName} {ExecutableName}>",

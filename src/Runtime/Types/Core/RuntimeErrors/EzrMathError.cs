@@ -1,5 +1,4 @@
 ﻿using EzrSquared.Runtime.WrapperAttributes;
-using System.Collections.Generic;
 
 namespace EzrSquared.Runtime.Types.Core.Errors;
 

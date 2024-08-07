@@ -573,7 +573,7 @@ public class Interpreter
         {
             case TokenType.Period:
                 ExecuteObjectAttributeAccess(node, executionContext, callingContext, accessibilityModifiers, ignoreUndefinedVariable); break;
-            
+
             case TokenType.KeywordOr:
             case TokenType.KeywordAnd:
                 ExecuteConjunctiveOperators(node, executionContext, callingContext, accessibilityModifiers); break;
@@ -607,7 +607,7 @@ public class Interpreter
             ? accessibilityModifiers & ~AccessMod.LocalScope
             : accessibilityModifiers;
 
-        VisitNode(node.Left, executionContext, callingContext,  accessibilityModifiers & ~AccessMod.LocalScope);
+        VisitNode(node.Left, executionContext, callingContext, accessibilityModifiers & ~AccessMod.LocalScope);
         if (RuntimeResult.ShouldReturn)
             return;
 
@@ -678,12 +678,12 @@ public class Interpreter
             case TokenType.AssignmentAddition:
                 first.Addition(second, RuntimeResult);
                 break;
-            
+
             case TokenType.HyphenMinus:
             case TokenType.AssignmentSubtraction:
                 first.Subtraction(second, RuntimeResult);
                 break;
-            
+
             case TokenType.Asterisk:
             case TokenType.AssignmentMultiplication:
                 first.Multiplication(second, RuntimeResult);
@@ -693,12 +693,12 @@ public class Interpreter
             case TokenType.AssignmentDivision:
                 first.Division(second, RuntimeResult);
                 break;
-            
+
             case TokenType.Caret:
             case TokenType.AssignmentPower:
                 first.Power(second, RuntimeResult);
                 break;
-            
+
             case TokenType.PercentSign:
             case TokenType.AssignmentModulo:
                 first.Modulo(second, RuntimeResult);
@@ -708,22 +708,22 @@ public class Interpreter
             case TokenType.AssignmentBitwiseAnd:
                 first.BitwiseAnd(second, RuntimeResult);
                 break;
-            
+
             case TokenType.VerticalBar:
             case TokenType.AssignmentBitwiseOr:
                 first.BitwiseOr(second, RuntimeResult);
                 break;
-            
+
             case TokenType.Backslash:
             case TokenType.AssignmentBitwiseXOr:
                 first.BitwiseXOr(second, RuntimeResult);
                 break;
-            
+
             case TokenType.BitwiseLeftShift:
             case TokenType.AssignmentBitwiseLeftShift:
                 first.BitwiseLeftShift(second, RuntimeResult);
                 break;
-            
+
             case TokenType.BitwiseRightShift:
             case TokenType.AssignmentBitwiseRightShift:
                 first.BitwiseRightShift(second, RuntimeResult);
@@ -732,23 +732,23 @@ public class Interpreter
             case TokenType.EqualSign:
                 first.ComparisonEqual(second, RuntimeResult);
                 break;
-            
+
             case TokenType.ExclamationMark:
                 first.ComparisonNotEqual(second, RuntimeResult);
                 break;
-            
+
             case TokenType.LessThanSign:
                 first.ComparisonLessThan(second, RuntimeResult);
                 break;
-            
+
             case TokenType.GreaterThanSign:
                 first.ComparisonGreaterThan(second, RuntimeResult);
                 break;
-            
+
             case TokenType.LessThanOrEqual:
                 first.ComparisonLessThanOrEqual(second, RuntimeResult);
                 break;
-            
+
             case TokenType.GreaterThanOrEqual:
                 first.ComparisonGreaterThanOrEqual(second, RuntimeResult);
                 break;
@@ -756,7 +756,7 @@ public class Interpreter
             case TokenType.KeywordIn:
                 second.HasValueContained(first, RuntimeResult);
                 break;
-            
+
             case TokenType.KeywordNot:
                 second.NotHasValueContained(first, RuntimeResult);
                 break;
@@ -1327,7 +1327,7 @@ public class Interpreter
         {
             Context argumentsContext = new($"<{receiver.TypeName} arguments>", false, receiver.StartPosition, callingContext, callingContext.StaticContext);
             arguments = new Reference[node.Arguments.Count];
-            
+
             for (int i = 0; i < node.Arguments.Count; i++)
             {
                 Node argument = node.Arguments[i];

@@ -1,9 +1,9 @@
-﻿using System;
-using EzrSquared.Runtime.Nodes;
+﻿using EzrSquared.Runtime.Nodes;
 using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
+using System;
 
 namespace EzrSquared.Runtime.Types;
 

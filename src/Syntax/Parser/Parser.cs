@@ -246,10 +246,10 @@ public class Parser
                 or TokenType.KeywordEnd
                 or TokenType.KeywordElse
                 or TokenType.KeywordCatch)
-                // || (_usingQuickSyntax
-                //     && (_currentToken.Type == TokenType.QeywordL
-                //     || _currentToken.Type == TokenType.QeywordE
-                //     || _currentToken.Type == TokenType.QeywordS)))
+            // || (_usingQuickSyntax
+            //     && (_currentToken.Type == TokenType.QeywordL
+            //     || _currentToken.Type == TokenType.QeywordE
+            //     || _currentToken.Type == TokenType.QeywordS)))
             {
                 _result.Success(new ReturnNode(null, false, startPosition, possibleEndPosition));
                 return;
@@ -2109,7 +2109,7 @@ public class Parser
             return;
         }
 
-        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, 
+        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar,
             (name is null && parents.Count == 0)
             ? "Expected an expression or the 'from' or 'do' keywords! An expression after the 'object' keyword defines the name, the 'from' keyword and the following expression(s, seperated by commas) define(s) the parents and the 'do' keyword declares the start of the body of the class."
             : (parents.Count == 0)

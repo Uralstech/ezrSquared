@@ -284,7 +284,7 @@ public abstract class EzrObject : IEzrObject
             result.Failure(new EzrUndefinedValueError($"You cannot create nor change members of a read-only object!", Context, StartPosition, EndPosition));
             return;
         }
-        
+
         if (IsReadOnly)
             result.Success(
                 ReferencePool.Get(
@@ -449,7 +449,7 @@ public abstract class EzrObject : IEzrObject
     /// <returns>The error.</returns>
     protected internal EzrIllegalOperationError IllegalOperation(IEzrObject other, bool isRightHandSide = true)
     {
-        return 
+        return
             isRightHandSide
             ? new EzrIllegalOperationError($"Illegal operation for types \"{TypeName}\" and \"{other.TypeName}\"!", _executionContext, StartPosition, other.EndPosition)
             : new EzrIllegalOperationError($"Illegal operation for types \"{other.TypeName}\" and \"{TypeName}\"!", _executionContext, other.StartPosition, EndPosition);

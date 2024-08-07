@@ -67,7 +67,7 @@ public class Lexer
             _currentChar = '\0';
         }
     }
-    
+
     /// <summary>
     /// Reverses to the given index.
     /// </summary>
@@ -81,12 +81,12 @@ public class Lexer
         _currentChar = _script[_position.Index];
     }
 
-/// <summary>
-/// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
-/// </summary>
-/// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
-/// <returns>Any <see cref="SyntaxError"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
-public SyntaxError? Tokenize(out List<Token> tokens)
+    /// <summary>
+    /// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
+    /// </summary>
+    /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
+    /// <returns>Any <see cref="SyntaxError"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
+    public SyntaxError? Tokenize(out List<Token> tokens)
     {
         SyntaxError? error;
         tokens = [];
@@ -379,7 +379,7 @@ public SyntaxError? Tokenize(out List<Token> tokens)
                 tooLong
                 ? "Value too long to be a character!"
                 : "A character cannot be empty!", startPosition, _position);
-            
+
             return Token.Empty;
         }
 

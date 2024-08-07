@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using EzrSquared.Runtime.Nodes;
+﻿using EzrSquared.Runtime.Nodes;
 using EzrSquared.Runtime.Types.Core.Errors;
+using System;
+using System.Collections.Generic;
 
 namespace EzrSquared.Runtime.Types;
 
