@@ -5,6 +5,7 @@ https://github.com/Uralstech/ezrSquared/releases
 
 * ezr² RE - v0.2.0 [07-08-24]
 	* [BREAKING CHANGE] SharpTypeWrapperAttribute will now require the type to have one SharpMethodWrapper wrapped constructor to create objects.
+	* [BREAKING CHANGE] All static `WrapperConstructor` methods in runtime error classes have been removed and converted to regular constructors.
 	* [BREAKING CHANGE] EzrSharpSourceExecutableWrapper now inherits directly from EzrObject and implements some overrides.
 	* Static wrapped methods in SharpTypeWrapper wrapped types should work now.
 	* SharpMethodWrapperAttribute now also supports constructors.
