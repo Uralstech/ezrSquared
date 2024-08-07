@@ -10,7 +10,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <param name="context">The context in which the error occurred.</param>
 /// <param name="startPosition">The starting position of the error.</param>
 /// <param name="endPosition">The ending position of the error.</param>
-[SharpTypeWrapper("math_error", nameof(WrapperConstructor))]
+[SharpTypeWrapper("math_error")]
 public class EzrMathError(string title, string details, Context context, Position startPosition, Position endPosition) : EzrRuntimeError(title, details, context, startPosition, endPosition)
 {
     /// <inheritdoc/>
@@ -24,20 +24,11 @@ public class EzrMathError(string title, string details, Context context, Positio
     /// </summary>
     /// <param name="arguments">The constructor arguments.</param>
     [SharpMethodWrapper(RequiredParameters = ["title", "details"])]
-    public static new void WrapperConstructor(SharpMethodParameters arguments)
-    {
-        RuntimeResult result = arguments.Result;
-        Reference titleReference = arguments.ArgumentReferences["title"];
-        Reference detailsReference = arguments.ArgumentReferences["details"];
-
-        string title = GetStringArgument("title", titleReference.Object, arguments.ExecutionContext, result);
-        if (result.ShouldReturn)
-            return;
-
-        string details = GetStringArgument("details", detailsReference.Object, arguments.ExecutionContext, result);
-        if (result.ShouldReturn)
-            return;
-
-        result.Success(ReferencePool.Get(new EzrMathError(title, details, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), AccessMod.PrivateConstant));
-    }
+    public EzrMathError(SharpMethodParameters arguments) : this(
+        GetStringArgument("title", arguments.ArgumentReferences["title"].Object, arguments.ExecutionContext, arguments.Result),
+        GetStringArgument("details", arguments.ArgumentReferences["details"].Object, arguments.ExecutionContext, arguments.Result),
+        arguments.ExecutionContext,
+        arguments.StartPosition,
+        arguments.EndPosition
+    ) { }
 }

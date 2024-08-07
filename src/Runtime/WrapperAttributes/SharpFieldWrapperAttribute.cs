@@ -29,7 +29,7 @@ public class SharpFieldWrapperAttribute(string name) : Attribute
     public static ArgumentException? ValidateField(FieldInfo fieldInfo)
     {
         return !typeof(IEzrObject).IsAssignableFrom(fieldInfo.FieldType)
-            ? new($"Expected field \"{fieldInfo.Name}\" to be of type {nameof(IEzrObject)}, as it uses the attribute \"{nameof(SharpFieldWrapperAttribute)}\"", fieldInfo.Name)
+            ? new($"Expected field \"{fieldInfo.Name}\" to be of type {nameof(IEzrObject)}, as it uses the attribute \"{nameof(SharpFieldWrapperAttribute)}\"", nameof(fieldInfo))
             : null;
     }
 
@@ -41,7 +41,7 @@ public class SharpFieldWrapperAttribute(string name) : Attribute
     public static ArgumentException? ValidateProperty(PropertyInfo propertyInfo)
     {
         return !typeof(IEzrObject).IsAssignableFrom(propertyInfo.PropertyType)
-            ? new($"Expected property \"{propertyInfo.Name}\" to be of type {nameof(IEzrObject)}, as it uses the attribute \"{nameof(SharpFieldWrapperAttribute)}\"", propertyInfo.Name)
+            ? new($"Expected property \"{propertyInfo.Name}\" to be of type {nameof(IEzrObject)}, as it uses the attribute \"{nameof(SharpFieldWrapperAttribute)}\"", nameof(propertyInfo))
             : null;
     }
 }

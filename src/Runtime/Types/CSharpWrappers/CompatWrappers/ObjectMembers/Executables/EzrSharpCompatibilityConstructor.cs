@@ -9,14 +9,14 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 
 public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
 {
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
     public readonly Type ConstructingType;
     public readonly string ConstructingTypeName;
     public readonly ConstructorInfo SharpConstructor;
 
     public EzrSharpCompatibilityConstructor(ConstructorInfo sharpConstructor,
 
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type constructType,
 
         Context context, Position startPosition, Position endPosition) : base(sharpConstructor, null, context, startPosition, endPosition)

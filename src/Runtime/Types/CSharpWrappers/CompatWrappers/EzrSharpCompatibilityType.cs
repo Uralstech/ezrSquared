@@ -17,13 +17,25 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpType";
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public readonly Type SharpType;
+    [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+    )] public readonly Type SharpType;
+    
     public readonly string SharpTypeName;
 
     public EzrSharpCompatibilityType(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        Type type,
+
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        )]Type type,
 
         RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {

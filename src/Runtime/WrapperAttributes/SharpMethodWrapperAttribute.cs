@@ -6,13 +6,13 @@ using System.Reflection;
 namespace EzrSquared.Runtime.WrapperAttributes;
 
 /// <summary>
-/// Attribute for C# methods which will be wrapped into ezr².
+/// Attribute for C# methods and constructors which will be wrapped into ezr².
 /// </summary>
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, AllowMultiple = false, Inherited = true)]
 public class SharpMethodWrapperAttribute : Attribute
 {
     /// <summary>
-    /// The ezr² name for the method.
+    /// The ezr² name for the method, optional.
     /// </summary>
     public readonly string Name = string.Empty;
 
@@ -46,18 +46,18 @@ public class SharpMethodWrapperAttribute : Attribute
     public SharpMethodWrapperAttribute() { }
 
     /// <summary>
-    /// Checks if the given method has all the required parameter.
+    /// Checks if the given method or constructor has the required parameters.
     /// </summary>
-    /// <param name="methodInfo">The method.</param>
+    /// <param name="methodInfo">The method or constructor to check.</param>
     /// <returns><see langword="null"/> if the check was successful, an <see cref="Exception"/> otherwise.</returns>
-    public static Exception? ValidateMethodParameters(MethodInfo methodInfo)
+    public static Exception? ValidateMethodParameters(MethodBase methodInfo)
     {
         // Get the parameter types of the method
         Type[] parameterTypes = Array.ConvertAll(methodInfo.GetParameters(), p => p.ParameterType);
 
         // Check if the number of parameters matches
         if (parameterTypes.Length != 1)
-            return new TargetParameterCountException($"\"{methodInfo.Name}\": Method must have exactly one parameter, as it uses the {nameof(SharpMethodWrapperAttribute)} attribute.");
+            return new TargetParameterCountException($"\"{methodInfo.Name}\": Method or constructor must have exactly one parameter, as it uses the {nameof(SharpMethodWrapperAttribute)} attribute.");
 
         // Check if the required parameter types match
         return parameterTypes[0] != typeof(SharpMethodParameters)

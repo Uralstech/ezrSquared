@@ -22,7 +22,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
 
     public EzrSharpCompatibilityObjectInstance(object instance,
 
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type instanceType,
 
         RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)

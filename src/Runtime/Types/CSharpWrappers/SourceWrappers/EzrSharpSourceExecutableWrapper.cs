@@ -1,12 +1,11 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 
-public abstract class EzrSharpSourceExecutableWrapper : EzrSharpCompatibilityWrapper
+public abstract class EzrSharpSourceExecutableWrapper : EzrObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp source executable wrapper";
@@ -114,5 +113,31 @@ public abstract class EzrSharpSourceExecutableWrapper : EzrSharpCompatibilityWra
         }
 
         return argumentReferences;
+    }
+
+    /// <inheritdoc/>
+    public override void ComparisonEqual(IEzrObject other, RuntimeResult result)
+    {
+        bool equal = StrictEquals(other, result);
+        if (result.ShouldReturn)
+            return;
+
+        result.Success(NewBooleanConstant(equal));
+    }
+
+    /// <inheritdoc/>
+    public override void ComparisonNotEqual(IEzrObject other, RuntimeResult result)
+    {
+        bool equal = StrictEquals(other, result);
+        if (result.ShouldReturn)
+            return;
+
+        result.Success(NewBooleanConstant(!equal));
+    }
+
+    /// <inheritdoc/>
+    public override bool EvaluateBoolean(RuntimeResult result)
+    {
+        return true;
     }
 }

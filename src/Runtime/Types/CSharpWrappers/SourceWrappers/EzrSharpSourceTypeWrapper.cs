@@ -16,17 +16,27 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpSourceTypeWrapper";
 
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-    public readonly Type SharpType;
+    [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.PublicConstructors
+        | DynamicallyAccessedMemberTypes.NonPublicConstructors
+    )] public readonly Type SharpType;
 
     public readonly string SharpTypeName;
 
-    public readonly EzrSharpSourceWrappableMethod Constructor;
+    public readonly ConstructorInfo Constructor;
 
     public EzrSharpSourceTypeWrapper(
 
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
-        Type type,
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        )] Type type,
 
         Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
@@ -44,46 +54,44 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         SharpTypeName = typeAttribute.Name;
         Tag = $"{Tag}.{SharpTypeName}.{Utils.GetNextUniqueId()}";
 
-        // Get constructor info.
-        MethodInfo constructor = SharpType.GetMethod(typeAttribute.Constructor, BindingFlags.Static | BindingFlags.Public | BindingFlags.IgnoreReturn)
-            ?? throw new NullReferenceException($"Could not find constructor method \"{typeAttribute.Constructor}\" in type \"{type.Name}\"!");
+        Exception? typeAttributeException = SharpTypeWrapperAttribute.ValidateMethodParameters(SharpType,
+            out (ConstructorInfo Info, SharpMethodWrapperAttribute Attribute)? constructor);
 
-        // Get constructor attribute.
-        SharpMethodWrapperAttribute constructorAttribute = constructor.GetCustomAttribute<SharpMethodWrapperAttribute>(true)
-            ?? throw new ArgumentException($"No \"{nameof(SharpMethodWrapperAttribute)}\" attribute found in constructor method \"{constructor.Name}\"!", nameof(type));
+        if (typeAttributeException is not null)
+            throw typeAttributeException;
 
-        Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(constructor);
+        Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(constructor!.Value.Info);
         if (parameterException is not null)
             throw parameterException;
 
         // Get constructor parameters.
-        int requiredParameters = constructorAttribute.RequiredParameters.Length;
-        Parameters = new (string Name, bool IsRequired)[constructorAttribute.RequiredParameters.Length + constructorAttribute.OptionalParameters.Length];
+        int requiredParameters = constructor.Value.Attribute.RequiredParameters.Length;
+        Parameters = new (string Name, bool IsRequired)[constructor.Value.Attribute.RequiredParameters.Length + constructor.Value.Attribute.OptionalParameters.Length];
 
         // Required parameters.
         for (int j = 0; j < requiredParameters; j++)
-            Parameters[j] = new(constructorAttribute.RequiredParameters[j], true);
+            Parameters[j] = new(constructor.Value.Attribute.RequiredParameters[j], true);
 
         // Optional parameters.
-        for (int j = 0; j < constructorAttribute.OptionalParameters.Length; j++)
-            Parameters[j + requiredParameters] = new(constructorAttribute.OptionalParameters[j], false);
+        for (int j = 0; j < constructor.Value.Attribute.OptionalParameters.Length; j++)
+            Parameters[j + requiredParameters] = new(constructor.Value.Attribute.OptionalParameters[j], false);
 
         // Set variables.
-        HasKeywordArguments = constructorAttribute.HasKeywordArguments;
-        Constructor = (EzrSharpSourceWrappableMethod)constructor.CreateDelegate(typeof(EzrSharpSourceWrappableMethod));
+        HasKeywordArguments = constructor.Value.Attribute.HasKeywordArguments;
+        Constructor = constructor.Value.Info;
 
         // Get static methods to wrap.
-        MethodInfo[] staticMethods = SharpType.GetMethods(BindingFlags.Static);
+        MethodInfo[] staticMethods = SharpType.GetMethods(BindingFlags.Public | BindingFlags.Static);
         for (int i = 0; i < staticMethods.Length; i++)
         {
             MethodInfo method = staticMethods[i];
 
-            // Check if abstract or same as constructor.
-            if (method.IsAbstract || method.Name == constructor.Name)
+            // Check if abstract.
+            if (method.IsAbstract)
                 continue;
 
             // Check if method can be wrapped.
-            SharpMethodWrapperAttribute? methodAttribute = constructor.GetCustomAttribute<SharpMethodWrapperAttribute>(true);
+            SharpMethodWrapperAttribute? methodAttribute = method.GetCustomAttribute<SharpMethodWrapperAttribute>(false);
             if (methodAttribute is null)
                 continue;
 
@@ -125,17 +133,24 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         if (result.ShouldReturn)
             return;
 
-        Constructor.Invoke(new SharpMethodParameters
-        (
-            argumentReferences,
-            _executionContext,
-            _creationContext,
-            Context,
-            StartPosition,
-            EndPosition,
-            interpreter,
-            result
-        ));
+        IEzrObject newObject = (IEzrObject)Constructor.Invoke(
+            [
+                new SharpMethodParameters
+                (
+                    argumentReferences,
+                    _executionContext,
+                    _creationContext,
+                    Context,
+                    StartPosition,
+                    EndPosition,
+                    interpreter,
+                    result
+                )
+            ]
+        );
+
+        if (!result.ShouldReturn)
+            result.Success(ReferencePool.Get(newObject, AccessMod.PrivateConstant));
     }
 
     /// <inheritdoc/>

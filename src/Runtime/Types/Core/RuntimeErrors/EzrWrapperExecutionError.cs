@@ -9,7 +9,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <param name="context">The context in which the error occurred.</param>
 /// <param name="startPosition">The starting position of the error.</param>
 /// <param name="endPosition">The ending position of the error.</param>
-[SharpTypeWrapper("wrapper_execution_error", nameof(WrapperConstructor))]
+[SharpTypeWrapper("wrapper_execution_error")]
 public class EzrWrapperExecutionError(string details, Context context, Position startPosition, Position endPosition) : EzrRuntimeError("Wrapper execution error", details, context, startPosition, endPosition)
 {
     /// <inheritdoc/>
@@ -23,15 +23,10 @@ public class EzrWrapperExecutionError(string details, Context context, Position 
     /// </summary>
     /// <param name="arguments">The constructor arguments.</param>
     [SharpMethodWrapper(RequiredParameters = ["details"])]
-    public static new void WrapperConstructor(SharpMethodParameters arguments)
-    {
-        RuntimeResult result = arguments.Result;
-        Reference detailsReference = arguments.ArgumentReferences["details"];
-
-        string details = GetStringArgument("details", detailsReference.Object, arguments.ExecutionContext, result);
-        if (result.ShouldReturn)
-            return;
-
-        result.Success(ReferencePool.Get(new EzrWrapperExecutionError(details, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), AccessMod.PrivateConstant));
-    }
+    public EzrWrapperExecutionError(SharpMethodParameters arguments) : this(
+        GetStringArgument("details", arguments.ArgumentReferences["details"].Object, arguments.ExecutionContext, arguments.Result),
+        arguments.ExecutionContext,
+        arguments.StartPosition,
+        arguments.EndPosition
+    ) { }
 }

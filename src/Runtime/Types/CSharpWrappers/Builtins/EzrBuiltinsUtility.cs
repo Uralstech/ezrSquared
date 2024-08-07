@@ -45,29 +45,32 @@ public static class EzrBuiltinsUtility
     public static void AddBuiltinTypes(Context context)
     {
         EzrSharpSourceTypeWrapper runtimeError = new(typeof(EzrRuntimeError), context, Position.None, Position.None);
+        context.Set(null, runtimeError.SharpTypeName, ReferencePool.Get(runtimeError, AccessMod.Constant));
+
+        EzrSharpSourceTypeWrapper assertionError = new(typeof(EzrAssertionError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper illegalOperationError = new(typeof(EzrIllegalOperationError), context, Position.None, Position.None);
-        EzrSharpSourceTypeWrapper undefinedValueError = new(typeof(EzrUndefinedValueError), context, Position.None, Position.None);
-        EzrSharpSourceTypeWrapper privateValueAccessError = new(typeof(EzrPrivateMemberOperationError), context, Position.None, Position.None);
-        EzrSharpSourceTypeWrapper mathError = new(typeof(EzrMathError), context, Position.None, Position.None);
-        EzrSharpSourceTypeWrapper valueOutOfRangeError = new(typeof(EzrValueOutOfRangeError), context, Position.None, Position.None);
-        EzrSharpSourceTypeWrapper unexpectedTypeError = new(typeof(EzrUnexpectedTypeError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper keyNotFoundError = new(typeof(EzrKeyNotFoundError), context, Position.None, Position.None);
+        EzrSharpSourceTypeWrapper mathError = new(typeof(EzrMathError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper missingRequiredArgumentError = new(typeof(EzrMissingRequiredArgumentError), context, Position.None, Position.None);
+        EzrSharpSourceTypeWrapper privateMemberOperationError = new(typeof(EzrPrivateMemberOperationError), context, Position.None, Position.None);
+        EzrSharpSourceTypeWrapper undefinedValueError = new(typeof(EzrUndefinedValueError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper unexpectedArgumentError = new(typeof(EzrUnexpectedArgumentError), context, Position.None, Position.None);
+        EzrSharpSourceTypeWrapper unexpectedTypeError = new(typeof(EzrUnexpectedTypeError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper unsupportedWrappingError = new(typeof(EzrUnsupportedWrappingError), context, Position.None, Position.None);
+        EzrSharpSourceTypeWrapper valueOutOfRangeError = new(typeof(EzrValueOutOfRangeError), context, Position.None, Position.None);
         EzrSharpSourceTypeWrapper wrapperExecutionError = new(typeof(EzrWrapperExecutionError), context, Position.None, Position.None);
 
-        context.Set(null, runtimeError.SharpTypeName, ReferencePool.Get(runtimeError, AccessMod.Constant));
+        context.Set(null, assertionError.SharpTypeName, ReferencePool.Get(assertionError, AccessMod.Constant));
         context.Set(null, illegalOperationError.SharpTypeName, ReferencePool.Get(illegalOperationError, AccessMod.Constant));
-        context.Set(null, undefinedValueError.SharpTypeName, ReferencePool.Get(undefinedValueError, AccessMod.Constant));
-        context.Set(null, privateValueAccessError.SharpTypeName, ReferencePool.Get(privateValueAccessError, AccessMod.Constant));
-        context.Set(null, mathError.SharpTypeName, ReferencePool.Get(mathError, AccessMod.Constant));
-        context.Set(null, valueOutOfRangeError.SharpTypeName, ReferencePool.Get(valueOutOfRangeError, AccessMod.Constant));
-        context.Set(null, unexpectedTypeError.SharpTypeName, ReferencePool.Get(unexpectedTypeError, AccessMod.Constant));
         context.Set(null, keyNotFoundError.SharpTypeName, ReferencePool.Get(keyNotFoundError, AccessMod.Constant));
+        context.Set(null, mathError.SharpTypeName, ReferencePool.Get(mathError, AccessMod.Constant));
         context.Set(null, missingRequiredArgumentError.SharpTypeName, ReferencePool.Get(missingRequiredArgumentError, AccessMod.Constant));
+        context.Set(null, privateMemberOperationError.SharpTypeName, ReferencePool.Get(privateMemberOperationError, AccessMod.Constant));
+        context.Set(null, undefinedValueError.SharpTypeName, ReferencePool.Get(undefinedValueError, AccessMod.Constant));
         context.Set(null, unexpectedArgumentError.SharpTypeName, ReferencePool.Get(unexpectedArgumentError, AccessMod.Constant));
+        context.Set(null, unexpectedTypeError.SharpTypeName, ReferencePool.Get(unexpectedTypeError, AccessMod.Constant));
         context.Set(null, unsupportedWrappingError.SharpTypeName, ReferencePool.Get(unsupportedWrappingError, AccessMod.Constant));
+        context.Set(null, valueOutOfRangeError.SharpTypeName, ReferencePool.Get(valueOutOfRangeError, AccessMod.Constant));
         context.Set(null, wrapperExecutionError.SharpTypeName, ReferencePool.Get(wrapperExecutionError, AccessMod.Constant));
     }
 

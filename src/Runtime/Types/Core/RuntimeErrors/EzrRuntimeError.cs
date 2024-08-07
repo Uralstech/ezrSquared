@@ -9,7 +9,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <summary>
 /// Base of all error type objects.
 /// </summary>
-[SharpTypeWrapper("runtime_error", nameof(WrapperConstructor))]
+[SharpTypeWrapper("runtime_error")]
 public class EzrRuntimeError : EzrObject
 {
     /// <inheritdoc/>
@@ -63,6 +63,20 @@ public class EzrRuntimeError : EzrObject
         Context.Set(null, "details", ReferencePool.Get(new EzrString(Details, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
+
+    /// <summary>
+    /// Wrapper constructor for creating the error object.
+    /// </summary>
+    /// <param name="arguments">The constructor arguments.</param>
+    [SharpMethodWrapper(RequiredParameters = ["title", "details"])]
+    public EzrRuntimeError(SharpMethodParameters arguments) : this(
+        GetStringArgument("title", arguments.ArgumentReferences["title"].Object, arguments.ExecutionContext, arguments.Result),
+        GetStringArgument("details", arguments.ArgumentReferences["details"].Object, arguments.ExecutionContext, arguments.Result),
+        arguments.ExecutionContext,
+        arguments.StartPosition,
+        arguments.EndPosition
+    ) { }
+
     /// <summary>
     /// Converts the given argument to a string.
     /// </summary>
@@ -73,6 +87,11 @@ public class EzrRuntimeError : EzrObject
     /// <returns>The string, or <see cref="string.Empty"/> if failed.</returns>
     protected internal static string GetStringArgument(string argumentName, IEzrObject ezrObject, Context context, RuntimeResult result)
     {
+        // Added so that if this is being called after a faulty GetStringArgument call, the error can be passed on to the interpreter
+        // without being overridden by another error.
+        if (result.ShouldReturn)
+            return string.Empty;
+
         switch (ezrObject)
         {
             case EzrString ezrString:
@@ -88,28 +107,6 @@ public class EzrRuntimeError : EzrObject
                 result.Failure(new EzrUnexpectedTypeError($"Expected {argumentName} of type string, character or character list, but got object of type \"{ezrObject.TypeName}\"!", context, ezrObject.StartPosition, ezrObject.EndPosition));
                 return string.Empty;
         }
-    }
-
-    /// <summary>
-    /// Wrapper constructor for creating the error object.
-    /// </summary>
-    /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper(RequiredParameters = ["title", "details"])]
-    public static void WrapperConstructor(SharpMethodParameters arguments)
-    {
-        RuntimeResult result = arguments.Result;
-        Reference titleReference = arguments.ArgumentReferences["title"];
-        Reference detailsReference = arguments.ArgumentReferences["details"];
-
-        string title = GetStringArgument("title", titleReference.Object, arguments.ExecutionContext, result);
-        if (result.ShouldReturn)
-            return;
-
-        string details = GetStringArgument("details", detailsReference.Object, arguments.ExecutionContext, result);
-        if (result.ShouldReturn)
-            return;
-
-        result.Success(ReferencePool.Get(new EzrRuntimeError(title, details, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), AccessMod.PrivateConstant));
     }
 
     /// <summary>
@@ -165,7 +162,7 @@ public class EzrRuntimeError : EzrObject
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        return $"<{TypeName} \"{Title}\">";
+        return $"<{TypeName}>";
     }
 
     /// <inheritdoc/>
