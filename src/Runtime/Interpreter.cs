@@ -7,6 +7,7 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
+using EzrSquared.Runtime.Types.Executables;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

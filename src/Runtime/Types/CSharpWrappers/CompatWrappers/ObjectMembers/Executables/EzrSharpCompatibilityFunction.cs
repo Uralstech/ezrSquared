@@ -13,12 +13,11 @@ public class EzrSharpCompatibilityFunction : EzrSharpCompatibilityExecutable
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpFunction";
 
-    public readonly MethodInfo SharpFunction;
+    public EzrSharpCompatibilityFunction(string name, MethodInfo sharpFunction, object? instance, Context context, Position startPosition, Position endPosition)
+        : base(name, sharpFunction, instance, context, startPosition, endPosition) { }
 
-    public EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? instance, Context context, Position startPosition, Position endPosition) : base(sharpFunction, instance, context, startPosition, endPosition)
-    {
-        SharpFunction = sharpFunction;
-    }
+    public EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? instance, Context context, Position startPosition, Position endPosition)
+        : base(sharpFunction, instance, context, startPosition, endPosition) { }
 
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
@@ -32,7 +31,7 @@ public class EzrSharpCompatibilityFunction : EzrSharpCompatibilityExecutable
 
         try
         {
-            object? output = SharpFunction.Invoke(Instance, mappedArguments);
+            object? output = Executable.Invoke(Instance, mappedArguments);
 
             if (output is null)
                 result.Success(NewNothingConstant());
@@ -44,21 +43,6 @@ public class EzrSharpCompatibilityFunction : EzrSharpCompatibilityExecutable
             result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
             return;
         }
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, SharpFunction);
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return other is EzrSharpCompatibilityFunction function
-            && function.SharpFunction == SharpFunction
-            && function.Instance?.GetHashCode() == Instance?.GetHashCode()
-            && other.HashTag == HashTag;
     }
 
     /// <inheritdoc/>

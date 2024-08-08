@@ -17,13 +17,16 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     public readonly object? Instance;
     public readonly string SharpFieldName;
 
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityField(string name, FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpField = sharpField;
         Instance = instance;
-        SharpFieldName = Utils.PascalToSnakeCase(SharpField.Name);
+        SharpFieldName = name;
         Tag = $"{Tag}.{SharpFieldName}.{Utils.GetNextUniqueId()}";
     }
+
+    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition)
+        : this(Utils.PascalToSnakeCase(sharpField.Name), sharpField, instance, parentContext, startPosition, endPosition) { }
 
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {

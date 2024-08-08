@@ -1,4 +1,5 @@
 ﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
@@ -8,6 +9,9 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 
+/// <summary>
+/// A class to wrap types written in C# so that they can be used in ezr².
+/// </summary>
 public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
 {
     /// <inheritdoc/>
@@ -16,24 +20,43 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpSourceTypeWrapper";
 
-    [DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.PublicFields
-        | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors
-    )] public readonly Type SharpType;
+    /// <summary>
+    /// The wrapped type.
+    /// </summary>
+    public readonly Type SharpType;
 
+    /// <summary>
+    /// The name of the type, in snake_case.
+    /// </summary>
     public readonly string SharpTypeName;
 
+    /// <summary>
+    /// Reflection information about the type's constructor.
+    /// </summary>
     public readonly ConstructorInfo Constructor;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpSourceTypeWrapper"/>.
+    /// </summary>
+    /// <param name="type">The type to wrap.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the type to be wrapped is generic or if the <see cref="SharpTypeWrapperAttribute"/> was not found in the type.
+    /// </exception>
+    /// <exception cref="AmbiguousMatchException">
+    /// Thrown if there are multiple methods/properties/fields with the same name.
+    /// </exception>
     public EzrSharpSourceTypeWrapper(
 
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
             | DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.NonPublicFields
             | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.NonPublicProperties
             | DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
         )] Type type,
@@ -43,18 +66,18 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         SharpType = type;
 
         // Check generics.
-        if (SharpType.IsGenericType)
-            throw new ArgumentException($"Cannot wrap generic CSharp type {SharpType.Name}!", nameof(type));
+        if (type.IsGenericType)
+            throw new ArgumentException($"Cannot wrap generic CSharp type {type.Name}!", nameof(type));
 
         // Check for type attribute.
-        SharpTypeWrapperAttribute typeAttribute = SharpType.GetCustomAttribute<SharpTypeWrapperAttribute>(true)
+        SharpTypeWrapperAttribute typeAttribute = type.GetCustomAttribute<SharpTypeWrapperAttribute>(true)
             ?? throw new ArgumentException($"No \"{nameof(SharpTypeWrapperAttribute)}\" attribute found for type \"{type.Name}\"!", nameof(type));
 
         // Set name and tag.
         SharpTypeName = typeAttribute.Name;
         Tag = $"{Tag}.{SharpTypeName}.{Utils.GetNextUniqueId()}";
 
-        Exception? typeAttributeException = SharpTypeWrapperAttribute.ValidateMethodParameters(SharpType,
+        Exception? typeAttributeException = SharpTypeWrapperAttribute.ValidateMethodParameters(type,
             out (ConstructorInfo Info, SharpMethodWrapperAttribute Attribute)? constructor);
 
         if (typeAttributeException is not null)
@@ -81,7 +104,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         Constructor = constructor.Value.Info;
 
         // Get static methods to wrap.
-        MethodInfo[] staticMethods = SharpType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        MethodInfo[] staticMethods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         for (int i = 0; i < staticMethods.Length; i++)
         {
             MethodInfo method = staticMethods[i];
@@ -90,43 +113,118 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             if (method.IsAbstract)
                 continue;
 
+            IEzrObject wrappedMethod;
+            string methodName;
+
             // Check if method can be wrapped.
-            SharpMethodWrapperAttribute? methodAttribute = method.GetCustomAttribute<SharpMethodWrapperAttribute>(false);
-            if (methodAttribute is null)
+            if (method.GetCustomAttribute<SharpMethodWrapperAttribute>(false) is SharpMethodWrapperAttribute methodAttribute)
+                (wrappedMethod, methodName) = GetWrappedMethod(method);
+            else if (method.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
+                (wrappedMethod, methodName) = GetAutoWrappedMethod(method, autoWrapAttribute);
+            else
                 continue;
 
-            // Check if parameters of the method are valid.
-            parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(method);
-            if (parameterException is not null)
-                throw parameterException;
+            // Check if name already defined.
+            if (Context.IsDefined(methodName))
+                throw new AmbiguousMatchException($"Cannot wrap CSharp static method \"{methodName}\" of type {type.Name} as another member with the same name already exists!");
 
             // Set in context.
-            EzrSharpSourceFunctionWrapper methodObject = new((EzrSharpSourceWrappableMethod)method.CreateDelegate(typeof(EzrSharpSourceWrappableMethod)), Context, startPosition, endPosition);
-
-            // Check if name already defined.
-            if (Context.IsDefined(methodObject.SharpFunctionName))
-                throw new ArgumentException($"Cannot wrap CSharp static method \"{methodObject.SharpFunctionName}\" of type {SharpType.Name} as another method with the same name already exists!", nameof(type));
-
-            Context.Set(null, methodObject.SharpFunctionName, ReferencePool.Get(methodObject, AccessMod.Constant));
+            Context.Set(null, methodName, ReferencePool.Get(wrappedMethod, AccessMod.Constant));
         }
 
         // Get public static properties.
-        PropertyInfo[] publicStaticProperties = SharpType.GetProperties(BindingFlags.Static | BindingFlags.Public);
+        PropertyInfo[] publicStaticProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         for (int i = 0; i < publicStaticProperties.Length; i++)
         {
-            EzrSharpCompatibilityProperty property = new(publicStaticProperties[i], null, Context, StartPosition, EndPosition);
-            Context.Set(null, property.SharpPropertyName, ReferencePool.Get(property, AccessMod.Constant));
+            PropertyInfo property = publicStaticProperties[i];
+            IEzrObject wrappedProperty;
+            string propertyName;
+
+            // Check if property can be wrapped.
+            if (property.GetCustomAttribute<SharpFieldWrapperAttribute>(false) is SharpFieldWrapperAttribute propertyAttribute)
+            {
+                EzrSharpSourcePropertyWrapper sourceWrapper = new(property, null, Context, StartPosition, EndPosition);
+                (wrappedProperty, propertyName) = (sourceWrapper, sourceWrapper.SharpPropertyName);
+            }
+            else if (property.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
+            {
+                EzrSharpCompatibilityProperty compatWrapper = !string.IsNullOrEmpty(autoWrapAttribute.Name)
+                                                                ? new(autoWrapAttribute.Name, property, null, Context, StartPosition, EndPosition)
+                                                                : new(property, null, Context, StartPosition, EndPosition);
+
+                (wrappedProperty, propertyName) = (compatWrapper, compatWrapper.SharpPropertyName);
+            }
+            else
+                continue;
+
+            // Check if name already defined.
+            if (Context.IsDefined(propertyName))
+                throw new AmbiguousMatchException($"Cannot wrap CSharp static property \"{propertyName}\" of type {type.Name} as another member with the same name already exists!");
+
+            Context.Set(null, propertyName, ReferencePool.Get(wrappedProperty, AccessMod.Constant));
         }
 
         // Get public static fields.
-        FieldInfo[] publicStaticFields = SharpType.GetFields(BindingFlags.Static | BindingFlags.Public);
+        FieldInfo[] publicStaticFields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         for (int i = 0; i < publicStaticFields.Length; i++)
         {
-            EzrSharpCompatibilityField field = new(publicStaticFields[i], null, Context, StartPosition, EndPosition);
-            Context.Set(null, field.SharpFieldName, ReferencePool.Get(field, AccessMod.Constant));
+            FieldInfo field = publicStaticFields[i];
+            IEzrObject wrappedField;
+            string fieldName;
+
+            // Check if property can be wrapped.
+            if (field.GetCustomAttribute<SharpFieldWrapperAttribute>(false) is SharpFieldWrapperAttribute fieldAttribute)
+            {
+                EzrSharpSourceFieldWrapper sourceWrapper = new(field, null, Context, StartPosition, EndPosition);
+                (wrappedField, fieldName) = (sourceWrapper, sourceWrapper.SharpFieldName);
+            }
+            else if (field.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
+            {
+                EzrSharpCompatibilityField compatWrapper = !string.IsNullOrEmpty(autoWrapAttribute.Name)
+                                                                ? new(autoWrapAttribute.Name, field, null, Context, StartPosition, EndPosition)
+                                                                : new(field, null, Context, StartPosition, EndPosition);
+
+                (wrappedField, fieldName) = (compatWrapper, compatWrapper.SharpFieldName);
+            }
+            else
+                continue;
+
+            // Check if name already defined.
+            if (Context.IsDefined(fieldName))
+                throw new AmbiguousMatchException($"Cannot wrap CSharp static fieldName \"{fieldName}\" of type {type.Name} as another member with the same name already exists!");
+
+            Context.Set(null, fieldName, ReferencePool.Get(wrappedField, AccessMod.Constant));
         }
     }
 
+    private (IEzrObject, string) GetWrappedMethod(MethodInfo method)
+    {
+        // Check if parameters of the method are valid.
+        Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(method);
+        if (parameterException is not null)
+            throw parameterException;
+
+        // Create the wrapper object.
+        EzrSharpSourceFunctionWrapper wrapper = new(method, Context, StartPosition, EndPosition);
+        return (wrapper, wrapper.SharpFunctionName);
+    }
+
+    private (IEzrObject, string) GetAutoWrappedMethod(MethodInfo method, SharpAutoCompatibilityWrapperAttribute attribute)
+    {
+        // Check if the method is eligible for automatic wrapping.
+        ArgumentException? formatException = SharpAutoCompatibilityWrapperAttribute.ValidateMethod(method);
+        if (formatException is not null)
+            throw formatException;
+
+        // Create the wrapper object.
+        EzrSharpCompatibilityFunction wrapper = !string.IsNullOrEmpty(attribute.Name)
+            ? new(attribute.Name, method, null, Context, StartPosition, EndPosition)
+            : new(method, null, Context, StartPosition, EndPosition);
+        
+        return (wrapper, wrapper.SharpRuntimeExecutableName);
+    }
+
+    /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
         Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result);

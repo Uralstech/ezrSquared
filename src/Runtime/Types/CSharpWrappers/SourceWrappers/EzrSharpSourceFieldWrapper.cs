@@ -4,10 +4,12 @@ using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 
+/// <summary>
+/// A class to wrap fields written in C# so that they can be used in ezr².
+/// </summary>
 public class EzrSharpSourceFieldWrapper : EzrSharpSourceExecutableWrapper
 {
     /// <inheritdoc/>
@@ -16,12 +18,39 @@ public class EzrSharpSourceFieldWrapper : EzrSharpSourceExecutableWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpSourceFieldWrapper";
 
+    /// <summary>
+    /// The object which the field is a part of, <see langword="null"/> if static.
+    /// </summary>
     public readonly object? SharpInstance;
+
+    /// <summary>
+    /// Reflection information about the field.
+    /// </summary>
     public readonly FieldInfo SharpField;
+
+    /// <summary>
+    /// The type of the field's value.
+    /// </summary>
     public readonly Type SharpFieldType;
+
+    /// <summary>
+    /// The name of the field, in snake_case.
+    /// </summary>
     public readonly string SharpFieldName;
+    /// <summary>
+    /// Is the field read-only?
+    /// </summary>
     public readonly bool IsReadOnlyField;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpSourceFieldWrapper"/>.
+    /// </summary>
+    /// <param name="fieldInfo">The field to wrap.</param>
+    /// <param name="instance">The object which the field is a part of, <see langword="null"/> if static.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    /// <exception cref="ArgumentException">Thrown if <see cref="SharpFieldWrapperAttribute"/> is not found in the field.</exception>
     public EzrSharpSourceFieldWrapper(FieldInfo fieldInfo, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpInstance = instance;
@@ -44,27 +73,9 @@ public class EzrSharpSourceFieldWrapper : EzrSharpSourceExecutableWrapper
     }
 
     /// <summary>
-    /// Converts a string from PascalCase to lowecase plain text, seperated by spaces.
+    /// If there are no arguments, accesses the field's value. If the field is not read-only and there is an arguments, sets the field's value.
     /// </summary>
-    /// <param name="text">The text to convert in PascalCase.</param>
-    /// <returns>The converted text in lowecase plain text.</returns>
-    private static string PascalCaseToLowerCasePlainText(string text)
-    {
-        StringBuilder result = new();
-        result.Append(char.ToLowerInvariant(text[0]));
-
-        for (int i = 1; i < text.Length; ++i)
-        {
-            char c = text[i];
-            if (char.IsUpper(c))
-                result.Append(' ').Append(char.ToLowerInvariant(c));
-            else
-                result.Append(c);
-        }
-
-        return result.ToString();
-    }
-
+    /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
         Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result);

@@ -17,13 +17,16 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     public readonly object? Instance;
     public readonly string SharpPropertyName;
 
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityProperty(string name, PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpProperty = sharpProperty;
         Instance = instance;
-        SharpPropertyName = Utils.PascalToSnakeCase(SharpProperty.Name);
+        SharpPropertyName = name;
         Tag = $"{Tag}.{SharpPropertyName}.{Utils.GetNextUniqueId()}";
     }
+
+    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition)
+        : this(Utils.PascalToSnakeCase(sharpProperty.Name), sharpProperty, instance, parentContext, startPosition, endPosition) { }
 
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {

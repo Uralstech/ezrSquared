@@ -1,6 +1,6 @@
 ﻿using EzrSquared.Runtime.Nodes;
 
-namespace EzrSquared.Runtime.Types;
+namespace EzrSquared.Runtime.Types.Executables;
 
 /// <summary>
 /// The function type object.

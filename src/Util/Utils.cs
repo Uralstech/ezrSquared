@@ -26,7 +26,7 @@ public static class Utils
     /// Converts an index to a power of two, so that the index can be used like an enum flag.
     /// </summary>
     /// <remarks>
-    /// This function is used to check if all arguments have been provided to <see cref="Runtime.Types.CSharpWrappers.SourceWrappers.EzrSharpSourceExecutableWrapper"/> and <see cref="Runtime.Types.EzrRuntimeExecutable"/> types.<br/>
+    /// This function is used to check if all arguments have been provided to <see cref="Runtime.Types.CSharpWrappers.SourceWrappers.EzrSharpSourceExecutableWrapper"/> and <see cref="Runtime.Types.Executables.EzrRuntimeExecutable"/> types.<br/>
     /// The indices of the given arguments are converted to powers of two and bitwise-ored together, then bitwise-anded with the index of a defined parameter which is also converted to a power of two.<br/>
     /// Finally, if the result is the same as the power of two of the parameter's index, this tells the interpreter that the particular required parameter has been provided.
     /// </remarks>

@@ -16,18 +16,23 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
 
     public readonly ParameterInfo[] Parameters;
     public readonly string[] ParameterNames;
+    public readonly MethodBase Executable;
     public readonly object? Instance;
     public readonly string SharpRuntimeExecutableName;
 
-    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context context, Position startPosition, Position endPosition) : base(context, startPosition, endPosition)
+    public EzrSharpCompatibilityExecutable(string name, MethodBase sharpMember, object? instance, Context context, Position startPosition, Position endPosition) : base(context, startPosition, endPosition)
     {
-        SharpRuntimeExecutableName = Utils.PascalToSnakeCase(sharpMember.Name);
+        SharpRuntimeExecutableName = name;
         Tag = $"{Tag}.{SharpRuntimeExecutableName}.{Utils.GetNextUniqueId()}";
-
-        Parameters = sharpMember.GetParameters();
+        
+        Executable = sharpMember;
+        Parameters = Executable.GetParameters();
         ParameterNames = Array.ConvertAll(Parameters, p => Utils.PascalToSnakeCase(p.Name ?? string.Empty));
         Instance = instance;
     }
+
+    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context context, Position startPosition, Position endPosition)
+        : this(Utils.PascalToSnakeCase(sharpMember.Name), sharpMember, instance, context, startPosition, endPosition) { }
 
     protected internal Dictionary<string, IEzrObject> ArgumentsArrayToDictionary(Reference[] arguments, RuntimeResult result)
     {
@@ -122,5 +127,20 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
         }
 
         return formattedArguments;
+    }
+
+    /// <inheritdoc/>
+    public override int ComputeHashCode(RuntimeResult result)
+    {
+        return HashCode.Combine(HashTag, Executable);
+    }
+
+    /// <inheritdoc/>
+    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
+    {
+        return other is EzrSharpCompatibilityExecutable executable
+            && executable.Executable == Executable
+            && executable.Instance?.GetHashCode() == Instance?.GetHashCode()
+            && other.HashTag == HashTag;
     }
 }

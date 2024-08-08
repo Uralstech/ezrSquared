@@ -16,6 +16,31 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
 
     public EzrSharpCompatibilityWrapper(Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition) { }
 
+    /// <summary>
+    /// Checks if the given type is supported by the primitive compatibility wrappers.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
+    public static bool IsSupportedPrimitiveType(Type type)
+    {
+        TypeCode typeCode = Type.GetTypeCode(type);
+        return typeCode is TypeCode.Empty
+                        or TypeCode.Int16
+                        or TypeCode.Int32
+                        or TypeCode.Int64
+                        or TypeCode.UInt16
+                        or TypeCode.UInt32
+                        or TypeCode.UInt64
+                        or TypeCode.Byte
+                        or TypeCode.SByte
+                        or TypeCode.Single
+                        or TypeCode.Double
+                        or TypeCode.Decimal
+                        or TypeCode.Boolean
+                        or TypeCode.Char
+                        or TypeCode.String;
+    }
+
     protected internal object? EzrObjectToPrimitive(IEzrObject value, TypeCode typeCode, RuntimeResult result)
     {
         switch (typeCode)
@@ -132,6 +157,12 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
 
                 result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
+            case TypeCode.Decimal:
+                if (value is EzrFloat decimalValue)
+                    return (decimal)decimalValue.Value;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                break;
             case TypeCode.Boolean:
                 if (value is EzrBoolean booleanValue)
                     return booleanValue.Value;
@@ -149,8 +180,10 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
                     return stringValue.Value;
                 else if (value is EzrCharacterList characterListValue)
                     return characterListValue.StringValue;
+                else if (value is EzrCharacter stringCharacterValue)
+                    return stringCharacterValue.Value.ToString();
 
-                result.Failure(new EzrUnexpectedTypeError($"Expected string or character list, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                result.Failure(new EzrUnexpectedTypeError($"Expected string, character or character list, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             case TypeCode.Empty:
                 if (value is EzrNothing)
@@ -159,7 +192,7 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
                 result.Failure(new EzrUnexpectedTypeError($"Expected type nothing, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             default:
-                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted from to CSharp type!", Context, value.StartPosition, value.EndPosition));
+                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted to CSharp type \"{typeCode}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
         }
 
@@ -200,10 +233,7 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
             case TypeCode.SByte:
                 result.Success(NewIntegerConstant((sbyte)value));
                 break;
-            case TypeCode.Single:
-                result.Success(NewFloatConstant((float)value));
-                break;
-            case TypeCode.Double:
+            case TypeCode.Single or TypeCode.Double or TypeCode.Decimal:
                 result.Success(NewFloatConstant((double)value));
                 break;
             case TypeCode.Boolean:
@@ -216,7 +246,7 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
                 result.Success(NewStringConstant((string)value));
                 break;
             default:
-                result.Failure(new EzrUnsupportedWrappingError($"CSharp type \"{value.GetType().Name}\" cannot be converted to EzrSquared type!", Context, StartPosition, EndPosition));
+                result.Failure(new EzrUnsupportedWrappingError($"CSharp type \"{value.GetType().Name}\" cannot be converted to an ezr² type!", Context, StartPosition, EndPosition));
                 break;
         }
     }

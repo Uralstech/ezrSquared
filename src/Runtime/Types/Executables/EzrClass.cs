@@ -3,7 +3,7 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using System;
 using System.Collections.Generic;
 
-namespace EzrSquared.Runtime.Types;
+namespace EzrSquared.Runtime.Types.Executables;
 
 /// <summary>
 /// The "type" type object? You know.

@@ -17,17 +17,12 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpType";
 
-    [DynamicallyAccessedMembers(
-        DynamicallyAccessedMemberTypes.PublicFields
-        | DynamicallyAccessedMemberTypes.PublicMethods
-        | DynamicallyAccessedMemberTypes.PublicProperties
-        | DynamicallyAccessedMemberTypes.PublicConstructors
-        | DynamicallyAccessedMemberTypes.NonPublicConstructors
-    )] public readonly Type SharpType;
+    public readonly Type SharpType;
     
     public readonly string SharpTypeName;
 
     public EzrSharpCompatibilityType(
+        string name,
 
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicFields
@@ -35,12 +30,12 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             | DynamicallyAccessedMemberTypes.PublicProperties
             | DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors
-        )]Type type,
+        )] Type type,
 
         RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpType = type;
-        SharpTypeName = Utils.PascalToSnakeCase(SharpType.Name);
+        SharpTypeName = name;
         Tag = $"{Tag}.{SharpTypeName}.{Utils.GetNextUniqueId()}";
 
         if (SharpType.IsGenericType)
@@ -49,7 +44,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             return;
         }
 
-        MethodInfo[] publicStaticMethods = SharpType.GetMethods(BindingFlags.Static | BindingFlags.Public);
+        MethodInfo[] publicStaticMethods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
         Dictionary<string, int> duplicateNames = new(publicStaticMethods.Length);
         for (int i = 0; i < publicStaticMethods.Length; i++)
         {
@@ -76,31 +71,44 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             Context.Set(null, methodObjectName, ReferencePool.Get(methodObject, AccessMod.Constant));
         }
 
-        PropertyInfo[] publicStaticProperties = SharpType.GetProperties(BindingFlags.Static | BindingFlags.Public);
+        PropertyInfo[] publicStaticProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public);
         for (int i = 0; i < publicStaticProperties.Length; i++)
         {
             EzrSharpCompatibilityProperty property = new(publicStaticProperties[i], null, Context, StartPosition, EndPosition);
             Context.Set(null, property.SharpPropertyName, ReferencePool.Get(property, AccessMod.Constant));
         }
 
-        FieldInfo[] publicStaticFields = SharpType.GetFields(BindingFlags.Static | BindingFlags.Public);
+        FieldInfo[] publicStaticFields = type.GetFields(BindingFlags.Static | BindingFlags.Public);
         for (int i = 0; i < publicStaticFields.Length; i++)
         {
             EzrSharpCompatibilityField field = new(publicStaticFields[i], null, Context, StartPosition, EndPosition);
             Context.Set(null, field.SharpFieldName, ReferencePool.Get(field, AccessMod.Constant));
         }
 
-        ConstructorInfo[] publicConstructors = SharpType.GetConstructors();
+        ConstructorInfo[] publicConstructors = type.GetConstructors();
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
             if (!constructor.IsPublic)
                 continue;
 
-            IEzrObject constructorObject = new EzrSharpCompatibilityConstructor(constructor, SharpType, Context, StartPosition, EndPosition);
+            IEzrObject constructorObject = new EzrSharpCompatibilityConstructor(constructor, type, Context, StartPosition, EndPosition);
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
         }
     }
+
+    public EzrSharpCompatibilityType(
+
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.NonPublicConstructors
+        )] Type type,
+
+        RuntimeResult result, Context parentContext, Position startPosition, Position endPosition)
+        : this(Utils.PascalToSnakeCase(type.Name), type, result, parentContext, startPosition, endPosition) { }
 
     /// <inheritdoc/>
     public override int ComputeHashCode(RuntimeResult result)

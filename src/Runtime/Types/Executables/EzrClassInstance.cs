@@ -5,7 +5,7 @@ using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using System;
 
-namespace EzrSquared.Runtime.Types;
+namespace EzrSquared.Runtime.Types.Executables;
 
 /// <summary>
 /// The "instance of a class" type object?

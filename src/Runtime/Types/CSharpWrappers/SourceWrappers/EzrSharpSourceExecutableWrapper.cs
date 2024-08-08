@@ -2,10 +2,17 @@
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 
-public abstract class EzrSharpSourceExecutableWrapper : EzrObject
+/// <summary>
+/// Parent of all wrapper classes which wrap executable members written in C# so that they can be used in ezr².
+/// </summary>
+/// <param name="parentContext">The context in which this object was created.</param>
+/// <param name="startPosition">The starting position of the object.</param>
+/// <param name="endPosition">The ending position of the object.</param>
+public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition)
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp source executable wrapper";
@@ -13,14 +20,44 @@ public abstract class EzrSharpSourceExecutableWrapper : EzrObject
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpSourceExecutableWrapper";
 
-    public (string Name, bool IsRequired)[] Parameters;
+    /// <summary>
+    /// The name of the executable's parameters and if they are required.
+    /// </summary>
+    public (string Name, bool IsRequired)[] Parameters = [];
+
+    /// <summary>
+    /// Does the executable accept extra keyword arguments?
+    /// </summary>
     public bool HasKeywordArguments;
 
-    public EzrSharpSourceExecutableWrapper(Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    /// <summary>
+    /// Converts a string from PascalCase to lowecase plain text, seperated by spaces.
+    /// </summary>
+    /// <param name="text">The text to convert in PascalCase.</param>
+    /// <returns>The converted text in lowecase plain text.</returns>
+    internal protected static string PascalCaseToLowerCasePlainText(string text)
     {
-        Parameters = [];
+        StringBuilder result = new();
+        result.Append(char.ToLowerInvariant(text[0]));
+
+        for (int i = 1; i < text.Length; ++i)
+        {
+            char c = text[i];
+            if (char.IsUpper(c))
+                result.Append(' ').Append(char.ToLowerInvariant(c));
+            else
+                result.Append(c);
+        }
+
+        return result.ToString();
     }
 
+    /// <summary>
+    /// Checks and populates the arguments given by the user's ezr² code into a dictionary.
+    /// </summary>
+    /// <param name="arguments">The array of arguments.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <returns>The dictionary of all the arguments.</returns>
     protected internal Dictionary<string, Reference> CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
     {
         int calculatedParameterIndex = 0;

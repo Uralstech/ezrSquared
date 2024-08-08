@@ -6,7 +6,7 @@ using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Util;
 using System;
 
-namespace EzrSquared.Runtime.Types;
+namespace EzrSquared.Runtime.Types.Executables;
 
 /// <summary>
 /// The base root class of all runtime executables.
@@ -98,7 +98,6 @@ public abstract class EzrRuntimeExecutable : EzrObject
             string key = isValidIndex ? Parameters[parameterIndex].Name : string.Empty;
 
             if (isKeywordArgument)
-            {
                 // If it is a keyword argument, and it exists in Parameters:
                 if (Array.FindIndex(Parameters, paramter => paramter.Name == argument.Name) != -1)
                     key = argument.Name; // Choose that as the key.
@@ -121,7 +120,6 @@ public abstract class EzrRuntimeExecutable : EzrObject
                     argumentIndex++;
                     continue;
                 }
-            }
 
             // Is the key already exist?
             bool hasKey = isValidIndex && context.IsDefined(key);

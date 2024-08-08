@@ -12,7 +12,6 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
     public readonly Type ConstructingType;
     public readonly string ConstructingTypeName;
-    public readonly ConstructorInfo SharpConstructor;
 
     public EzrSharpCompatibilityConstructor(ConstructorInfo sharpConstructor,
 
@@ -21,7 +20,6 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
 
         Context context, Position startPosition, Position endPosition) : base(sharpConstructor, null, context, startPosition, endPosition)
     {
-        SharpConstructor = sharpConstructor;
         ConstructingType = constructType;
         ConstructingTypeName = Utils.PascalToSnakeCase(ConstructingType.Name);
     }
@@ -38,7 +36,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
 
         try
         {
-            object? output = SharpConstructor.Invoke(mappedArguments);
+            object? output = ((ConstructorInfo)Executable).Invoke(mappedArguments);
 
             if (output is null)
                 result.Success(NewNothingConstant());
@@ -56,18 +54,6 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
             result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
             return;
         }
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return (other as EzrSharpCompatibilityConstructor)?.SharpConstructor == SharpConstructor && other.HashTag == HashTag;
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, SharpConstructor);
     }
 
     /// <inheritdoc/>
