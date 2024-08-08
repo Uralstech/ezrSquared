@@ -259,6 +259,9 @@ public class Lexer
         return null;
     }
 
+    /// <summary>
+    /// Skips a comment in the ezr² code.
+    /// </summary>
     private void SkipComment()
     {
         do

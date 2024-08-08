@@ -32,7 +32,6 @@ public class ParseResult
     /// Sets <see cref="Node"/> as the result of successful parsing.
     /// </summary>
     /// <param name="node">The <see cref="Runtime.Nodes.Node"/> result of the parsing.</param>
-    /// <returns>The same <see cref="ParseResult"/> object.</returns>
     public void Success(Node node)
     {
         Node = node;
@@ -47,7 +46,6 @@ public class ParseResult
     /// </remarks>
     /// <param name="priority">The priority/fatality of the failure.</param>
     /// <param name="error">The <see cref="SyntaxError"/> that occurred in parsing.</param>
-    /// <returns>The same <see cref="ParseResult"/> object.</returns>
     public void Failure(int priority, SyntaxError error)
     {
         if (Error is null || _errorPriority < priority)

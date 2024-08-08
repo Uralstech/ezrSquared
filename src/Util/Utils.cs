@@ -40,7 +40,9 @@ public static class Utils
     /// <summary>
     /// Creates formatted text which contains the text between <paramref name="startPosition"/> and <paramref name="endPosition"/>, underlined with tilde (~) symbols.
     /// </summary>
-    /// <returns>The formatted text.</returns>
+    /// <param name="startPosition">The starting position of the underlining.</param>
+    /// <param name="endPosition">The ending position of the underlining.</param>
+    /// <returns>The formatted text and the actual starting line number of the error.</returns>
     public static (int AdjustedLineNumber, string SourceWithUnderline) SourceWithUnderline(Position startPosition, Position endPosition)
     {
         string text = startPosition.Script;

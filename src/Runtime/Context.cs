@@ -307,7 +307,7 @@ public class Context
     /// <param name="newObject">The new <see cref="IEzrObject"/> to be assigned and the name of the symbol, in the format (<see cref="IEzrObject"/> Object, <see cref="string"/> Name).</param>
     /// <param name="oldReference">The old reference to assign to.</param>
     /// <param name="accessibilityModifiers">Accessibility modifiers of the operation, <see cref="AccessMod.None"/> by default.</param>
-    /// <returns>The <see cref="SetStatus"/>, representing the result of the operation.</returns>
+    /// <returns>The <see cref="SetStatus"/>, representing the result of the operation, and the reference to the set symbol.</returns>
     public (SetStatus, Reference) Set(Context? callingContext, (IEzrObject Object, string Name) newObject, Reference oldReference, AccessMod accessibilityModifiers = AccessMod.None)
     {
         if (oldReference.IsEmpty)
