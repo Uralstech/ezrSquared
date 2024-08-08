@@ -33,13 +33,16 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityObjectInstance"/>.
     /// </summary>
+    /// <param name="typeName">The name of the type of the wrapped instance, in ezr² (snake_case) format.</param>
     /// <param name="instance">The object to wrap.</param>
     /// <param name="instanceType">The type of the wrapped instance</param>
     /// <param name="result">Runtime result for carrying any errors.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityObjectInstance(object instance,
+    public EzrSharpCompatibilityObjectInstance(
+        string typeName,
+        object instance,
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type instanceType,
@@ -47,7 +50,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
         RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         Instance = instance;
-        InstanceTypeName = Utils.PascalToSnakeCase(instanceType.Name);
+        InstanceTypeName = typeName;
         Tag = $"{Tag}.{InstanceTypeName}.{Utils.GetNextUniqueId()}";
 
         MethodInfo[] publicMethods = instanceType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
@@ -91,6 +94,23 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
             Context.Set(null, field.SharpFieldName, ReferencePool.Get(field, AccessMod.Constant));
         }
     }
+
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityObjectInstance"/>. Infers the type's name by converting it to snake_case.
+    /// </summary>
+    /// <param name="instance">The object to wrap.</param>
+    /// <param name="instanceType">The type of the wrapped instance</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrSharpCompatibilityObjectInstance(object instance,
+
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type instanceType,
+
+        RuntimeResult result, Context parentContext, Position startPosition, Position endPosition)
+    : this(Utils.PascalToSnakeCase(instanceType.Name), instance, instanceType, result, parentContext, startPosition, endPosition) { }
 
     /// <inheritdoc/>
     public override int ComputeHashCode(RuntimeResult result)

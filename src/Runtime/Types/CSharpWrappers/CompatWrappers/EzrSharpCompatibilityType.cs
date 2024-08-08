@@ -110,7 +110,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             if (!constructor.IsPublic)
                 continue;
 
-            IEzrObject constructorObject = new EzrSharpCompatibilityConstructor(constructor, type, Context, StartPosition, EndPosition);
+            IEzrObject constructorObject = new EzrSharpCompatibilityConstructor(SharpTypeName, constructor, type, Context, StartPosition, EndPosition);
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
         }
     }

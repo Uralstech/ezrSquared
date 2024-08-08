@@ -26,12 +26,15 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityConstructor"/>.
     /// </summary>
+    /// <param name="constructTypeName">The name of the constructor's constructing type, in ezr² format (snake_case).</param>
     /// <param name="sharpConstructor">The constructor to wrap.</param>
     /// <param name="constructType">The type which is constructed by the constructor.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityConstructor(ConstructorInfo sharpConstructor,
+    public EzrSharpCompatibilityConstructor(
+        string constructTypeName,
+        ConstructorInfo sharpConstructor,
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type constructType,
@@ -39,8 +42,25 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
         Context parentContext, Position startPosition, Position endPosition) : base(sharpConstructor, null, parentContext, startPosition, endPosition)
     {
         ConstructingType = constructType;
-        ConstructingTypeName = Utils.PascalToSnakeCase(ConstructingType.Name);
+        ConstructingTypeName = constructTypeName;
     }
+
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityConstructor"/>. Infers the constructing type's name by converting it to snake_case.
+    /// </summary>
+    /// <param name="sharpConstructor">The constructor to wrap.</param>
+    /// <param name="constructType">The type which is constructed by the constructor.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrSharpCompatibilityConstructor(
+        ConstructorInfo sharpConstructor,
+
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type constructType,
+
+        Context parentContext, Position startPosition, Position endPosition)
+    : this(Utils.PascalToSnakeCase(constructType.Name), sharpConstructor, constructType, parentContext, startPosition, endPosition) { }
 
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
@@ -61,7 +81,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
                 result.Success(NewNothingConstant());
             else
             {
-                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingType, result, _executionContext, StartPosition, EndPosition);
+                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(ConstructingTypeName, output, ConstructingType, result, _executionContext, StartPosition, EndPosition);
                 if (result.ShouldReturn)
                     return;
 
