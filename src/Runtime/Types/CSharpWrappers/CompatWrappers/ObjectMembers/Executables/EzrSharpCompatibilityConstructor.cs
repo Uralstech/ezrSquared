@@ -7,23 +7,42 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 
+/// <summary>
+/// Class to automatically wrap C# constructors so that they can be used in ezr².
+/// </summary>
 public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
 {
+    /// <summary>
+    /// Reflection information about the type which is constructed by the wrapped constructor.
+    /// </summary>
     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
     public readonly Type ConstructingType;
+
+    /// <summary>
+    /// The name of the constructor's constructing type, in ezr² format (snake_case).
+    /// </summary>
     public readonly string ConstructingTypeName;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityConstructor"/>.
+    /// </summary>
+    /// <param name="sharpConstructor">The constructor to wrap.</param>
+    /// <param name="constructType">The type which is constructed by the constructor.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityConstructor(ConstructorInfo sharpConstructor,
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type constructType,
 
-        Context context, Position startPosition, Position endPosition) : base(sharpConstructor, null, context, startPosition, endPosition)
+        Context parentContext, Position startPosition, Position endPosition) : base(sharpConstructor, null, parentContext, startPosition, endPosition)
     {
         ConstructingType = constructType;
         ConstructingTypeName = Utils.PascalToSnakeCase(ConstructingType.Name);
     }
 
+    /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
         Dictionary<string, IEzrObject> formattedArguments = ArgumentsArrayToDictionary(arguments, result);

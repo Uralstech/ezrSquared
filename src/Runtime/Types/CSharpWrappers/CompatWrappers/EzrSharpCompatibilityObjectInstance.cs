@@ -9,6 +9,9 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 
+/// <summary>
+/// Class to automatically wrap <i>instances</i> of already-wrapped C# types so that they can be used in ezr².
+/// </summary>
 public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
 {
     /// <inheritdoc/>
@@ -17,9 +20,25 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpObjectInstance";
 
+    /// <summary>
+    /// The object to wrap.
+    /// </summary>
     public readonly object Instance;
+
+    /// <summary>
+    /// The name of the type of the wrapped instance, in ezr² (snake_case) format.
+    /// </summary>
     public readonly string InstanceTypeName;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityObjectInstance"/>.
+    /// </summary>
+    /// <param name="instance">The object to wrap.</param>
+    /// <param name="instanceType">The type of the wrapped instance</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityObjectInstance(object instance,
 
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties)]

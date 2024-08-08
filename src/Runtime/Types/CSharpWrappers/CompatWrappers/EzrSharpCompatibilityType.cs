@@ -9,6 +9,9 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 
+/// <summary>
+/// Class to automatically wrap C# types so that they can be used in ezr².
+/// </summary>
 public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
 {
     /// <inheritdoc/>
@@ -17,10 +20,25 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpType";
 
+    /// <summary>
+    /// The type to wrap.
+    /// </summary>
     public readonly Type SharpType;
     
+    /// <summary>
+    /// The name of the type to wrap, in ezr² format (snake_case).
+    /// </summary>
     public readonly string SharpTypeName;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityType"/>.
+    /// </summary>
+    /// <param name="name">The name of the type to wrap, in ezr² format (snake_case).</param>
+    /// <param name="type">The type to wrap.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityType(
         string name,
 
@@ -97,6 +115,14 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
         }
     }
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityType"/>. Infers the name by converting the member's name to snake_case.
+    /// </summary>
+    /// <param name="type">The type to wrap.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityType(
 
         [DynamicallyAccessedMembers(

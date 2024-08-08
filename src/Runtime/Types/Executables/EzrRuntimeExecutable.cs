@@ -69,7 +69,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <param name="arguments">The arguments to check.</param>
     /// <param name="context">The context to populate</param>
     /// <param name="interpreter">The interpreter for executing parameter default values.</param>
-    /// <param name="result">Runtime result for carrying errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <param name="ignoreExtraArguments">Should the checker ignore extra arguments?</param>
     protected internal void CheckAndPopulateArguments(Reference[] arguments, Context context, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {

@@ -128,7 +128,7 @@ public class EzrClassInstance : EzrObject, IEzrMutableObject
     /// <param name="body">The source code body of the object.</param>
     /// <param name="readOnly">Is the object read-only?</param>
     /// <param name="interpreter">The interpreter for executing parts of the object.</param>
-    /// <param name="result">Runtime result for carrying errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>

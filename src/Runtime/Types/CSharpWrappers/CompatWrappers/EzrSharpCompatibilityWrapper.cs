@@ -50,7 +50,7 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     /// </summary>
     /// <param name="value">The <see cref="IEzrObject"/> to convert.</param>
     /// <param name="typeCode">The primitive type to convert it to.</param>
-    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <returns>The converted object.</returns>
     protected internal object? EzrObjectToPrimitive(IEzrObject value, TypeCode typeCode, RuntimeResult result)
     {

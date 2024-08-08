@@ -217,7 +217,7 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
     /// </summary>
     /// <param name="arguments">The arguments of the execution.</param>
     /// <param name="interpreter">The interpreter to be used in execution.</param>
-    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <param name="ignoreExtraArguments">Should the arguments checker ignore extra parameters?</param>
     private void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {

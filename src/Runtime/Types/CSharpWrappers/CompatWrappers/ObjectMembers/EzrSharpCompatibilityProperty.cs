@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 
+/// <summary>
+/// Class to automatically wrap C# properties so that they can be used in ezr².
+/// </summary>
 public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
 {
     /// <inheritdoc/>
@@ -13,10 +16,30 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpProperty";
 
+    /// <summary>
+    /// Reflection information about the wrapped property.
+    /// </summary>
     public readonly PropertyInfo SharpProperty;
+
+    /// <summary>
+    /// The object which contains the property, <see langword="null"/> if static.
+    /// </summary>
     public readonly object? Instance;
+
+    /// <summary>
+    /// The name of the property to wrap, in ezr² format (snake_case).
+    /// </summary>
     public readonly string SharpPropertyName;
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>.
+    /// </summary>
+    /// <param name="name">The name of the property to wrap, in ezr² format (snake_case).</param>
+    /// <param name="sharpProperty">The property to wrap.</param>
+    /// <param name="instance">The object which contains the property, <see langword="null"/> if static.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityProperty(string name, PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpProperty = sharpProperty;
@@ -25,9 +48,21 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
         Tag = $"{Tag}.{SharpPropertyName}.{Utils.GetNextUniqueId()}";
     }
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>. Infers the name by converting the member's name to snake_case.
+    /// </summary>
+    /// <param name="sharpProperty">The property to wrap.</param>
+    /// <param name="instance">The object which contains the property, <see langword="null"/> if static.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
     public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition)
         : this(Utils.PascalToSnakeCase(sharpProperty.Name), sharpProperty, instance, parentContext, startPosition, endPosition) { }
 
+    /// <summary>
+    /// If there are no arguments, accesses the property's value. If the property is not read-only and there is an arguments, sets the property's value.
+    /// </summary>
+    /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
         if (arguments.Length > 1)

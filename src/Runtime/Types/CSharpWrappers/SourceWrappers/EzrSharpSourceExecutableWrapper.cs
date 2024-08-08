@@ -56,7 +56,7 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
     /// Checks and populates the arguments given by the user's ezr² code into a dictionary.
     /// </summary>
     /// <param name="arguments">The array of arguments.</param>
-    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <returns>The dictionary of all the arguments.</returns>
     protected internal Dictionary<string, Reference> CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
     {

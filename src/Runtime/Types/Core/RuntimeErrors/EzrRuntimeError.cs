@@ -83,7 +83,7 @@ public class EzrRuntimeError : EzrObject
     /// <param name="argumentName">The name of the argument.</param>
     /// <param name="ezrObject">The argument object.</param>
     /// <param name="context">The context of the argument.</param>
-    /// <param name="result">Runtime result for carrying errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <returns>The string, or <see cref="string.Empty"/> if failed.</returns>
     protected internal static string GetStringArgument(string argumentName, IEzrObject ezrObject, Context context, RuntimeResult result)
     {

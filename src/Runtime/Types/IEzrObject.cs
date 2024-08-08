@@ -227,7 +227,7 @@ public interface IEzrObject
     /// <param name="code">The node to interpret.</param>
     /// <param name="callingContext">The context calling on this action.</param>
     /// <param name="interpreter">The interpreter to use.</param>
-    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <param name="ignoreUndefinedVariable">Should the interpretation ignore undefined variables? Useful in getting empty variable references.</param>
     public void Interpret(Node code, Context callingContext, Interpreter interpreter, RuntimeResult result, bool ignoreUndefinedVariable = false);
 
@@ -236,14 +236,14 @@ public interface IEzrObject
     /// </summary>
     /// <param name="arguments">The arguments of the execution.</param>
     /// <param name="interpreter">The interpreter to be used in execution.</param>
-    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
     public void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result);
 
     /// <summary>
     /// Strictly compares the current object to another, taking into account inheritance.
     /// </summary>
     /// <param name="other">The other object in the operation.</param>
-    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <param name="result">Runtime result for carrying any errors.</param>
     public bool StrictEquals(IEzrObject other, RuntimeResult result);
 
     /// <summary>

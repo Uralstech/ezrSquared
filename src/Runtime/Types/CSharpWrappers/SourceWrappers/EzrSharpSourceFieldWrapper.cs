@@ -37,6 +37,7 @@ public class EzrSharpSourceFieldWrapper : EzrSharpSourceExecutableWrapper
     /// The name of the field, in snake_case.
     /// </summary>
     public readonly string SharpFieldName;
+
     /// <summary>
     /// Is the field read-only?
     /// </summary>

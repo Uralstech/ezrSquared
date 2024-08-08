@@ -6,6 +6,9 @@ using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 
+/// <summary>
+/// Base class for all automatic wrappers which wrap C# executables so that they can be used in ezr².
+/// </summary>
 public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWrapper
 {
     /// <inheritdoc/>
@@ -14,13 +17,41 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpRuntimeExecutable";
 
+    /// <summary>
+    /// Reflection information about the parameters of the executable to wrap.
+    /// </summary>
     public readonly ParameterInfo[] Parameters;
+
+    /// <summary>
+    /// The names of the parameters of the executable to wrap, in ezr² (snake_case) format.
+    /// </summary>
     public readonly string[] ParameterNames;
+
+    /// <summary>
+    /// The executable to wrap.
+    /// </summary>
     public readonly MethodBase Executable;
+
+    /// <summary>
+    /// The object which contains the executable, <see langword="null"/> if static.
+    /// </summary>
     public readonly object? Instance;
+
+    /// <summary>
+    /// The name of the executable to wrap, in ezr² (snake_case) format.
+    /// </summary>
     public readonly string SharpRuntimeExecutableName;
 
-    public EzrSharpCompatibilityExecutable(string name, MethodBase sharpMember, object? instance, Context context, Position startPosition, Position endPosition) : base(context, startPosition, endPosition)
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityExecutable"/>.
+    /// </summary>
+    /// <param name="name">The name of the executable to wrap, in ezr² format (snake_case).</param>
+    /// <param name="sharpMember">The executable to wrap.</param>
+    /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrSharpCompatibilityExecutable(string name, MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpRuntimeExecutableName = name;
         Tag = $"{Tag}.{SharpRuntimeExecutableName}.{Utils.GetNextUniqueId()}";
@@ -31,9 +62,23 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
         Instance = instance;
     }
 
-    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context context, Position startPosition, Position endPosition)
-        : this(Utils.PascalToSnakeCase(sharpMember.Name), sharpMember, instance, context, startPosition, endPosition) { }
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityExecutable"/>. Infers the name by converting the member's name to snake_case.
+    /// </summary>
+    /// <param name="sharpMember">The executable to wrap.</param>
+    /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition)
+        : this(Utils.PascalToSnakeCase(sharpMember.Name), sharpMember, instance, parentContext, startPosition, endPosition) { }
 
+    /// <summary>
+    /// Converts an array of arguments from ezr² code to an ordered dictionary.
+    /// </summary>
+    /// <param name="arguments">The arguments.</param>
+    /// <param name="result">Runtime result for carrying errors.</param>
+    /// <returns>The dictionary.</returns>
     protected internal Dictionary<string, IEzrObject> ArgumentsArrayToDictionary(Reference[] arguments, RuntimeResult result)
     {
         Dictionary<string, IEzrObject> formattedArguments = new(arguments.Length);
@@ -85,6 +130,12 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
         return formattedArguments;
     }
 
+    /// <summary>
+    /// Converts an ordered dictionary of named arguments into an array of primitive C# objects in the order the executable expects them in.
+    /// </summary>
+    /// <param name="arguments">The arguments.</param>
+    /// <param name="result">Runtime result for carrying errors.</param>
+    /// <returns>The array of objects.</returns>
     protected internal object?[] CheckAndPopulateArguments(Dictionary<string, IEzrObject> arguments, RuntimeResult result)
     {
         object?[] formattedArguments = new object?[Parameters.Length];

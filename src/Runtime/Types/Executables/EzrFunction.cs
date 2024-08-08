@@ -31,7 +31,7 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
     /// </summary>
     /// <param name="arguments">The arguments of the execution.</param>
     /// <param name="interpreter">The interpreter to be used in execution.</param>
-    /// <param name="result">Runtime result for carrying any errors.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <param name="ignoreExtraArguments">Should the function ignore extra arguments?</param>
     public void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {
