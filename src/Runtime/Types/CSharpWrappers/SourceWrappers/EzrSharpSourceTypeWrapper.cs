@@ -197,6 +197,11 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         }
     }
 
+    /// <summary>
+    /// Creates a <see cref="EzrSharpSourceFunctionWrapper"/> from a <see cref="SharpMethodWrapperAttribute"/>-decorated method.
+    /// </summary>
+    /// <param name="method">The method to wrap.</param>
+    /// <returns>The method wrapper and its ezr² (snake_case) formatted name.</returns>
     private (IEzrObject, string) GetWrappedMethod(MethodInfo method)
     {
         // Check if parameters of the method are valid.
@@ -209,6 +214,12 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         return (wrapper, wrapper.SharpFunctionName);
     }
 
+    /// <summary>
+    /// Creates a <see cref="EzrSharpCompatibilityFunction"/> from a <see cref="SharpAutoCompatibilityWrapperAttribute"/>-decorated method.
+    /// </summary>
+    /// <param name="method">The method to wrap.</param>
+    /// <param name="attribute">The wrapper attribute.</param>
+    /// <returns>The method wrapper and its ezr² (snake_case) formatted name.</returns>
     private (IEzrObject, string) GetAutoWrappedMethod(MethodInfo method, SharpAutoCompatibilityWrapperAttribute attribute)
     {
         // Check if the method is eligible for automatic wrapping.
