@@ -39,6 +39,17 @@ public interface IEzrObject
     public Context Context { get; }
 
     /// <summary>
+    /// The context under which the object was created.
+    /// </summary>
+    public Context CreationContext { get; }
+
+    /// <summary>
+    /// Changes <see cref="CreationContext"/> and the parent of <see cref="Context"/>. Be careful when you use this function.
+    /// </summary>
+    /// <param name="newCreationContext">The new creation context.</param>
+    public void UpdateCreationContext(Context newCreationContext);
+
+    /// <summary>
     /// Updates the context and position of the object.
     /// </summary>
     /// <param name="context">The new context of the object.</param>

@@ -35,7 +35,7 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
     /// <param name="ignoreExtraArguments">Should the function ignore extra arguments?</param>
     public void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {
-        Context newContext = new($"<{TypeName} \"{ExecutableName}\">", false, StartPosition, _creationContext, _creationContext.StaticContext);
+        Context newContext = new($"<{TypeName} \"{ExecutableName}\">", false, StartPosition, CreationContext, CreationContext.StaticContext);
         CheckAndPopulateArguments(arguments, newContext, interpreter, result, ignoreExtraArguments);
         if (result.ShouldReturn)
             return;
@@ -66,6 +66,6 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
     /// <inheritdoc/>
     public IMutable<IEzrMutableObject>? DeepCopy(RuntimeResult result)
     {
-        return new EzrFunction(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, ReturnLast, _creationContext, StartPosition, EndPosition);
+        return new EzrFunction(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, ReturnLast, CreationContext, StartPosition, EndPosition);
     }
 }

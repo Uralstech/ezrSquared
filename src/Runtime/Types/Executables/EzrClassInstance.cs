@@ -572,6 +572,6 @@ public class EzrClassInstance : EzrObject, IEzrMutableObject
             copy.LinkedContexts[i] = reference.Object.Context;
         }
 
-        return new EzrClassInstance(Class, parentReferences, IsReadOnly, Interpreter, copy!, _creationContext, StartPosition, EndPosition);
+        return new EzrClassInstance(Class, parentReferences, IsReadOnly, Interpreter, copy!, CreationContext, StartPosition, EndPosition);
     }
 }

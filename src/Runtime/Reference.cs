@@ -105,6 +105,9 @@ public class Reference(IEzrObject? @object = null, AccessMod accessibilityModifi
     public void UpdateRegisteredContext(Context? context)
     {
         RegisteredContext = context;
+
+        if (context is not null && ReferenceEquals(Object.CreationContext, Context.Empty))
+            Object.UpdateCreationContext(context);
     }
 
     /// <summary>

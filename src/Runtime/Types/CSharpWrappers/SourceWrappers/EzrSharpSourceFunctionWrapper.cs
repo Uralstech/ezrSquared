@@ -111,7 +111,7 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
         (
             argumentReferences,
             _executionContext,
-            _creationContext,
+            CreationContext,
             Context,
             StartPosition,
             EndPosition,

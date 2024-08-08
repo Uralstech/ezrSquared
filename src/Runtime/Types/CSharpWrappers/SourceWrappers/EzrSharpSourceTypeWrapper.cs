@@ -237,7 +237,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
                 (
                     argumentReferences,
                     _executionContext,
-                    _creationContext,
+                    CreationContext,
                     Context,
                     StartPosition,
                     EndPosition,

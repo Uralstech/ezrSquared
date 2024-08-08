@@ -61,6 +61,9 @@ public abstract class EzrObject : IEzrObject
     /// <inheritdoc/>
     public Context Context { get; private set; }
 
+    /// <inheritdoc/>
+    public Context CreationContext { get; private set; }
+
     /// <summary>
     /// Is the current object read-only?
     /// </summary>
@@ -70,11 +73,6 @@ public abstract class EzrObject : IEzrObject
     /// The current context in which the operation is being executed.
     /// </summary>
     protected internal Context _executionContext;
-
-    /// <summary>
-    /// The context under which the object was created.
-    /// </summary>
-    protected internal Context _creationContext;
 
     /// <summary>
     /// Creates a new object with the specified parent context and position.
@@ -87,8 +85,8 @@ public abstract class EzrObject : IEzrObject
         StartPosition = startPosition;
         EndPosition = endPosition;
 
-        _executionContext = _creationContext = parentContext;
-        Context = new Context(TypeName, false, startPosition, _creationContext, _creationContext.StaticContext);
+        _executionContext = CreationContext = parentContext;
+        Context = new Context(TypeName, false, startPosition, CreationContext, CreationContext.StaticContext);
     }
 
     /// <summary>
@@ -103,17 +101,20 @@ public abstract class EzrObject : IEzrObject
         StartPosition = startPosition;
         EndPosition = endPosition;
 
-        _executionContext = _creationContext = creationContext;
-        Context = context ?? new Context(TypeName, false, startPosition, _creationContext, _creationContext.StaticContext);
+        _executionContext = CreationContext = creationContext;
+        Context = context ?? new Context(TypeName, false, startPosition, CreationContext, CreationContext.StaticContext);
     }
 
-    /// <summary>
-    /// Changes <see cref="_creationContext"/> and the parent of <see cref="Context"/>. Be careful when you use this function.
-    /// </summary>
-    /// <param name="newCreationContext">The new creation context.</param>
+    /// <inheritdoc/>
     public void UpdateCreationContext(Context newCreationContext)
     {
-        _creationContext = newCreationContext;
+        CreationContext = newCreationContext;
+
+        if (ReferenceEquals(Context.Parent, Context.Empty))
+        {
+            Context.UpdateParent(CreationContext);
+            Context.UpdateStaticContext(CreationContext.StaticContext);
+        }
     }
 
     /// <inheritdoc/>

@@ -227,7 +227,7 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
             return;
         }
 
-        Context newContext = new($"<{TypeName} \"{ExecutableName}\" instance>", false, StartPosition, Context, Context, Parents.Length);
+        Context newContext = new($"<{TypeName} \"{ExecutableName}\" instance>", false, StartPosition, _executionContext, Context, Parents.Length);
         Reference[] instanceParentReferences = AddParents(arguments, newContext, interpreter, result);
         if (result.ShouldReturn)
             return;
@@ -271,6 +271,6 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
             copy.LinkedContexts[i] = reference.Object.Context;
         }
 
-        return new EzrClass(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, Parents, staticParentReferences, IsReadOnly, IsStatic, copy!, _creationContext, StartPosition, EndPosition);
+        return new EzrClass(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, Parents, staticParentReferences, IsReadOnly, IsStatic, copy!, CreationContext, StartPosition, EndPosition);
     }
 }
