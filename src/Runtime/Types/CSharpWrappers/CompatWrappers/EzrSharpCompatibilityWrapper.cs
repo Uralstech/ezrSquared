@@ -6,15 +6,19 @@ using System;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 
-public abstract class EzrSharpCompatibilityWrapper : EzrObject
+/// <summary>
+/// Parent class for all automatic wrappers which wrap existing C# objects and members so that they can be used in ezr².
+/// </summary>
+/// <param name="parentContext">The context in which this object was created.</param>
+/// <param name="startPosition">The starting position of the object.</param>
+/// <param name="endPosition">The ending position of the object.</param>
+public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition)
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp wrapper";
 
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpWrapper";
-
-    public EzrSharpCompatibilityWrapper(Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition) { }
 
     /// <summary>
     /// Checks if the given type is supported by the primitive compatibility wrappers.
@@ -41,6 +45,13 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
                         or TypeCode.String;
     }
 
+    /// <summary>
+    /// Converts an ezr² type to a C# primitive type.
+    /// </summary>
+    /// <param name="value">The <see cref="IEzrObject"/> to convert.</param>
+    /// <param name="typeCode">The primitive type to convert it to.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <returns>The converted object.</returns>
     protected internal object? EzrObjectToPrimitive(IEzrObject value, TypeCode typeCode, RuntimeResult result)
     {
         switch (typeCode)
@@ -148,20 +159,50 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
                     else
                         return (float)output;
                 }
+                else if (value is EzrInteger integerValue)
+                {
+                    double output = integerValue.GetDoubleRepresentation();
+                    if (output is < float.MinValue or > float.MaxValue)
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                    else
+                        return (float)output;
+                }
                 else
                     result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             case TypeCode.Double:
                 if (value is EzrFloat doubleValue)
                     return doubleValue.Value;
-
-                result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                else if (value is EzrInteger integerValue)
+                {
+                    double output = integerValue.GetDoubleRepresentation();
+                    if (output is < double.MinValue or > double.MaxValue)
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                    else
+                        return output;
+                }
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             case TypeCode.Decimal:
                 if (value is EzrFloat decimalValue)
-                    return (decimal)decimalValue.Value;
-
-                result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
+                {
+                    double output = decimalValue.Value;
+                    if (output is < (double)decimal.MinValue or > (double)decimal.MaxValue)
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                    else
+                        return (decimal)output;
+                }
+                else if (value is EzrInteger integerValue)
+                {
+                    double output = integerValue.GetDoubleRepresentation();
+                    if (output is < (double)decimal.MinValue or > (double)decimal.MaxValue)
+                        result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", Context, value.StartPosition, value.EndPosition));
+                    else
+                        return (decimal)output;
+                }
+                else
+                    result.Failure(new EzrUnexpectedTypeError($"Expected float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             case TypeCode.Boolean:
                 if (value is EzrBoolean booleanValue)
@@ -199,6 +240,13 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
         return 0;
     }
 
+    /// <summary>
+    /// Converts a C# primitive type to an ezr² type.
+    /// </summary>
+    /// <param name="value">The C# object to convert.</param>
+    /// <param name="typeCode">The primitive type to convert from.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    /// <returns>The converted <see cref="IEzrObject"/>.</returns>
     protected internal void PrimitiveToEzrObject(object? value, TypeCode typeCode, RuntimeResult result)
     {
         if (value is null)
@@ -233,8 +281,14 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
             case TypeCode.SByte:
                 result.Success(NewIntegerConstant((sbyte)value));
                 break;
-            case TypeCode.Single or TypeCode.Double or TypeCode.Decimal:
+            case TypeCode.Single:
+                result.Success(NewFloatConstant((float)value));
+                break;
+            case TypeCode.Double:
                 result.Success(NewFloatConstant((double)value));
+                break;
+            case TypeCode.Decimal:
+                result.Success(NewFloatConstant((double)(decimal)value));
                 break;
             case TypeCode.Boolean:
                 result.Success(NewBooleanConstant((bool)value));
