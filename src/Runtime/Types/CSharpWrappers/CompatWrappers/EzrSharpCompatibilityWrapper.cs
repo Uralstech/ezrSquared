@@ -3,6 +3,9 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 
