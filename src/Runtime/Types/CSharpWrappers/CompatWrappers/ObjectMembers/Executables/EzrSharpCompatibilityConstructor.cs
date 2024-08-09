@@ -90,8 +90,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable
         }
         catch (Exception error)
         {
-            result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
-            return;
+            result.Failure(new EzrWrapperExecutionError(error.InnerException?.Message ?? error.Message, Context, StartPosition, EndPosition));
         }
     }
 

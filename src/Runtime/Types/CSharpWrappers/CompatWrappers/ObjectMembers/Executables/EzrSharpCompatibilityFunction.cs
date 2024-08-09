@@ -57,12 +57,11 @@ public class EzrSharpCompatibilityFunction : EzrSharpCompatibilityExecutable
             if (output is null)
                 result.Success(NewNothingConstant());
             else
-                PrimitiveToEzrObject(output, Type.GetTypeCode(output.GetType()), result);
+                PrimitiveToEzrObject(output, output.GetType(), result);
         }
         catch (Exception error)
         {
-            result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
-            return;
+            result.Failure(new EzrWrapperExecutionError(error.InnerException?.Message ?? error.Message, Context, StartPosition, EndPosition));
         }
     }
 

@@ -74,7 +74,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
         if (arguments.Length == 0)
         {
             object? value = SharpField.GetValue(Instance);
-            PrimitiveToEzrObject(value, Type.GetTypeCode(value?.GetType()), result);
+            PrimitiveToEzrObject(value, value?.GetType(), result);
         }
         else
         {

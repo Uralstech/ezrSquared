@@ -241,21 +241,27 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     }
 
     /// <summary>
-    /// Converts a C# primitive type to an ezr² type.
+    /// Converts a C# primitive type object or a task which returns a C# primitive type object to an ezr² object.
     /// </summary>
     /// <param name="value">The C# object to convert.</param>
-    /// <param name="typeCode">The primitive type to convert from.</param>
+    /// <param name="valueType">The type to convert from.</param>
     /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <returns>The converted <see cref="IEzrObject"/>.</returns>
-    protected internal void PrimitiveToEzrObject(object? value, TypeCode typeCode, RuntimeResult result)
+    protected internal void PrimitiveToEzrObject(
+        object? value,
+        
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type? valueType,
+        
+        RuntimeResult result)
     {
-        if (value is null)
+        if (value is null || valueType is null)
         {
             result.Success(NewNothingConstant());
             return;
         }
 
-        switch (typeCode)
+        switch (Type.GetTypeCode(valueType))
         {
             case TypeCode.Int16:
                 result.Success(NewIntegerConstant((short)value));
@@ -299,9 +305,50 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
             case TypeCode.String:
                 result.Success(NewStringConstant((string)value));
                 break;
+            case TypeCode.Object when typeof(Task).IsAssignableFrom(valueType):
+                HandleAsynchronousObject(value, valueType, result);
+                break;
             default:
                 result.Failure(new EzrUnsupportedWrappingError($"CSharp type \"{value.GetType().Name}\" cannot be converted to an ezr² type!", Context, StartPosition, EndPosition));
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Waits for a task to complete and returns the result as an ezr² object.
+    /// </summary>
+    /// <param name="value">The task to await.</param>
+    /// <param name="type">The type of the task.</param>
+    /// <param name="result">Runtime result for carrying the result and any errors.</param>
+    protected internal void HandleAsynchronousObject(
+        object value,
+
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
+        Type type,
+
+        RuntimeResult result)
+    {
+        try
+        {
+            ((Task)value).Wait();
+
+            // Get the Result property of the Task<TResult>
+            PropertyInfo? resultProperty = type.GetProperty("Result");
+
+            // Check if it's a Task<TResult>
+            if (resultProperty is not null)
+            {
+                // Get the value of the Result property
+                object taskResult = resultProperty.GetValue(value)!;
+
+                PrimitiveToEzrObject(taskResult, taskResult.GetType(), result);
+            }
+            else
+                result.Success(NewNothingConstant());
+        }
+        catch (Exception error)
+        {
+            result.Failure(new EzrWrapperExecutionError(error.InnerException?.Message ?? error.Message, Context, StartPosition, EndPosition));
         }
     }
 

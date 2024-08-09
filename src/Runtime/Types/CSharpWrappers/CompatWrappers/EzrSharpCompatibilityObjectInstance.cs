@@ -67,7 +67,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
             if (method.IsAbstract)
                 continue;
 
-            string methodObjectName = method.Name;
+            string methodObjectName = Utils.PascalToSnakeCase(method.Name);
             if (duplicateNames.TryGetValue(method.Name, out int duplicates))
             {
                 methodObjectName += $"_{duplicates}";
