@@ -31,6 +31,7 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     public static bool IsSupportedPrimitiveType(Type type)
     {
         TypeCode typeCode = Type.GetTypeCode(type);
+
         return typeCode is TypeCode.Empty
                         or TypeCode.Int16
                         or TypeCode.Int32
@@ -46,6 +47,20 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
                         or TypeCode.Boolean
                         or TypeCode.Char
                         or TypeCode.String;
+    }
+
+    /// <summary>
+    /// Checks if the given type is supported by the primitive compatibility wrappers, including generic <see cref="Task"/> objects.
+    /// </summary>
+    /// <param name="type">The type to check.</param>
+    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
+    public static bool IsSupportedReturnType(Type type)
+    {
+        return Type.GetTypeCode(type) switch
+        {
+            TypeCode.Object when typeof(Task).IsAssignableFrom(type) => type.GenericTypeArguments.Length == 0 || IsSupportedPrimitiveType(type.GenericTypeArguments[0]),
+            _ => IsSupportedPrimitiveType(type),
+        };
     }
 
     /// <summary>

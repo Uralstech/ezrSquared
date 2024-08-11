@@ -54,7 +54,7 @@ public class SharpAutoCompatibilityWrapperAttribute : Attribute
         if (methodInfo.IsGenericMethod)
             return new($"The \"{nameof(SharpAutoCompatibilityWrapperAttribute)}\" attribute does not support generic method \"{methodInfo.Name}\".", nameof(methodInfo));
 
-        if (methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper.IsSupportedPrimitiveType(methodInfo.ReturnType))
+        if (methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper.IsSupportedReturnType(methodInfo.ReturnType))
             return new($"Expected method \"{methodInfo.Name}\"'s return type to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoCompatibilityWrapperAttribute)}\"", nameof(methodInfo));
     
         foreach (ParameterInfo parameterInfo in methodInfo.GetParameters())
