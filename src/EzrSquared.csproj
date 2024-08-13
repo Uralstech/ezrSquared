@@ -28,7 +28,7 @@
 		<Title>ezr² Portable Library</Title>
 		<Description>The ezr² programming language, as a portable class library! This can be used to integrate ezr² as an embedded scripting language in your apps, websites and more!</Description>
 		
-		<Version>0.3.0</Version>
+		<Version>0.3.1</Version>
 		
 		<Authors>Udayshankar Ravikumar</Authors>
 		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
