@@ -3,6 +3,24 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.3.0 [14-08-24]
+	* [BREAKING CHANGE] All core executable types have been moved to `EzrSquared.Runtime.Types.Executables`.
+	* [BREAKING CHANGE] Auto wrapped methods in `EzrSharpCompatibilityObjectInstance` will now have their names in snake_case.
+	* [BREAKING CHANGE] `UpdateCreationContext` in `EzrObject` is now part of `IEzrObject`.
+	* [BREAKING CHANGE] `_creationContext` in `EzrObject` is now public as `CreationContext` and is part of `IEzrObject`.
+	* [BREAKING CHANGE] `PascalCaseToLowerCasePlainText` has been moved from `EzrSharpSourceFieldWrapper` to `EzrSharpSourceExecutableWrapper` as an internal protected static method.
+	* [BREAKING CHANGE] The `DynamicallyAccessedMembers` attribute has been removed for `EzrSharpCompatibilityType.SharpType` and `EzrSharpSourceTypeWrapper.SharpType`.
+	* [BREAKING CHANGE] The constructors for `EzrSharpCompatibilityType` and `EzrSharpSourceTypeWrapper` now use the `type` parameter to access the members of the C# type.
+	* [BREAKING CHANGE] The `creationContext` parameter in the constructors for `EzrObject` has been renamed to `parentContext` to maintain consistency.
+	* Auto wrappers now support async `Task`s that return one of the supported primitive types.
+	* `EzrSharpSourceTypeWrapper` now supports auto-wrapping static members through the new `SharpAutoCompatibilityWrapperAttribute` attribute.
+	* Added utility methods in `EzrSharpCompatibilityWrapper` to check if a given type is supported by the C#-to-ezr² and ezr²-to-C# converters.
+	* Added support for `decimal` type in the C#-to-ezr² and ezr²-to-C# converters.
+	* All auto-wrapper types now support overriding the names for members which would be named using `Utils.PascalToSnakeCase` otherwise.
+	* Added type checking in `EzrSharpSourcePropertyWrapper`.
+	* Objects created with `Context.Empty` will have their creation context updated to be the first context they are assigned to.
+	* Improved error messages here and there.
+
 * ezr² RE - v0.2.0 [07-08-24]
 	* [BREAKING CHANGE] SharpTypeWrapperAttribute will now require the type to have one SharpMethodWrapper wrapped constructor to create objects.
 	* [BREAKING CHANGE] All static `WrapperConstructor` methods in runtime error classes have been removed and converted to regular constructors.
