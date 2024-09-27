@@ -7,10 +7,10 @@ using System.Text;
 namespace EzrSquared.Runtime.Types.Core.Errors;
 
 /// <summary>
-/// Base of all error type objects.
+/// Implementation of <see cref="IEzrRuntimeError"/> with some utility methods.
 /// </summary>
 [SharpTypeWrapper("runtime_error")]
-public class EzrRuntimeError : EzrObject
+public class EzrRuntimeError : EzrObject, IEzrRuntimeError
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "runtime error";
@@ -18,30 +18,20 @@ public class EzrRuntimeError : EzrObject
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.RuntimeError";
 
-    /// <summary>
-    /// The name of the <see cref="EzrRuntimeError"/>.
-    /// </summary>
-    public readonly string Title;
+    /// <inheritdoc/>
+    public string Title { get; }
 
-    /// <summary>
-    /// The reason why the <see cref="EzrRuntimeError"/> occurred.
-    /// </summary>
-    public readonly string Details;
+    /// <inheritdoc/>
+    public string Details { get; }
 
-    /// <summary>
-    /// The context where the error occurred.
-    /// </summary>
-    public readonly Context ErrorContext;
+    /// <inheritdoc/>
+    public Context ErrorContext { get; }
 
-    /// <summary>
-    /// The starting position of the error.
-    /// </summary>
-    public readonly Position ErrorStartPosition;
+    /// <inheritdoc/>
+    public Position ErrorStartPosition { get; }
 
-    /// <summary>
-    /// The ending position of the error.
-    /// </summary>
-    public readonly Position ErrorEndPosition;
+    /// <inheritdoc/>
+    public Position ErrorEndPosition { get; }
 
     /// <summary>
     /// Creates a new runtime error object.
@@ -94,17 +84,11 @@ public class EzrRuntimeError : EzrObject
 
         switch (ezrObject)
         {
-            case EzrString ezrString:
-                return ezrString.Value;
-
-            case EzrCharacter ezrCharacter:
-                return ezrCharacter.Value.ToString();
-
-            case EzrCharacterList ezrCharacterList:
-                return ezrCharacterList.StringValue;
+            case IEzrString ezrString:
+                return ezrString.StringValue;
 
             default:
-                result.Failure(new EzrUnexpectedTypeError($"Expected {argumentName} of type string, character or character list, but got object of type \"{ezrObject.TypeName}\"!", context, ezrObject.StartPosition, ezrObject.EndPosition));
+                result.Failure(new EzrUnexpectedTypeError($"Expected {argumentName} to be text, but got object of type \"{ezrObject.TypeName}\"!", context, ezrObject.StartPosition, ezrObject.EndPosition));
                 return string.Empty;
         }
     }

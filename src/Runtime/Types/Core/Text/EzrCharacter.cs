@@ -13,7 +13,7 @@ namespace EzrSquared.Runtime.Types.Core.Text;
 /// <param name="parentContext">The parent context.</param>
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
-public class EzrCharacter(char value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition)
+public class EzrCharacter(char value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrString
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "character";
@@ -27,6 +27,9 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
     public readonly char Value = value;
 
     /// <inheritdoc/>
+    public string StringValue => Value.ToString();
+
+    /// <inheritdoc/>
     public override void ComparisonEqual(IEzrObject other, RuntimeResult result)
     {
         switch (other)
@@ -37,10 +40,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value == otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value == otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.ToString() == otherString.Value)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.ToString() == otherCharacterList.StringValue)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(StringValue == otherString.StringValue)); break;
             default:
                 result.Success(NewBooleanConstant(false)); break;
         }
@@ -57,10 +58,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value != otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value != otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.ToString() != otherString.Value)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.ToString() != otherCharacterList.StringValue)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(StringValue != otherString.StringValue)); break;
             default:
                 result.Success(NewBooleanConstant(true)); break;
         }
@@ -77,10 +76,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value < otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value < otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherString.Value) < 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherCharacterList.StringValue) < 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(Value.CompareTo(otherString.StringValue) < 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -97,10 +94,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value > otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value > otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherString.Value) > 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherCharacterList.StringValue) > 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(Value.CompareTo(otherString.StringValue) > 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -117,10 +112,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value <= otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value <= otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherString.Value) <= 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherCharacterList.StringValue) <= 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(Value.CompareTo(otherString.StringValue) <= 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -137,10 +130,8 @@ public class EzrCharacter(char value, Context parentContext, Position startPosit
                 result.Success(NewBooleanConstant(Value >= otherInteger.Value)); break;
             case EzrFloat otherFloat:
                 result.Success(NewBooleanConstant(Value >= otherFloat.Value)); break;
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherString.Value) >= 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(Value.CompareTo(otherCharacterList.StringValue) >= 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(Value.CompareTo(otherString.StringValue) >= 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }

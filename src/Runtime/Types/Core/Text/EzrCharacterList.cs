@@ -14,7 +14,7 @@ namespace EzrSquared.Runtime.Types.Core.Text;
 /// <param name="parentContext">The parent context.</param>
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
-public class EzrCharacterList(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrMutableObject
+public class EzrCharacterList(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrMutableObject, IEzrString
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "character list";
@@ -37,12 +37,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(StringValue == otherString.Value)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(StringValue == otherCharacterList.StringValue)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(StringValue == otherCharacter.Value.ToString())); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(StringValue == otherString.StringValue)); break;
             default:
                 result.Success(NewBooleanConstant(false)); break;
         }
@@ -53,12 +49,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(StringValue != otherString.Value)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(StringValue != otherCharacterList.StringValue)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(StringValue != otherCharacter.Value.ToString())); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(StringValue != otherString.StringValue)); break;
             default:
                 result.Success(NewBooleanConstant(true)); break;
         }
@@ -138,12 +130,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
                 result.Success(NewCharacterListConstant(StringValue[startIndexInt..(endIndexInt + 1)]));
                 break;
 
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.Value) < 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacterList.StringValue) < 0)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacter.Value.ToString()) < 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.StringValue) < 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -154,12 +142,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.Value) > 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacterList.StringValue) > 0)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacter.Value.ToString()) > 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.StringValue) > 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -178,12 +162,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
                 ComparisonLessThan(other, result);
                 break;
 
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.Value) <= 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacterList.StringValue) <= 0)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacter.Value.ToString()) <= 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.StringValue) <= 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -194,12 +174,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.Value) >= 0)); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacterList.StringValue) >= 0)); break;
-            case EzrCharacter otherCharacter:
-                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherCharacter.Value.ToString()) >= 0)); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(string.CompareOrdinal(StringValue, otherString.StringValue) >= 0)); break;
             default:
                 result.Failure(IllegalOperation(other)); break;
         }
@@ -213,12 +189,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrCharacterList otherCharacterList:
-                Value.Append(otherCharacterList.Value); break;
-            case EzrString otherString:
-                Value.Append(otherString.Value); break;
-            case EzrCharacter otherCharacter:
-                Value.Append(otherCharacter.Value); break;
+            case IEzrString otherString:
+                Value.Append(otherString.StringValue); break;
             default:
                 string otherStringValue = other.ToPureString(result);
                 if (result.ShouldReturn)
@@ -426,10 +398,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(StringValue.Contains(otherString.Value))); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(StringValue.Contains(otherCharacterList.StringValue))); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(StringValue.Contains(otherString.StringValue))); break;
             default:
                 result.Failure(IllegalOperation(other, false)); break;
         }
@@ -440,10 +410,8 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     {
         switch (other)
         {
-            case EzrString otherString:
-                result.Success(NewBooleanConstant(!StringValue.Contains(otherString.Value))); break;
-            case EzrCharacterList otherCharacterList:
-                result.Success(NewBooleanConstant(!StringValue.Contains(otherCharacterList.StringValue))); break;
+            case IEzrString otherString:
+                result.Success(NewBooleanConstant(!StringValue.Contains(otherString.StringValue))); break;
             default:
                 result.Failure(IllegalOperation(other, false)); break;
         }

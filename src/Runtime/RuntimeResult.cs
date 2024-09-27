@@ -16,7 +16,7 @@ public class RuntimeResult
     /// <summary>
     /// The error that occured in interpretation, if none occured, this is <see langword="null"/>.
     /// </summary>
-    public EzrRuntimeError? Error;
+    public IEzrRuntimeError? Error;
 
     /// <summary>
     /// Should the interpreter return from the current execution?
@@ -164,7 +164,7 @@ public class RuntimeResult
     /// Sets a failed expression execution.
     /// </summary>
     /// <param name="error">The error that caused the failure.</param>
-    public void Failure(EzrRuntimeError error)
+    public void Failure(IEzrRuntimeError error)
     {
         Reset();
         Error = error;

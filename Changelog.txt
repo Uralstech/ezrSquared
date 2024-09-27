@@ -3,6 +3,10 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.4.0 [27-09-24]
+	* Text objects (strings, characters, character lists), now implement a common interface `IEzrString`.
+	* Runtime errors now implement a common interface `IEzrRuntimeError`.
+
 * ezr² RE - v0.3.1 [14-08-24]
 	* Updated shell with new version.
 

@@ -15,20 +15,20 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     /// <summary>
     /// The collection of <see cref="IEzrObject"/>s stored in the <see cref="RuntimeEzrObjectDictionary"/>, in the format Dictionary&lt;hashOfKey, KeyValuePair&lt;key, valueReference&gt;&gt;.
     /// </summary>
-    private readonly Dictionary<int, KeyValuePair<IEzrObject, Reference>> _items;
+    private readonly IDictionary<int, KeyValuePair<IEzrObject, Reference>> _items;
 
     /// <summary>
     /// Creates a new <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
     public RuntimeEzrObjectDictionary()
     {
-        _items = [];
+        _items = new Dictionary<int, KeyValuePair<IEzrObject, Reference>>();
     }
 
     /// <summary>
     /// Creates a new <see cref="RuntimeEzrObjectDictionary"/> from an existing <see cref="Dictionary{TKey, TValue}"/>.
     /// </summary>
-    public RuntimeEzrObjectDictionary(Dictionary<int, KeyValuePair<IEzrObject, Reference>> items)
+    public RuntimeEzrObjectDictionary(IDictionary<int, KeyValuePair<IEzrObject, Reference>> items)
     {
         _items = items;
     }
@@ -273,7 +273,6 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
         }
 
         _items.Clear();
-        _items.TrimExcess();
     }
 
     /// <summary>Destructor.</summary>

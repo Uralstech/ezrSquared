@@ -1069,7 +1069,7 @@ public class Interpreter
         if (RuntimeResult.ShouldReturnTryCatch || RuntimeResult.Error is null)
             return;
 
-        EzrRuntimeError error = RuntimeResult.Error!;
+        IEzrRuntimeError error = RuntimeResult.Error!;
         RuntimeResult.Reset();
 
         for (int i = 0; i < node.Cases.Count; i++)
@@ -1081,7 +1081,7 @@ public class Interpreter
                 return;
 
             IEzrObject targetObject = RuntimeResult.Reference.Object;
-            if (targetObject is not EzrSharpSourceTypeWrapper target || !typeof(EzrRuntimeError).IsAssignableFrom(target.SharpType))
+            if (targetObject is not EzrSharpSourceTypeWrapper target || !typeof(IEzrRuntimeError).IsAssignableFrom(target.SharpType))
             {
                 RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected error type, but got object of type \"{targetObject.TypeName}\"!", executionContext, errorType.StartPosition, errorType.EndPosition));
                 return;

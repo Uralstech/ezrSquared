@@ -67,14 +67,14 @@ public static class EzrBuiltinFunctions
     }
 
     /// <summary>
-    /// Basic error throwing function. Implements <see cref="RuntimeResult.Failure(EzrRuntimeError)"/>.
+    /// Basic error throwing function. Implements <see cref="RuntimeResult.Failure(IEzrRuntimeError)"/>.
     /// </summary>
     /// <remarks>
     /// ezr² parameters:
     /// <list type="table">
     ///     <item>
     ///         <term>error</term>
-    ///         <description>(<see cref="EzrRuntimeError"/>) The error to throw.</description>
+    ///         <description>(<see cref="IEzrRuntimeError"/>) The error to throw.</description>
     ///     </item>
     /// </list>
     /// 
@@ -97,7 +97,7 @@ public static class EzrBuiltinFunctions
         Reference reference = arguments.ArgumentReferences["error"];
 
         IEzrObject referenceObject = reference.Object;
-        if (referenceObject is not EzrRuntimeError error)
+        if (referenceObject is not IEzrRuntimeError error)
             arguments.Result.Failure(new EzrUnexpectedTypeError($"Expected runtime error, but got object of type \"{referenceObject.TypeName}\"!", arguments.ExecutionContext, referenceObject.StartPosition, referenceObject.EndPosition));
         else
             arguments.Result.Failure(error);
