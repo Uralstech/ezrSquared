@@ -445,7 +445,7 @@ public class Context
             if (copy.Object is IEzrMutableObject mutable)
             {
                 mutable.Context.UpdateParent(newContext);
-                (mutable as EzrObject)?.UpdateCreationContext(newContext);
+                (mutable as IEzrObject)?.UpdateCreationContext(newContext);
             }
 
             newSymbols[keyValuePair.Key] = copy;
