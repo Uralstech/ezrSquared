@@ -2,6 +2,8 @@
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
@@ -14,7 +16,7 @@ namespace EzrSquared.Runtime.Types.Core.Text;
 /// <param name="parentContext">The parent context.</param>
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
-public class EzrString(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrString
+public class EzrString(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrString, IEzrIndexedCollection
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "string";
@@ -31,12 +33,57 @@ public class EzrString(string value, Context parentContext, Position startPositi
     public string StringValue => Value;
 
     /// <inheritdoc/>
+    public int Length => Value.Length;
+
+    /// <summary>
+    /// Compares the current string with another collection.
+    /// </summary>
+    /// <param name="other">The other collection.</param>
+    /// <returns>The result of the comparison.</returns>
+    private bool Compare(IEzrIndexedCollection other)
+    {
+        if (Value.Length != other.Length)
+            return false;
+
+        for (int i = 0; i < Value.Length; i++)
+        {
+            // This is not a strict equality check, unlike array/list comparisons. So, if the value in the other collection
+            // inherits from EzrCharacter, this should still return true if the values are the same.
+            if (other.At(i) is not EzrCharacter ezrCharacter || ezrCharacter.Value != Value[i])
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public IEzrObject At(int index)
+    {
+        return new EzrCharacter(Value[index], _executionContext, StartPosition, EndPosition);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<IEzrObject> GetEnumerator()
+    {
+        foreach (char @char in Value)
+            yield return new EzrCharacter(@char, _executionContext, StartPosition, EndPosition);
+    }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    /// <inheritdoc/>
     public override void ComparisonEqual(IEzrObject other, RuntimeResult result)
     {
         switch (other)
         {
             case IEzrString otherString:
                 result.Success(NewBooleanConstant(Value == otherString.StringValue)); break;
+            case IEzrIndexedCollection otherCollection:
+                result.Success(NewBooleanConstant(Compare(otherCollection))); break;
             default:
                 result.Success(NewBooleanConstant(false)); break;
         }
@@ -49,6 +96,8 @@ public class EzrString(string value, Context parentContext, Position startPositi
         {
             case IEzrString otherString:
                 result.Success(NewBooleanConstant(Value != otherString.StringValue)); break;
+            case IEzrIndexedCollection otherCollection:
+                result.Success(NewBooleanConstant(!Compare(otherCollection))); break;
             default:
                 result.Success(NewBooleanConstant(true)); break;
         }
