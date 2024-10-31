@@ -100,7 +100,8 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             Parameters[j + requiredParameters] = new(constructor.Value.Attribute.OptionalParameters[j], false);
 
         // Set variables.
-        HasKeywordArguments = constructor.Value.Attribute.HasKeywordArguments;
+        HasExtraKeywordArguments = constructor.Value.Attribute.HasExtraKeywordArguments;
+        HasExtraPositionalArguments = constructor.Value.Attribute.HasExtraPositionalArguments;
         Constructor = constructor.Value.Info;
 
         // Get static methods to wrap.
@@ -238,7 +239,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result);
+        WrapperArgumentPopulationResult argumentReferences = CheckAndPopulateArguments(arguments, result);
         if (result.ShouldReturn)
             return;
 
@@ -246,7 +247,8 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             [
                 new SharpMethodParameters
                 (
-                    argumentReferences,
+                    argumentReferences.Arguments,
+                    argumentReferences.ExtraPositionalArguments,
                     _executionContext,
                     CreationContext,
                     Context,

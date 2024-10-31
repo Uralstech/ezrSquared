@@ -79,7 +79,7 @@ public class EzrSharpSourceFieldWrapper : EzrSharpSourceExecutableWrapper
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result);
+        Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result).Arguments;
         if (result.ShouldReturn)
             return;
 

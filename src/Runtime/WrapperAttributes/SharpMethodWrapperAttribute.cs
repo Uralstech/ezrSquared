@@ -29,7 +29,12 @@ public class SharpMethodWrapperAttribute : Attribute
     /// <summary>
     /// Does this method support additional keyword arguments (kwargs)?
     /// </summary>
-    public bool HasKeywordArguments;
+    public bool HasExtraKeywordArguments;
+
+    /// <summary>
+    /// Does this method support additional positional arguments (args)?
+    /// </summary>
+    public bool HasExtraPositionalArguments;
 
     /// <summary>
     /// Creates a new instance of <see cref="SharpMethodWrapperAttribute"/> with a name.

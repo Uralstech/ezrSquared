@@ -6,6 +6,7 @@ namespace EzrSquared.Runtime.WrapperAttributes;
 /// Class for the paramters of a wrapped C# method.
 /// </summary>
 /// <param name="argumentReferences">See <see cref="ArgumentReferences"/>.</param>
+/// <param name="extraPositionalArgumentReferences">See <see cref="ExtraPositionalArgumentReferences"/>.</param>
 /// <param name="executionContext">See <see cref="ExecutionContext"/>.</param>
 /// <param name="creationContext">See <see cref="CreationContext"/>.</param>
 /// <param name="methodContext">See <see cref="MethodContext"/>.</param>
@@ -15,6 +16,7 @@ namespace EzrSquared.Runtime.WrapperAttributes;
 /// <param name="result">See <see cref="Result"/>.</param>
 public class SharpMethodParameters(
     Dictionary<string, Reference> argumentReferences,
+    List<Reference>? extraPositionalArgumentReferences,
     Context executionContext,
     Context creationContext,
     Context methodContext,
@@ -27,6 +29,11 @@ public class SharpMethodParameters(
     /// The references to the actual ezr² arguments.
     /// </summary>
     public Dictionary<string, Reference> ArgumentReferences = argumentReferences;
+
+    /// <summary>
+    /// The references to optional extra positional ezr² arguments.
+    /// </summary>
+    public List<Reference>? ExtraPositionalArgumentReferences = extraPositionalArgumentReferences;
 
     /// <summary>
     /// The context under which the method is being executed.

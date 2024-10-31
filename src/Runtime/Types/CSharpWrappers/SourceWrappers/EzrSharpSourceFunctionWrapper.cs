@@ -97,19 +97,21 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
         for (int j = 0; j < attribute.OptionalParameters.Length; j++)
             Parameters[j + requiredParameters] = new(attribute.OptionalParameters[j], false);
 
-        HasKeywordArguments = attribute.HasKeywordArguments;
+        HasExtraKeywordArguments = attribute.HasExtraKeywordArguments;
+        HasExtraPositionalArguments = attribute.HasExtraPositionalArguments;
     }
 
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        Dictionary<string, Reference> argumentReferences = CheckAndPopulateArguments(arguments, result);
+        WrapperArgumentPopulationResult argumentReferences = CheckAndPopulateArguments(arguments, result);
         if (result.ShouldReturn)
             return;
 
         SharpFunction.Invoke(new SharpMethodParameters
         (
-            argumentReferences,
+            argumentReferences.Arguments,
+            argumentReferences.ExtraPositionalArguments,
             _executionContext,
             CreationContext,
             Context,

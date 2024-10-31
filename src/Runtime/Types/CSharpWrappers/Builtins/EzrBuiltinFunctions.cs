@@ -4,6 +4,8 @@ using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
 
@@ -19,12 +21,16 @@ public static class EzrBuiltinFunctions
     /// ezr² parameters:
     /// <list type="table">
     ///     <item>
-    ///         <term>message</term>
-    ///         <description>(<see cref="IEzrObject"/>) The message to display on the console.</description>
+    ///         <term>Extra Positional Arguments</term>
+    ///         <description>(<see cref="List{T}"/> of <see cref="Reference"/>s) The message(s) to display on the console.</description>
     ///     </item>
     ///     <item>
     ///         <term>line_end</term>
-    ///         <description>(Optional, <see cref="EzrString"/>, <see cref="EzrCharacterList"/>, <see cref="EzrCharacter"/>) Line end character(s) to use instead of \n.</description>
+    ///         <description>(Optional, <see cref="IEzrString"/>) Line end character(s) to use instead of \n.</description>
+    ///     </item>
+    ///     <item>
+    ///         <term>separator</term>
+    ///         <description>(Optional, <see cref="IEzrString"/>) separator to separate each message to be printed.</description>
     ///     </item>
     /// </list>
     /// 
@@ -32,29 +38,56 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrNothing"/>
     /// <br/>
     /// ezr² errors:
-    /// <see cref="EzrUnexpectedTypeError"/> if "line_end" is not one of the specified types.
+    /// <see cref="MissingFieldException"/> if no messages provided.<br/>
+    /// <see cref="EzrUnexpectedTypeError"/> if "line_end" is not one of the specified types.<br/>
+    /// <see cref="EzrUnexpectedTypeError"/> if "separator" is not one of the specified types.
     /// </remarks>
     /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper("show", RequiredParameters = ["message"], OptionalParameters = ["line_end"])]
+    [SharpMethodWrapper("show", HasExtraPositionalArguments = true, OptionalParameters = ["line_end", "separator"])]
     public static void Show(SharpMethodParameters arguments)
     {
         RuntimeResult result = arguments.Result;
-        Reference messageReference = arguments.ArgumentReferences["message"];
+        List<Reference> messageReferences = arguments.ExtraPositionalArgumentReferences!;
 
-        string message = messageReference.Object.ToPureString(result);
-        if (result.ShouldReturn)
+        if (messageReferences.Count == 0)
+        {
+            result.Failure(new EzrMissingRequiredArgumentError("At least one message must be provided!", arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition));
             return;
+        }
+
+        string separator = string.Empty;
+        if (arguments.ArgumentReferences.TryGetValue("separator", out Reference? separatorReference))
+        {
+            IEzrObject separatorObject = separatorReference.Object;
+            if (separatorObject is IEzrString separatorString)
+                separator = separatorString.StringValue;
+            else
+            {
+                result.Failure(new EzrUnexpectedTypeError($"Expected separator of type string, character or character list, but got object of type \"{separatorObject.TypeName}\"", arguments.ExecutionContext, separatorObject.StartPosition, separatorObject.EndPosition));
+                return;
+            }
+        }
+
+        StringBuilder messageBuilder = new();
+        int messagesCount = messageReferences.Count;
+
+        for (int i = 0; i < messagesCount; i++)
+        {
+            string messagePart = messageReferences[i].Object.ToPureString(result);
+            if (result.ShouldReturn)
+                return;
+
+            messageBuilder.Append(messagePart);
+            if (i < messagesCount - 1)
+                messageBuilder.Append(separator);
+        }
 
         string lineEnd = Environment.NewLine;
         if (arguments.ArgumentReferences.TryGetValue("line_end", out Reference? lineEndReference))
         {
             IEzrObject lineEndObject = lineEndReference.Object;
-            if (lineEndObject is EzrString lineEndString)
-                lineEnd = lineEndString.Value;
-            else if (lineEndObject is EzrCharacter lineEndCharacter)
-                lineEnd = lineEndCharacter.Value.ToString();
-            else if (lineEndObject is EzrCharacterList lineEndCharacterList)
-                lineEnd = lineEndCharacterList.StringValue;
+            if (lineEndObject is IEzrString lineEndString)
+                lineEnd = lineEndString.StringValue;
             else
             {
                 result.Failure(new EzrUnexpectedTypeError($"Expected line ending of type string, character or character list, but got object of type \"{lineEndObject.TypeName}\"", arguments.ExecutionContext, lineEndObject.StartPosition, lineEndObject.EndPosition));
@@ -62,7 +95,7 @@ public static class EzrBuiltinFunctions
             }
         }
 
-        Console.Write($"{message}{lineEnd}");
+        Console.Write(messageBuilder.Append(lineEnd).ToString());
         result.Success(ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant));
     }
 

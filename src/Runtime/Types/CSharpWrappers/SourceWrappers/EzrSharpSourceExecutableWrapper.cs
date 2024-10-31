@@ -1,4 +1,6 @@
-﻿using EzrSquared.Runtime.Types.Core.Errors;
+﻿global using WrapperArgumentPopulationResult = (System.Collections.Generic.Dictionary<string, EzrSquared.Runtime.Reference> Arguments, System.Collections.Generic.List<EzrSquared.Runtime.Reference>? ExtraPositionalArguments);
+
+using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
@@ -28,7 +30,12 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
     /// <summary>
     /// Does the executable accept extra keyword arguments?
     /// </summary>
-    public bool HasKeywordArguments;
+    public bool HasExtraKeywordArguments;
+
+    /// <summary>
+    /// Does the executable accept extra positional arguments?
+    /// </summary>
+    public bool HasExtraPositionalArguments;
 
     /// <summary>
     /// Converts a string from PascalCase to lowecase plain text, seperated by spaces.
@@ -58,13 +65,21 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
     /// <param name="arguments">The array of arguments.</param>
     /// <param name="result">Runtime result for carrying any errors.</param>
     /// <returns>The dictionary of all the arguments.</returns>
-    protected internal Dictionary<string, Reference> CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
+    protected internal WrapperArgumentPopulationResult CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
     {
+        int totalRequiredArguments = 0;
+        foreach ((string Name, bool IsRequired) in Parameters)
+        {
+            if (IsRequired)
+                totalRequiredArguments++;
+        }
+
         int calculatedParameterIndex = 0;
         int requiredKeywordArguments = 0;
         int flaggedRequiredArguments = -1;
 
         Dictionary<string, Reference> argumentReferences = new(arguments.Length);
+        List<Reference>? extraPositionalArgumentReferences = HasExtraPositionalArguments ? new() : null;
 
         for (int i = 0; i < arguments.Length; i++)
         {
@@ -78,21 +93,16 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
                 if (argumentReferences.ContainsKey(name))
                 {
                     result.Failure(new EzrIllegalOperationError($"Cannot override already defined argument \"{name}\"!", _executionContext, reference.Object.StartPosition, reference.Object.EndPosition));
-                    return argumentReferences;
+                    return (argumentReferences, extraPositionalArgumentReferences);
                 }
 
-                bool found = Array.Find(Parameters, (v) =>
-                {
-                    parameterIndex++;
-                    return v.Name == name;
-                }) != default;
-
-                if (found)
+                parameterIndex = Array.FindIndex(Parameters, (param) => param.Name == name);
+                if (parameterIndex > -1)
                 {
                     argumentReferences.Add(name, reference);
                     requiredKeywordArguments++;
                 }
-                else if (HasKeywordArguments)
+                else if (HasExtraKeywordArguments)
                 {
                     argumentReferences.Add(name, reference);
                     parameterIndex = -1;
@@ -100,13 +110,13 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
                 else
                 {
                     result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{name}\"!", _executionContext, reference.Object.StartPosition, reference.Object.EndPosition));
-                    return argumentReferences;
+                    return (argumentReferences, extraPositionalArgumentReferences);
                 }
             }
             else
             {
             IndexCheck:
-                if (Parameters.Length <= calculatedParameterIndex)
+                if (Parameters.Length <= calculatedParameterIndex && !HasExtraPositionalArguments)
                 {
                     result.Failure(new EzrUnexpectedArgumentError(
                         requiredKeywordArguments > 0
@@ -114,6 +124,11 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
                             : $"Only expected {Parameters.Length} unnamed argument(s)!",
                         _executionContext, StartPosition, EndPosition));
                     break;
+                }
+                else if (totalRequiredArguments <= calculatedParameterIndex && HasExtraPositionalArguments)
+                {
+                    extraPositionalArgumentReferences!.Add(reference);
+                    continue;
                 }
 
                 string argumentName = Parameters[calculatedParameterIndex].Name;
@@ -145,11 +160,11 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
             if (Parameters[i].IsRequired && (flaggedRequiredArguments < 0 || (flaggedRequiredArguments & parameterFlag) != parameterFlag))
             {
                 result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{Parameters[i].Name}\"!", _executionContext, StartPosition, EndPosition));
-                return argumentReferences;
+                return (argumentReferences, extraPositionalArgumentReferences);
             }
         }
 
-        return argumentReferences;
+        return (argumentReferences, extraPositionalArgumentReferences);
     }
 
     /// <inheritdoc/>
