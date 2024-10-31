@@ -162,7 +162,7 @@ try-expression:
 	
 @ 'function-definition-expression' structures contain declarations of functions.
 function-definition-expression:
-	("global" | "private")? "static"? "constant"? "function" expression? ("with" (expression (',' expression)+?)? ("more" "as" expression))? "do" ((statements "end") | statement)
+	("global" | "private")? "static"? "constant"? "function" expression? ("with" (expression (',' expression)+?)? (','? "more" "named"? "as" expression)+?)? "do" ((statements "end") | statement)
 	
 @ 'class-definition-expression' structures contain declarations of classes.
 class-definition-expression:

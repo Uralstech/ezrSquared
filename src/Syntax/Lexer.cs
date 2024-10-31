@@ -624,6 +624,7 @@ public class Lexer
 
             "with"      => new Token(TokenType.KeywordWith, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "more"      => new Token(TokenType.KeywordMore, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
+            "named"     => new Token(TokenType.KeywordNamed, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "end"       => new Token(TokenType.KeywordEnd, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "return"    => new Token(TokenType.KeywordReturn, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "last"      => new Token(TokenType.KeywordLast, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),

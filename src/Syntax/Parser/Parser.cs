@@ -1933,7 +1933,8 @@ public class Parser
         Advance();
         Node? name = null;
         List<Node> parameters = [];
-        Node? keywordArguments = null;
+        Node? extraKeywordArguments = null;
+        Node? extraPositionalArguments = null;
         Node body;
 
         Position endPosition;
@@ -1947,6 +1948,7 @@ public class Parser
             {
                 do
                 {
+                    Position paramStartPosition = _currentToken.StartPosition;
                     Advance();
 
                     if (_currentToken.Type == TokenType.NewLine)
@@ -1955,9 +1957,21 @@ public class Parser
                     if (_currentToken.Type == TokenType.KeywordMore)
                     {
                         Advance();
+
+                        bool isNamedExtraParamters = false;
+                        if (_currentToken.Type == TokenType.KeywordNamed)
+                        {
+                            isNamedExtraParamters = true;
+                            Advance();
+                        }
+
                         if (_currentToken.Type != TokenType.KeywordAs)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' keyword! The 'as' keyword comes in-between the 'from' keyword and an expression when declaring extra parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
+                            if (isNamedExtraParamters)
+                                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' keyword! The 'as' keyword comes in-between the 'named' keyword and an expression when declaring extra keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
+                            else
+                                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' or 'named' keywords! The 'named' keyword starts the definition of extra keyword parameters and the 'as' keyword comes in-between the 'from' or 'named' keyword and an expression when declaring extra positional or keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
+
                             return;
                         }
 
@@ -1966,17 +1980,31 @@ public class Parser
                         if (_result.Error is not null)
                             return;
 
-                        keywordArguments = _result.Node;
-                        if (_currentToken.Type == TokenType.NewLine)
-                            Advance();
-
-                        if (_currentToken.Type == TokenType.Comma)
+                        if (isNamedExtraParamters && extraKeywordArguments is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Cannot have more parameters after declaring extra parameters! Declaring extra parameters must be done last, after declaring all mandatory parameters.", _currentToken.StartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Only one extra keyword parameter dictionary can be defined per function!", paramStartPosition, _currentToken.EndPosition));
+                            return;
+                        }
+                        else if (!isNamedExtraParamters && extraPositionalArguments is not null)
+                        {
+                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Only one extra positional parameter list can be defined per function!", paramStartPosition, _currentToken.EndPosition));
                             return;
                         }
 
-                        break;
+                        if (isNamedExtraParamters)
+                            extraKeywordArguments = _result.Node;
+                        else
+                            extraPositionalArguments = _result.Node;
+
+                        if (_currentToken.Type == TokenType.NewLine)
+                            Advance();
+
+                        continue;
+                    }
+                    else if (extraKeywordArguments is not null || extraPositionalArguments is not null)
+                    {
+                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Normal mixed parameters must come before extra positional/keyword parameter list/dictionary definitions.", paramStartPosition, _currentToken.EndPosition));
+                        return;
                     }
 
                     ParseExpression();
@@ -2053,7 +2081,7 @@ public class Parser
             return;
         }
 
-        _result.Success(new FunctionDefinitionNode(name, accessibilityModifiers, returnLast, parameters, keywordArguments, body, startPosition, endPosition));
+        _result.Success(new FunctionDefinitionNode(name, accessibilityModifiers, returnLast, parameters, extraKeywordArguments, extraPositionalArguments, body, startPosition, endPosition));
     }
 
     /// <summary>

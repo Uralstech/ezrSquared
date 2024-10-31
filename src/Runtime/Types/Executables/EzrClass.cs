@@ -44,7 +44,7 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrClass(string? name, Node body, EzrClass[] parents, bool isReadOnly, bool isStatic, Interpreter interpreter, RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(name, body, [], null, parentContext, startPosition, endPosition, new Context($"<{$"\"{name}\"" ?? "<anonymous>"} static context>", true, startPosition, parentContext))
+    public EzrClass(string? name, Node body, EzrClass[] parents, bool isReadOnly, bool isStatic, Interpreter interpreter, RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(name, body, [], null, null, parentContext, startPosition, endPosition, new Context($"<{$"\"{name}\"" ?? "<anonymous>"} static context>", true, startPosition, parentContext))
     {
         IsReadOnly = isReadOnly;
         IsStatic = isStatic;
@@ -93,7 +93,8 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
 
         EzrFunction initializationFunction = (EzrFunction)functionReference.Object;
         Parameters = initializationFunction.Parameters;
-        KeywordArguments = initializationFunction.KeywordArguments;
+        ExtraKeywordArguments = initializationFunction.ExtraKeywordArguments;
+        ExtraPositionalArguments = initializationFunction.ExtraPositionalArguments;
 
         newContext.Release();
     }
@@ -104,7 +105,8 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
     /// <param name="name">The name of the executable.</param>
     /// <param name="body">The source code body of the executable.</param>
     /// <param name="parameters">The source code of the class's parameters and their default values.</param>
-    /// <param name="keywordArguments">The position in source code and name of the variable for the class's extra keyword arguments.</param>
+    /// <param name="extraKeywordArguments">The position in source code and name of the variable for the class's extra keyword arguments.</param>
+    /// <param name="extraPositionalArguments">The position in source code and name of the variable for the class's extra positional arguments.</param>
     /// <param name="parents">The parents of the class.</param>
     /// <param name="staticParentReferences">The references to the class's static parents.</param>
     /// <param name="isReadOnly">Is this a read-only class?</param>
@@ -113,7 +115,7 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrClass(string? name, Node body, (string Name, Node Node)[] parameters, (Position StartPosition, Position EndPosition, string Name)? keywordArguments, EzrClass[] parents, Reference[] staticParentReferences, bool isReadOnly, bool isStatic, Context staticContext, Context parentContext, Position startPosition, Position endPosition) : base(name, body, parameters, keywordArguments, parentContext, startPosition, endPosition, staticContext)
+    public EzrClass(string? name, Node body, (string Name, Node Node)[] parameters, OptionalExtraArguments extraKeywordArguments, OptionalExtraArguments extraPositionalArguments, EzrClass[] parents, Reference[] staticParentReferences, bool isReadOnly, bool isStatic, Context staticContext, Context parentContext, Position startPosition, Position endPosition) : base(name, body, parameters, extraKeywordArguments, extraPositionalArguments, parentContext, startPosition, endPosition, staticContext)
     {
         Parents = parents;
         IsReadOnly = isReadOnly;
@@ -271,6 +273,6 @@ public class EzrClass : EzrRuntimeExecutable, IEzrMutableObject
             copy.LinkedContexts[i] = reference.Object.Context;
         }
 
-        return new EzrClass(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, Parents, staticParentReferences, IsReadOnly, IsStatic, copy!, CreationContext, StartPosition, EndPosition);
+        return new EzrClass(IsAnonymous ? null : ExecutableName, Body, Parameters, ExtraKeywordArguments, ExtraPositionalArguments, Parents, staticParentReferences, IsReadOnly, IsStatic, copy!, CreationContext, StartPosition, EndPosition);
     }
 }

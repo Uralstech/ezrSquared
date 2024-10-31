@@ -390,18 +390,11 @@ public class Interpreter
             if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
                 operationAccessibilityModifiers |= AccessMod.LocalScope;
 
-            VisitNode(elementNode, executionContext, callingContext, operationAccessibilityModifiers, true);
+            Reference? reference = GetRegisteredReference(elementNode, executionContext, callingContext, operationAccessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = RuntimeResult.Reference;
-            if (!reference.IsRegistered)
-            {
-                RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for variable name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, elementNode.StartPosition, elementNode.EndPosition));
-                return;
-            }
-
-            variables[i] = reference;
+            variables[i] = reference!;
         }
 
         VisitNode(node.Value, executionContext, callingContext, accessibilityModifiers);
@@ -409,6 +402,30 @@ public class Interpreter
             return;
 
         AssignValuesToVariables(node, variables, isSingleVariable, executionContext, callingContext, accessibilityModifiers);
+    }
+
+    /// <summary>
+    /// Gets and checks if a node represents a variable reference.
+    /// </summary>
+    /// <param name="node">The node to check.</param>
+    /// <param name="executionContext">The <see cref="Context"/> in which the variable will be assigned.</param>
+    /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the <see cref="Node"/>.</param>
+    /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
+    /// <returns>The variable reference. <see langword="null"/> if any error occurs.</returns>
+    private Reference? GetRegisteredReference(Node node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
+    {
+        VisitNode(node, executionContext, callingContext, accessibilityModifiers, true);
+        if (RuntimeResult.ShouldReturn)
+            return null;
+
+        Reference reference = RuntimeResult.Reference;
+        if (!reference.IsRegistered)
+        {
+            RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for variable name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, node.StartPosition, node.EndPosition));
+            return null;
+        }
+
+        return reference;
     }
 
     /// <summary>
@@ -874,18 +891,11 @@ public class Interpreter
 
         if (node.IterationVariable is not null)
         {
-            VisitNode(node.IterationVariable, executionContext, callingContext, operationAccessibilityModifiers, true);
+            iterationVariableReference = GetRegisteredReference(node.IterationVariable, executionContext, callingContext, operationAccessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            iterationVariableReference = RuntimeResult.Reference;
-            if (!iterationVariableReference.IsRegistered)
-            {
-                RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for iteration variable name, but got object of type \"{iterationVariableReference.Object.TypeName}\"!", executionContext, node.IterationVariable.StartPosition, node.IterationVariable.EndPosition));
-                return;
-            }
-
-            iterationVariableName = iterationVariableReference.Name;
+            iterationVariableName = iterationVariableReference!.Name;
             iterationVariableRegisteredContext = iterationVariableReference.RegisteredContext ?? executionContext;
         }
 
@@ -1022,19 +1032,16 @@ public class Interpreter
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
     private void VisitForEachNode(ForEachNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
-        VisitNode(node.Expression.Left, executionContext, callingContext, accessibilityModifiers, true);
+        AccessMod operationAccessibilityModifiers = accessibilityModifiers;
+        if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
+            operationAccessibilityModifiers |= AccessMod.LocalScope;
+
+        Reference? iterationVariableReference = GetRegisteredReference(node.Expression.Left, executionContext, callingContext, operationAccessibilityModifiers);
         if (RuntimeResult.ShouldReturn)
             return;
 
-        Reference iterationVariableReference = RuntimeResult.Reference;
-        string iterationVariableName = iterationVariableReference.Name;
+        string iterationVariableName = iterationVariableReference!.Name;
         Context iterationVariableRegisteredContext = iterationVariableReference.RegisteredContext ?? executionContext;
-
-        if (!iterationVariableReference.IsRegistered)
-        {
-            RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for iteration variable name, but got object of type \"{iterationVariableReference.Object.TypeName}\"!", executionContext, node.Expression.Left.StartPosition, node.Expression.Left.EndPosition));
-            return;
-        }
 
         VisitNode(node.Expression.Right, executionContext, callingContext, accessibilityModifiers);
         if (RuntimeResult.ShouldReturn)
@@ -1046,10 +1053,6 @@ public class Interpreter
             RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected an iterable object to iterate, but got object of type \"{iterableObjectReference.Object.TypeName}\"!", executionContext, node.Expression.Right.StartPosition, node.Expression.Right.EndPosition));
             return;
         }
-
-        AccessMod operationAccessibilityModifiers = accessibilityModifiers;
-        if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
-            operationAccessibilityModifiers |= AccessMod.LocalScope;
 
         List<IEzrObject> returns = new(iterableObject.Length);
         foreach (IEzrObject ezrObject in iterableObject)
@@ -1171,18 +1174,11 @@ public class Interpreter
                     if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
                         operationAccessibilityModifiers |= AccessMod.LocalScope;
 
-                    VisitNode(errorVariableNode, executionContext, callingContext, operationAccessibilityModifiers, true);
+                    Reference? reference = GetRegisteredReference(errorVariableNode, executionContext, callingContext, operationAccessibilityModifiers);
                     if (RuntimeResult.ShouldReturn)
                         return;
 
-                    Reference reference = RuntimeResult.Reference;
-                    if (!reference.IsRegistered)
-                    {
-                        RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for error variable name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, errorVariableNode.StartPosition, errorVariableNode.EndPosition));
-                        return;
-                    }
-
-                    Context assignmentContext = reference.RegisteredContext ?? executionContext;
+                    Context assignmentContext = reference!.RegisteredContext ?? executionContext;
                     error.Update(assignmentContext, errorVariableNode.StartPosition, errorVariableNode.EndPosition);
 
                     (IEzrObject Object, string Name) newErrorVariable = (error, reference.Name);
@@ -1205,18 +1201,11 @@ public class Interpreter
                 if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
                     operationAccessibilityModifiers |= AccessMod.LocalScope;
 
-                VisitNode(emptyCaseVariable, executionContext, callingContext, operationAccessibilityModifiers, true);
+                Reference? reference = GetRegisteredReference(emptyCaseVariable, executionContext, callingContext, operationAccessibilityModifiers);
                 if (RuntimeResult.ShouldReturn)
                     return;
 
-                Reference reference = RuntimeResult.Reference;
-                if (!reference.IsRegistered)
-                {
-                    RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for error variable name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, emptyCaseVariable.StartPosition, emptyCaseVariable.EndPosition));
-                    return;
-                }
-
-                Context assignmentContext = reference.RegisteredContext ?? executionContext;
+                Context assignmentContext = reference!.RegisteredContext ?? executionContext;
                 error.Update(assignmentContext, emptyCaseVariable.StartPosition, emptyCaseVariable.EndPosition);
 
                 (IEzrObject Object, string Name) newErrorVariable = (error, reference.Name);
@@ -1262,21 +1251,24 @@ public class Interpreter
             parameters[i] = (reference.Name, node.Parameters[i]);
         }
 
-        (Position StartPosition, Position EndPosition, string Name)? keywordArguments = null;
-        if (node.KeywordArguments is not null)
+        OptionalExtraArguments keywordArguments = null;
+        if (node.ExtraKeywordArguments is not null)
         {
-            VisitNode(node.KeywordArguments, newContext, callingContext, AccessMod.None, true);
+            Reference? reference = GetRegisteredReference(node.ExtraKeywordArguments, newContext, callingContext, AccessMod.None);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = RuntimeResult.Reference;
-            if (string.IsNullOrEmpty(reference.Name))
-            {
-                RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected an identifier to store keyword arguments in, but received object of type \"{reference.Object.TypeName}\"!", executionContext, node.KeywordArguments.StartPosition, node.KeywordArguments.EndPosition));
-                return;
-            }
+            keywordArguments = (node.ExtraKeywordArguments.StartPosition, node.ExtraKeywordArguments.EndPosition, reference!.Name);
+        }
 
-            keywordArguments = (node.KeywordArguments.StartPosition, node.KeywordArguments.EndPosition, reference.Name);
+        OptionalExtraArguments positionalArguments = null;
+        if (node.ExtraPositionalArguments is not null)
+        {
+            Reference? reference = GetRegisteredReference(node.ExtraPositionalArguments, newContext, callingContext, AccessMod.None);
+            if (RuntimeResult.ShouldReturn)
+                return;
+
+            positionalArguments = (node.ExtraPositionalArguments.StartPosition, node.ExtraPositionalArguments.EndPosition, reference!.Name);
         }
 
         newContext.Release();
@@ -1288,19 +1280,12 @@ public class Interpreter
             if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
                 operationAccessibilityModifiers |= AccessMod.LocalScope;
 
-            VisitNode(node.Name, executionContext, callingContext, operationAccessibilityModifiers, true);
+            Reference? reference = GetRegisteredReference(node.Name, executionContext, callingContext, operationAccessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = RuntimeResult.Reference;
-            if (!reference.IsRegistered)
-            {
-                RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for function name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, node.Name.StartPosition, node.Name.EndPosition));
-                return;
-            }
-
-            Context assignmentContext = reference.RegisteredContext ?? executionContext;
-            function = new EzrFunction(reference.Name, node.Body, parameters, keywordArguments, node.ReturnLast, assignmentContext, node.StartPosition, node.EndPosition);
+            Context assignmentContext = reference!.RegisteredContext ?? executionContext;
+            function = new EzrFunction(reference.Name, node.Body, parameters, keywordArguments, positionalArguments, node.ReturnLast, assignmentContext, node.StartPosition, node.EndPosition);
 
             (IEzrObject Object, string Name) newFunctionVariable = (function, reference.Name);
             HandleSetStatus(assignmentContext.Set(callingContext, newFunctionVariable, reference, operationAccessibilityModifiers), reference.Name, node.Name, assignmentContext);
@@ -1308,7 +1293,7 @@ public class Interpreter
                 return;
         }
         else
-            function = new EzrFunction(null, node.Body, parameters, keywordArguments, node.ReturnLast, executionContext, node.StartPosition, node.EndPosition);
+            function = new EzrFunction(null, node.Body, parameters, keywordArguments, positionalArguments, node.ReturnLast, executionContext, node.StartPosition, node.EndPosition);
 
         RuntimeResult.Success(ReferencePool.Get(function, AccessMod.PrivateConstant));
     }
@@ -1347,18 +1332,11 @@ public class Interpreter
             if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
                 operationAccessibilityModifiers |= AccessMod.LocalScope;
 
-            VisitNode(node.Name, executionContext, callingContext, operationAccessibilityModifiers, true);
+            Reference? reference = GetRegisteredReference(node.Name, executionContext, callingContext, operationAccessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = RuntimeResult.Reference;
-            if (!reference.IsRegistered)
-            {
-                RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for class name, but got object of type \"{reference.Object.TypeName}\"!", executionContext, node.Name.StartPosition, node.Name.EndPosition));
-                return;
-            }
-
-            Context assignmentContext = reference.RegisteredContext ?? executionContext;
+            Context assignmentContext = reference!.RegisteredContext ?? executionContext;
             @class = new EzrClass(reference.Name, node.Body, parents, node.Readonly,
                 ((node.AccessibilityModifiers | accessibilityModifiers) & AccessMod.Static) == AccessMod.Static, this,
                 RuntimeResult, assignmentContext, node.StartPosition, node.EndPosition);

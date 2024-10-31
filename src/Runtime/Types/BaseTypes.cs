@@ -92,17 +92,17 @@ public abstract class EzrObject : IEzrObject
     /// <summary>
     /// Creates a new object with the specified internal context, parent context and position.
     /// </summary>
-    /// <param name="context">The internal context.</param>
+    /// <param name="context">The internal context, if <see langword="null"/>, creates a new one.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrObject(Context context, Context parentContext, Position startPosition, Position endPosition)
+    public EzrObject(Context? context, Context parentContext, Position startPosition, Position endPosition)
     {
         StartPosition = startPosition;
         EndPosition = endPosition;
 
         _executionContext = CreationContext = parentContext;
-        Context = context;
+        Context = context ?? new Context(TypeName, false, startPosition, CreationContext, CreationContext.StaticContext);
     }
 
     /// <inheritdoc/>

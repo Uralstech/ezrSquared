@@ -148,6 +148,11 @@ public enum TokenType : ushort
     KeywordMore,
 
     /// <summary>
+    /// The keyword "named", case-insensitive, part of the <see cref="TokenTypeGroup.Keyword"/> type-group.
+    /// </summary>
+    KeywordNamed,
+
+    /// <summary>
     /// The keyword "function", case-insensitive, part of the <see cref="TokenTypeGroup.Keyword"/> type-group.
     /// </summary>
     KeywordFunction,

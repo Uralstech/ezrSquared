@@ -8,12 +8,13 @@ namespace EzrSquared.Runtime.Types.Executables;
 /// <param name="name">The name of the executable.</param>
 /// <param name="body">The source code body of the executable.</param>
 /// <param name="parameters">The source code of the executable's parameters and their default values.</param>
-/// <param name="keywordArguments">The position in source code and name of the variable for the executable's extra keyword arguments.</param>
+/// <param name="extraKeywordArguments">The position in source code and name of the variable for the executable's extra keyword arguments.</param>
+/// <param name="extraPositionalArguments">The position in source code and name of the variable for the executable's extra positional arguments.</param>
 /// <param name="returnLast">Should the function return its last expression as the result?</param>
 /// <param name="parentContext">The parent context.</param>
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
-public class EzrFunction(string? name, Node body, (string Name, Node Node)[] parameters, (Position StartPosition, Position EndPosition, string Name)? keywordArguments, bool returnLast, Context parentContext, Position startPosition, Position endPosition) : EzrRuntimeExecutable(name, body, parameters, keywordArguments, parentContext, startPosition, endPosition), IEzrMutableObject
+public class EzrFunction(string? name, Node body, (string Name, Node Node)[] parameters, OptionalExtraArguments extraKeywordArguments, OptionalExtraArguments extraPositionalArguments, bool returnLast, Context parentContext, Position startPosition, Position endPosition) : EzrRuntimeExecutable(name, body, parameters, extraKeywordArguments, extraPositionalArguments, parentContext, startPosition, endPosition), IEzrMutableObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "function";
@@ -66,6 +67,6 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
     /// <inheritdoc/>
     public IMutable<IEzrMutableObject>? DeepCopy(RuntimeResult result)
     {
-        return new EzrFunction(IsAnonymous ? null : ExecutableName, Body, Parameters, KeywordArguments, ReturnLast, CreationContext, StartPosition, EndPosition);
+        return new EzrFunction(IsAnonymous ? null : ExecutableName, Body, Parameters, ExtraKeywordArguments, ExtraPositionalArguments, ReturnLast, CreationContext, StartPosition, EndPosition);
     }
 }

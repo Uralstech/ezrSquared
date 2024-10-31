@@ -1,4 +1,6 @@
-﻿using EzrSquared.Runtime.Collections;
+﻿global using OptionalExtraArguments = (EzrSquared.Position StartPosition, EzrSquared.Position EndPosition, string Name)?;
+
+using EzrSquared.Runtime.Collections;
 using EzrSquared.Runtime.Nodes;
 using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
@@ -36,7 +38,12 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <summary>
     /// The position in source code and name of the variable for the executable's extra keyword arguments.
     /// </summary>
-    public (Position StartPosition, Position EndPosition, string Name)? KeywordArguments { get; internal protected set; }
+    public OptionalExtraArguments ExtraKeywordArguments { get; internal protected set; }
+
+    /// <summary>
+    /// The position in source code and name of the variable for the executable's extra positional arguments.
+    /// </summary>
+    public OptionalExtraArguments ExtraPositionalArguments { get; internal protected set; }
 
     /// <summary>
     /// Creates a new executable object.
@@ -44,12 +51,13 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <param name="name">The name of the executable.</param>
     /// <param name="body">The source code body of the executable.</param>
     /// <param name="parameters">The source code of the executable's parameters and their default values.</param>
-    /// <param name="keywordArguments">The position in source code and name of the variable for the executable's extra keyword arguments.</param>
+    /// <param name="extraKeywordArguments">The position in source code and name of the variable for the executable's extra keyword arguments.</param>
+    /// <param name="extraPositionalArguments">The position in source code and name of the variable for the executable's extra positional arguments.</param>
     /// <param name="initializationContext">The internal context, if <see langword="null"/>, creates a new one.</param>
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrRuntimeExecutable(string? name, Node body, (string Name, Node Node)[] parameters, (Position StartPosition, Position EndPosition, string Name)? keywordArguments, Context parentContext, Position startPosition, Position endPosition, Context? initializationContext = null) : base(initializationContext, parentContext, startPosition, endPosition)
+    public EzrRuntimeExecutable(string? name, Node body, (string Name, Node Node)[] parameters, OptionalExtraArguments extraKeywordArguments, OptionalExtraArguments extraPositionalArguments, Context parentContext, Position startPosition, Position endPosition, Context? initializationContext = null) : base(initializationContext, parentContext, startPosition, endPosition)
     {
         Tag = name is not null
             ? $"{Tag}.{name}.{Utils.GetNextUniqueId()}"
@@ -58,7 +66,8 @@ public abstract class EzrRuntimeExecutable : EzrObject
 
         Body = body;
         Parameters = parameters;
-        KeywordArguments = keywordArguments;
+        ExtraKeywordArguments = extraKeywordArguments;
+        ExtraPositionalArguments = extraPositionalArguments;
 
         IsAnonymous = string.IsNullOrEmpty(name);
     }
@@ -73,8 +82,9 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <param name="ignoreExtraArguments">Should the checker ignore extra arguments?</param>
     protected internal void CheckAndPopulateArguments(Reference[] arguments, Context context, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {
-        // Create dictionary to store extra keyword arguments, if allowed.
-        RuntimeEzrObjectDictionary? keywordArguments = KeywordArguments.HasValue ? new() : null;
+        // Create dictionary or list to store extra arguments, if allowed.
+        RuntimeEzrObjectDictionary? extraKeywordArguments = ExtraKeywordArguments.HasValue ? new() : null;
+        RuntimeEzrObjectList? extraPositionalArguments = ExtraPositionalArguments.HasValue ? new() : null;
 
         // Index for iterating through the ParameterNames array.
         int parameterIndex = 0;
@@ -88,6 +98,9 @@ public abstract class EzrRuntimeExecutable : EzrObject
             Reference argument = arguments[argumentIndex];
             IEzrObject argumentObject = argument.Object;
 
+            // Update the object's context.
+            argumentObject.Update(context, argumentObject.StartPosition, argumentObject.EndPosition);
+
             // Is the parameterIndex in the bounds of the dictionary?
             bool isValidIndex = parameterIndex < Parameters.Length;
 
@@ -98,18 +111,19 @@ public abstract class EzrRuntimeExecutable : EzrObject
             string key = isValidIndex ? Parameters[parameterIndex].Name : string.Empty;
 
             if (isKeywordArgument)
+            {
                 // If it is a keyword argument, and it exists in Parameters:
                 if (Array.FindIndex(Parameters, paramter => paramter.Name == argument.Name) != -1)
                     key = argument.Name; // Choose that as the key.
-                else if (keywordArguments is not null) // If it doesn't, and extra keyword arguments are allowed:
+                else if (extraKeywordArguments is not null) // If it doesn't, and extra keyword arguments are allowed:
                 {
                     // Add the argument to the dictionary, and continue onto the next argument.
-                    keywordArguments.Update(new EzrString(argument.Name, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
+                    extraKeywordArguments.Update(new EzrString(argument.Name, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
 
                     argumentIndex++;
                     continue;
                 }
-                else if (!ignoreExtraArguments) // If extra arguments are not allowed, and ignoreExtraArguments is not set:
+                else if (!ignoreExtraArguments) // If extra keyword arguments are not allowed, and ignoreExtraArguments is not set:
                 {
                     // Return an error.
                     result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{argument.Name}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
@@ -120,8 +134,9 @@ public abstract class EzrRuntimeExecutable : EzrObject
                     argumentIndex++;
                     continue;
                 }
+            }
 
-            // Is the key already exist?
+            // Does the key already exist?
             bool hasKey = isValidIndex && context.IsDefined(key);
 
             // If parameterIndex is out of bounds, or the key is already defined and the argument is a keyword argument, or if all the arguments have already been set:
@@ -145,8 +160,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
             if (hasKey)
                 continue;
 
-            // After all that, update the argument, and set it to the context.
-            argumentObject.Update(context, argumentObject.StartPosition, argumentObject.EndPosition);
+            // After all that, set it to the context.
             context.Set(null, key, ReferencePool.Get(argumentObject, AccessMod.Private));
 
             // Add to the argument index.
@@ -184,8 +198,12 @@ public abstract class EzrRuntimeExecutable : EzrObject
         }
 
         // If the extra keyword arguments dictionary should be set:
-        if (KeywordArguments.HasValue)
-            context.Set(null, KeywordArguments.Value.Name, ReferencePool.Get(new EzrDictionary(keywordArguments!, context, KeywordArguments.Value.StartPosition, KeywordArguments.Value.EndPosition), AccessMod.Private)); // Set it.
+        if (ExtraKeywordArguments.HasValue)
+            context.Set(null, ExtraKeywordArguments.Value.Name, ReferencePool.Get(new EzrDictionary(extraKeywordArguments!, context, ExtraKeywordArguments.Value.StartPosition, ExtraKeywordArguments.Value.EndPosition), AccessMod.Private)); // Set it.
+
+        // If the extra positional arguments list should be set:
+        if (ExtraPositionalArguments.HasValue)
+            context.Set(null, ExtraPositionalArguments.Value.Name, ReferencePool.Get(new EzrList(extraPositionalArguments!, context, ExtraPositionalArguments.Value.StartPosition, ExtraPositionalArguments.Value.EndPosition), AccessMod.Private)); // Set it.
     }
 
     /// <inheritdoc/>
@@ -229,14 +247,19 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        string[] paramterNames = Array.ConvertAll(Parameters, parameter => parameter.Name);
+        static string ToEnabledOrDisabled(bool enabled)
+        {
+            return enabled ? "enabled" : "disabled";
+        }
+
+        string[] parameterNames = Array.ConvertAll(Parameters, parameter => parameter.Name);
         return (Parameters.Length > 0, IsAnonymous) switch
         {
-            (true, true) => $"<{TypeName} {ExecutableName}, with \"{string.Join("\", \"", paramterNames)}\">",
-            (true, false) => $"<{TypeName} \"{ExecutableName}\", with \"{string.Join("\", \"", paramterNames)}\">",
+            (true, true) => $"<{TypeName} {ExecutableName}, with \"{string.Join("\", \"", parameterNames)}\", extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
+            (true, false) => $"<{TypeName} \"{ExecutableName}\", with \"{string.Join("\", \"", parameterNames)}\", extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
 
-            (false, true) => $"<{TypeName} {ExecutableName}>",
-            (false, false) => $"<{TypeName} \"{ExecutableName}\">",
+            (false, true) => $"<{TypeName} {ExecutableName} with extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
+            (false, false) => $"<{TypeName} \"{ExecutableName}\" with extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
         };
     }
 }
