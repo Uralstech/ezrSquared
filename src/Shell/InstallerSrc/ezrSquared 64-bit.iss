@@ -4,7 +4,7 @@
 #include "environment.iss"
 
 #define MyAppName "ezr² Shell"
-#define MyAppVersion "0.6.0"
+#define MyAppVersion "0.7.0"
 #define MyAppPublisher "Urav Advanced Learning Systems Pvt Ltd"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
