@@ -968,6 +968,9 @@ public class Parser
             case TokenType.KeywordCount:
                 ParseCountExpression();
                 break;
+            case TokenType.KeywordFor:
+                ParseForEachExpression();
+                break;
             case TokenType.KeywordWhile:
                 ParseWhileExpression();
                 break;
@@ -1560,6 +1563,69 @@ public class Parser
         }
 
         _result.Success(new CountNode(to, from, step, iterationVariable, body, startPosition, endPosition));
+    }
+
+    /// <summary>
+    /// Tries parsing a for-each expression. Starts from <see cref="_currentToken"/>, which should be of <see cref="TokenType"/> <see cref="TokenType.KeywordFor"/>.
+    /// </summary>
+    private void ParseForEachExpression()
+    {
+        Position startPosition = _currentToken.StartPosition;
+        Advance();
+
+        if (_currentToken.Type != TokenType.KeywordEach)
+        {
+            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'each' keyword! The 'each' keyword is essential for forming a \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            return;
+        }
+
+        Advance();
+        ParseExpression();
+        if (_result.Error is not null)
+            return;
+
+        if (_result.Node is not BinaryOperationNode expression || expression.Operator != TokenType.KeywordIn)
+        {
+            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a binary expression in the format \"[iteration variable] in [iterable collection]\".", _result.Node.StartPosition, _result.Node.EndPosition));
+            return;
+        }
+
+        if (_currentToken.Type != TokenType.KeywordDo)
+        {
+            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            return;
+        }
+
+        Advance();
+
+        Node body;
+        Position endPosition;
+        if (_currentToken.Type == TokenType.NewLine)
+        {
+            ParseStatements();
+            if (_result.Error is not null)
+                return;
+            else if (_currentToken.Type != TokenType.KeywordEnd)
+            {
+                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                return;
+            }
+
+            body = _result.Node;
+            endPosition = _currentToken.EndPosition;
+            Advance();
+        }
+        else
+        {
+            ParseStatement();
+            if (_result.Error is not null)
+                return;
+
+            body = _result.Node;
+            endPosition = PeekPrevious().EndPosition;
+        }
+
+        _result.Success(new ForEachNode(expression, body, startPosition, endPosition));
     }
 
     /// <summary>

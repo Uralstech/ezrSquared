@@ -98,6 +98,16 @@ public enum TokenType : ushort
     KeywordCount,
 
     /// <summary>
+    /// The keyword "for", case-insensitive, part of the <see cref="TokenTypeGroup.Keyword"/> type-group.
+    /// </summary>
+    KeywordFor,
+
+    /// <summary>
+    /// The keyword "each", case-insensitive, part of the <see cref="TokenTypeGroup.Keyword"/> type-group.
+    /// </summary>
+    KeywordEach,
+
+    /// <summary>
     /// The keyword "from", case-insensitive, part of the <see cref="TokenTypeGroup.Keyword"/> type-group.
     /// </summary>
     KeywordFrom,

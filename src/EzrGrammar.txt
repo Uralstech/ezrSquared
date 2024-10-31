@@ -127,6 +127,7 @@ atom:
 	| '{' '\n'+? (expression '\n'+? ':' '\n'+? expression '\n'+? (',' '\n'+? expression '\n'+? ':' '\n'+? expression '\n'+?)+?)? '}'
 	| if-expression
 	| count-expression
+	| for-each-expression
 	| while-expression
 	| try-expression
 	| function-definition-expression
@@ -143,6 +144,12 @@ if-expression:
 count-expression:
 	"count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statements "end"
 	| "count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statement
+	
+@ 'for-each-expression' structures contain declarations of for-each loops.
+@ Here, the expression must be a 'contains-check'.
+for-each-expression:
+	"for" "each" expression "do" statements "end"
+	| "for" "each" expression "do" statement
 	
 @ 'while-expression' structures contain declarations of while loops.
 while-expression:

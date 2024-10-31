@@ -1,6 +1,8 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace EzrSquared.Runtime.Types.Collections;
@@ -68,6 +70,18 @@ public class EzrArray(IEzrObject[] elements, Context parentContext, Position sta
     public IEzrObject At(int index)
     {
         return Value[index];
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<IEzrObject> GetEnumerator()
+    {
+        return ((IEnumerable<IEzrObject>)Value).GetEnumerator();
+    }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return Value.GetEnumerator();
     }
 
     /// <inheritdoc/>

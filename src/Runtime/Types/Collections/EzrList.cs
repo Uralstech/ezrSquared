@@ -2,6 +2,8 @@
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace EzrSquared.Runtime.Types.Collections;
@@ -69,6 +71,18 @@ public class EzrList(RuntimeEzrObjectList elements, Context parentContext, Posit
     public IEzrObject At(int index)
     {
         return Value[index].Object;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<IEzrObject> GetEnumerator()
+    {
+        return Value.ConvertAll(reference => reference.Object).GetEnumerator();
+    }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 
     /// <inheritdoc/>

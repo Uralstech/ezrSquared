@@ -6,7 +6,7 @@
 /// <param name="to">The amount to count to.</param>
 /// <param name="from">The amount to count from - optional.</param>
 /// <param name="step">The increment of each iteration - optional.</param>
-/// <param name="iterationVariable">TThe variable to store the iteration number in - optional.</param>
+/// <param name="iterationVariable">The variable to store the iteration number in - optional.</param>
 /// <param name="body">The body of the count loop.</param>
 /// <param name="startPosition">The starting <see cref="Position"/> of the <see cref="CountNode"/>.</param>
 /// <param name="endPosition">The ending <see cref="Position"/> of the <see cref="CountNode"/>.</param>

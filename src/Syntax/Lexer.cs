@@ -609,6 +609,8 @@ public class Lexer
             "else"      => new Token(TokenType.KeywordElse, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "do"        => new Token(TokenType.KeywordDo, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "count"     => new Token(TokenType.KeywordCount, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
+            "for"       => new Token(TokenType.KeywordFor, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
+            "each"      => new Token(TokenType.KeywordEach, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "from"      => new Token(TokenType.KeywordFrom, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "as"        => new Token(TokenType.KeywordAs, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "to"        => new Token(TokenType.KeywordTo, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),

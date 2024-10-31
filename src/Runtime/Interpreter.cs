@@ -84,6 +84,9 @@ public class Interpreter
             case CountNode node:
                 VisitCountNode(node, executionContext, callingContext, accessibilityModifiers);
                 break;
+            case ForEachNode node:
+                VisitForEachNode(node, executionContext, callingContext, accessibilityModifiers);
+                break;
             case WhileNode node:
                 VisitWhileNode(node, executionContext, callingContext, accessibilityModifiers);
                 break;
@@ -995,13 +998,12 @@ public class Interpreter
         VisitNode(node.Body, executionContext, callingContext, accessibilityModifiers);
         if (RuntimeResult.ShouldReturnLoop)
             return -1;
-
-        if (RuntimeResult.SkipSet)
+        else if (RuntimeResult.SkipSet)
         {
             RuntimeResult.Reset();
             return 1;
         }
-        if (RuntimeResult.StopSet)
+        else if (RuntimeResult.StopSet)
         {
             RuntimeResult.Reset();
             return 2;
@@ -1009,6 +1011,80 @@ public class Interpreter
 
         returns.Add(RuntimeResult.Reference.Object);
         return 0;
+    }
+
+    /// <summary>
+    /// Executes a <see cref="ForEachNode"/> and creates a for-each loop.
+    /// </summary>
+    /// <param name="node">The <see cref="ForEachNode"/> to execute.</param>
+    /// <param name="executionContext">The <see cref="Context"/> under which the loop will be executed.</param>
+    /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the <see cref="Node"/>.</param>
+    /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
+    private void VisitForEachNode(ForEachNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
+    {
+        VisitNode(node.Expression.Left, executionContext, callingContext, accessibilityModifiers, true);
+        if (RuntimeResult.ShouldReturn)
+            return;
+
+        Reference iterationVariableReference = RuntimeResult.Reference;
+        string iterationVariableName = iterationVariableReference.Name;
+        Context iterationVariableRegisteredContext = iterationVariableReference.RegisteredContext ?? executionContext;
+
+        if (!iterationVariableReference.IsRegistered)
+        {
+            RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected reference or identifier for iteration variable name, but got object of type \"{iterationVariableReference.Object.TypeName}\"!", executionContext, node.Expression.Left.StartPosition, node.Expression.Left.EndPosition));
+            return;
+        }
+
+        VisitNode(node.Expression.Right, executionContext, callingContext, accessibilityModifiers);
+        if (RuntimeResult.ShouldReturn)
+            return;
+
+        Reference iterableObjectReference = RuntimeResult.Reference;
+        if (iterableObjectReference.Object is not IEzrIndexedCollection iterableObject)
+        {
+            RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected an iterable object to iterate, but got object of type \"{iterableObjectReference.Object.TypeName}\"!", executionContext, node.Expression.Right.StartPosition, node.Expression.Right.EndPosition));
+            return;
+        }
+
+        AccessMod operationAccessibilityModifiers = accessibilityModifiers;
+        if ((operationAccessibilityModifiers & AccessMod.Global) != AccessMod.Global)
+            operationAccessibilityModifiers |= AccessMod.LocalScope;
+
+        List<IEzrObject> returns = new(iterableObject.Length);
+        foreach (IEzrObject ezrObject in iterableObject)
+        {
+            ezrObject.Update(executionContext, node.Expression.StartPosition, node.Expression.EndPosition);
+            (IEzrObject Object, string Name) newIterationVariable = (ezrObject, iterationVariableName);
+
+            HandleSetStatus(
+                iterationVariableRegisteredContext.Set(callingContext, newIterationVariable, iterationVariableReference, operationAccessibilityModifiers),
+                iterationVariableName,
+                node.Expression.Left,
+                iterationVariableRegisteredContext
+            );
+
+            if (RuntimeResult.ShouldReturn)
+                return;
+
+            VisitNode(node.Body, executionContext, callingContext, accessibilityModifiers);
+            if (RuntimeResult.ShouldReturnLoop)
+                return;
+            else if (RuntimeResult.SkipSet)
+            {
+                RuntimeResult.Reset();
+                continue;
+            }
+            else if (RuntimeResult.StopSet)
+            {
+                RuntimeResult.Reset();
+                break;
+            }
+
+            returns.Add(RuntimeResult.Reference.Object);
+        }
+
+        RuntimeResult.Success(ReferencePool.Get(new EzrArray([.. returns], executionContext, node.StartPosition, node.EndPosition), AccessMod.PrivateConstant));
     }
 
     /// <summary>

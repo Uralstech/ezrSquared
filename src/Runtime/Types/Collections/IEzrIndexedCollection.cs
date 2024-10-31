@@ -1,9 +1,11 @@
-﻿namespace EzrSquared.Runtime.Types.Collections;
+﻿using System.Collections.Generic;
+
+namespace EzrSquared.Runtime.Types.Collections;
 
 /// <summary>
 /// Interface for an indexed collection of ezr² objects.
 /// </summary>
-internal interface IEzrIndexedCollection : IEzrObject
+public interface IEzrIndexedCollection : IEzrObject, IEnumerable<IEzrObject>
 {
     /// <summary>
     /// The length of the collection.
