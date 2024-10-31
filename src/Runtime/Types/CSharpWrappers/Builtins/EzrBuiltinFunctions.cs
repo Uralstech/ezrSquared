@@ -40,7 +40,7 @@ public static class EzrBuiltinFunctions
     /// ezr² errors:
     /// <list type="table">
     ///     <item>
-    ///         <term><see cref="MissingFieldException"/></term>
+    ///         <term><see cref="EzrMissingRequiredArgumentError"/></term>
     ///         <description>Thrown if no messages are provided.</description>
     ///     </item>
     ///     <item>
