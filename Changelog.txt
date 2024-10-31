@@ -3,6 +3,12 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.6.0 [31-10-24]
+	* [BREAKING CHANGE] EKAs (Extra Keyword Arguments) now use the following syntax: "function abc with more named as keyword_args do ..."
+	* Added EPA (Extra Positional Arguments) support! Define them like so: "function abc with more as epas do ...". Here, "epas" will be a `EzrList` of the extra arguments.
+	* Improved string representations of `EzrRuntimeExecutable`-s.
+	* Fixed scope handling in for-each loop assignments.
+
 * ezr² RE - v0.5.0 [31-10-24]
 	* [BREAKING CHANGE] `IMutable` has been moved to the `EzrSquared.Runtime` namespace.
 	* [BREAKING CHANGE] The `context` parameter in the constructor for `EzrObject` is no longer nullable.

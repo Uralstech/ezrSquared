@@ -86,115 +86,123 @@ public abstract class EzrRuntimeExecutable : EzrObject
         RuntimeEzrObjectDictionary? extraKeywordArguments = ExtraKeywordArguments.HasValue ? new() : null;
         RuntimeEzrObjectList? extraPositionalArguments = ExtraPositionalArguments.HasValue ? new() : null;
 
-        // Index for iterating through the ParameterNames array.
-        int parameterIndex = 0;
-
-        // Index for iterating through the arguments.
-        int argumentIndex = 0;
-
-        while (argumentIndex < arguments.Length)
+        int currentIndexThroughParameters = 0;
+        for (int i = 0; i < arguments.Length; i++)
         {
             // Get the argument. Reference and object.
-            Reference argument = arguments[argumentIndex];
+            Reference argument = arguments[i];
             IEzrObject argumentObject = argument.Object;
 
-            // Update the object's context.
+            // Update the argument's context.
             argumentObject.Update(context, argumentObject.StartPosition, argumentObject.EndPosition);
 
-            // Is the parameterIndex in the bounds of the dictionary?
-            bool isValidIndex = parameterIndex < Parameters.Length;
-
-            // Is this a keyword argument? As in, provided like name: value.
+            // Is the argument a keyword argument? As in, defined as name: value.
             bool isKeywordArgument = !string.IsNullOrEmpty(argument.Name) && !argument.IsRegistered;
 
             // The name of the argument as in Parameters or the given name.
-            string key = isValidIndex ? Parameters[parameterIndex].Name : string.Empty;
+            string parameterName = currentIndexThroughParameters < Parameters.Length ? Parameters[currentIndexThroughParameters].Name : string.Empty;
 
+            // Handle keyword arguments.
             if (isKeywordArgument)
             {
-                // If it is a keyword argument, and it exists in Parameters:
-                if (Array.FindIndex(Parameters, paramter => paramter.Name == argument.Name) != -1)
-                    key = argument.Name; // Choose that as the key.
-                else if (extraKeywordArguments is not null) // If it doesn't, and extra keyword arguments are allowed:
-                {
-                    // Add the argument to the dictionary, and continue onto the next argument.
-                    extraKeywordArguments.Update(new EzrString(argument.Name, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
+                string keywordArgumentName = argument.Name;
 
-                    argumentIndex++;
+                // Check if there is a parameter with the same name as the keyword argument:
+                if (keywordArgumentName == parameterName || Array.Exists(Parameters, param => keywordArgumentName == param.Name))
+                    parameterName = keywordArgumentName; // If so, fine.
+                else if (extraKeywordArguments is not null) // Otherwise, if extra keyword arguments (EKAs) are allowed:
+                {
+                    // Add it to the EKA dictionary.
+                    extraKeywordArguments.Update(new EzrString(keywordArgumentName, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
+
+                    // Continue onto the next argument.
+                    ReferencePool.TryRelease(argument);
                     continue;
                 }
-                else if (!ignoreExtraArguments) // If extra keyword arguments are not allowed, and ignoreExtraArguments is not set:
+                else if (!ignoreExtraArguments) // Otherwise still, if extra arguments should not be ignored:
                 {
-                    // Return an error.
+                    // Throw an error.
                     result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{argument.Name}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
                     return;
                 }
-                else // Otherwise, if ignoreExtraArguments is set, continue onto the next argument.
+                else // Otherwise, skip this argument.
                 {
-                    argumentIndex++;
+                    ReferencePool.TryRelease(argument);
                     continue;
                 }
             }
 
-            // Does the key already exist?
-            bool hasKey = isValidIndex && context.IsDefined(key);
+            // Has the current parameter been defined?
+            bool parameterAlreadyDefined = context.IsDefined(parameterName);
 
-            // If parameterIndex is out of bounds, or the key is already defined and the argument is a keyword argument, or if all the arguments have already been set:
-            if (!isValidIndex || (hasKey && (isKeywordArgument || parameterIndex + 1 >= Parameters.Length)))
+            // If the argument is not a kwarg and there are no more parameters to define and EPAs are allowed:
+            if (!isKeywordArgument && currentIndexThroughParameters >= Parameters.Length && extraPositionalArguments is not null)
+            {
+                // Create a new reference.
+                Reference newReference = ReferencePool.Get(argumentObject);
+                newReference.UpdateRegister(true);
+
+                // And add it to the EPA list.
+                extraPositionalArguments.Add(newReference);
+                ReferencePool.TryRelease(argument);
+
+                continue;
+            }
+            else if ((parameterAlreadyDefined && isKeywordArgument) || currentIndexThroughParameters >= Parameters.Length)
             {
                 // Return an error.
                 result.Failure(new EzrUnexpectedArgumentError(
                     isKeywordArgument
-                        ? $"Did not expect argument \"{key}\", as it is already specified!"
-                        : "Did not expect any more arguments!",
+                        ? $"Did not expect argument \"{parameterName}\", as it is already specified!"
+                        : "Did not expect any more positional arguments!",
                     _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
+                
                 return;
             }
 
-            // Otherwise, if it is not a keyword argument:
-            if (!isKeywordArgument)
-                parameterIndex++; // Add to parameterIndex.
+            // Otherwise, if this is / corresponds to a positional argument previously undefined:
+            if (!isKeywordArgument || (Parameters[currentIndexThroughParameters].Name == parameterName))
+                currentIndexThroughParameters++; // Add to currentIndexThroughParameters!
 
-            // If the argument is already defined, and it's not a keyword argument, then go to the next iteration while staying on the same argument.
-            // The parameterIndex will be added to again, and get onto the next required parameter.
-            if (hasKey)
-                continue;
-
-            // After all that, set it to the context.
-            context.Set(null, key, ReferencePool.Get(argumentObject, AccessMod.Private));
-
-            // Add to the argument index.
-            argumentIndex++;
+            // After all that, set the argument to the context.
+            context.Set(null, parameterName, ReferencePool.Get(argumentObject, AccessMod.Private));
+            ReferencePool.TryRelease(argument);
         }
 
-        // Go through all the parameters.
-        for (int i = parameterIndex; i < Parameters.Length; i++)
+        // Go through all the leftover parameters.
+        for (int i = currentIndexThroughParameters; i < Parameters.Length; i++)
         {
-            (string parameter, Node parameterNode) = Parameters[i];
-
-            // Check if it is defined:
-            if (context.IsDefined(parameter))
+            (string parameterName, Node parameterCode) = Parameters[i];
+        
+            // Check if it is defined as a kwarg:
+            if (context.IsDefined(parameterName))
                 continue; // If so, continue to the next.
+        
+            // The accessibility modifiers for the execution.
+            AccessMod operationAccessibilityModifiers = AccessMod.None;
+            if (parameterCode is VariableAccessNode vaNode)
+            {
+                operationAccessibilityModifiers = (vaNode.AccessibilityModifiers & AccessMod.Global) != AccessMod.Global
+                                                    ? vaNode.AccessibilityModifiers |= AccessMod.LocalScope
+                                                    : vaNode.AccessibilityModifiers;
+            }
 
-            // The accessibility modifiers for the execution; if it is a simple access node, the modifiers should be local-only.
-            AccessMod operationAccessibilityModifiers = parameterNode is VariableAccessNode ? AccessMod.LocalScope : AccessMod.None;
-
-            // Otherwise, execute the parameter source code.
-            interpreter.VisitNode(parameterNode, context, null, operationAccessibilityModifiers, true);
+            // Execute the parameter source code!
+            interpreter.VisitNode(parameterCode, context, null, operationAccessibilityModifiers, true);
             if (result.ShouldReturn) // Check for errors and return if necessary.
                 return;
-
+        
             // If the result is empty, i.e. there is no default value:
             if (result.Reference.IsEmpty)
             {
                 // Return an error.
-                result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{parameter}\"!", _executionContext, StartPosition, EndPosition));
+                result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{parameterName}\"!", _executionContext, StartPosition, EndPosition));
                 return;
             }
-
+        
             // Otherwise, if it is still not defined due to strange assignment practises by the programmer:
-            if (!context.IsDefined(parameter))
-                context.Set(null, parameter, ReferencePool.Get(result.Reference.Object, AccessMod.Private)); // Set it.
+            if (!context.IsDefined(parameterName))
+                context.Set(null, parameterName, ReferencePool.Get(result.Reference.Object, AccessMod.Private)); // Set it.
         }
 
         // If the extra keyword arguments dictionary should be set:

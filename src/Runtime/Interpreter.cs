@@ -57,8 +57,11 @@ public class Interpreter
             case ValueNode node:
                 VisitValueNode(node, executionContext);
                 break;
+            case ArrayLikeNode node when node.CreateList:
+                VisitArrayLikeNodeList(node, executionContext, callingContext, accessibilityModifiers);
+                break;
             case ArrayLikeNode node:
-                VisitArrayLikeNode(node, executionContext, callingContext, accessibilityModifiers);
+                VisitArrayLikeNodeArray(node, executionContext, callingContext, accessibilityModifiers);
                 break;
             case DictionaryNode node:
                 VisitDictionaryNode(node, executionContext, callingContext, accessibilityModifiers);
@@ -199,21 +202,7 @@ public class Interpreter
         }
     }
 
-    /// <summary>
-    /// Creates an array-like object, see <see cref="ArrayLikeNode"/>, <see cref="CreateList(ArrayLikeNode, Context, Context, AccessMod)"/> and <see cref="CreateArray(ArrayLikeNode, Context, Context, AccessMod)"/> for more information.
-    /// </summary>
-    /// <param name="node">The <see cref="ArrayLikeNode"/> to execute.</param>
-    /// <param name="executionContext">The <see cref="Context"/> under which the array-like object will be created.</param>
-    /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the <see cref="Node"/>.</param>
-    /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
-    #region private void VisitArrayLikeNode(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
-    private void VisitArrayLikeNode(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
-    {
-        if (node.CreateList)
-            CreateList(node, executionContext, callingContext, accessibilityModifiers);
-        else
-            CreateArray(node, executionContext, callingContext, accessibilityModifiers);
-    }
+    #region VisitArrayLikeNode
 
     /// <summary>
     /// Creates a list of references to its elements.
@@ -222,7 +211,7 @@ public class Interpreter
     /// <param name="executionContext">The <see cref="Context"/> under which the list will be created.</param>
     /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the <see cref="Node"/>.</param>
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
-    private void CreateList(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
+    private void VisitArrayLikeNodeList(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
         RuntimeEzrObjectList elementsReferences = new(node.Elements.Count);
         for (int i = 0; i < node.Elements.Count; i++)
@@ -232,7 +221,7 @@ public class Interpreter
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = ReferencePool.Get(RuntimeResult.Reference.Object, AccessMod.None, string.Empty);
+            Reference reference = ReferencePool.Get(RuntimeResult.Reference.Object);
             reference.UpdateRegister(true);
 
             elementsReferences.Add(reference);
@@ -248,7 +237,7 @@ public class Interpreter
     /// <param name="executionContext">The <see cref="Context"/> under which the array will be created.</param>
     /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the <see cref="Node"/>.</param>
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
-    private void CreateArray(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
+    private void VisitArrayLikeNodeArray(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
         IEzrObject[] elements = new IEzrObject[node.Elements.Count];
         for (int i = 0; i < node.Elements.Count; i++)
