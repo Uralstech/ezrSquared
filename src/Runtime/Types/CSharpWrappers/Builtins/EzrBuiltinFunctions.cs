@@ -37,10 +37,17 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrNothing"/>
     /// <br/>
-    /// ezr² errors:<br/>
-    /// <see cref="MissingFieldException"/> if no messages provided.<br/>
-    /// <see cref="EzrUnexpectedTypeError"/> if "line_end" is not one of the specified types.<br/>
-    /// <see cref="EzrUnexpectedTypeError"/> if "separator" is not one of the specified types.
+    /// ezr² errors:
+    /// <list type="table">
+    ///     <item>
+    ///         <term><see cref="MissingFieldException"/></term>
+    ///         <description>Thrown if no messages are provided.</description>
+    ///     </item>
+    ///     <item>
+    ///         <term><see cref="EzrUnexpectedTypeError"/></term>
+    ///         <description>Thrown if "line_end" or "separator" are not of the specified types.</description>
+    ///     </item>
+    /// </list>
     /// </remarks>
     /// <param name="arguments">The constructor arguments.</param>
     [SharpMethodWrapper("show", HasExtraPositionalArguments = true, OptionalParameters = ["line_end", "separator"])]
