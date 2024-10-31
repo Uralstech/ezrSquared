@@ -3,19 +3,19 @@
 
 #include "environment.iss"
 
-#define MyAppName "ezr²"
-#define MyAppVersion "0.4.0"
-#define MyAppPublisher "Uralstech"
+#define MyAppName "ezr² Shell"
+#define MyAppVersion "0.5.0"
+#define MyAppPublisher "Urav Advanced Learning Systems Pvt Ltd"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
-#define MyAppAssocName MyAppName + " Source Code"
+#define MyAppAssocName "ezr² Script"
 #define MyAppAssocExt ".ezr2"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{0F1DF58D-F539-4FEB-8174-04F973E54F03}
+AppId={{B84F04C4-4945-4687-8455-7E179F3A05A0}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -24,10 +24,15 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
+; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
+; on anything but x64 and Windows 11 on Arm.
+ArchitecturesAllowed=x64compatible
+; "ArchitecturesInstallIn64BitMode=x64compatible" requests that the
+; install be done in "64-bit mode" on x64 or Windows 11 on Arm,
+; meaning it should use the native 64-bit Program Files directory and
+; the 64-bit view of the registry.
+ArchitecturesInstallIn64BitMode=x64compatible
 ChangesAssociations=yes
-ChangesEnvironment=yes
-MinVersion=6.1.7600
-ArchitecturesAllowed=x64
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=D:\Code\csharp\ezrSquared\LICENSE.txt
@@ -35,9 +40,9 @@ InfoAfterFile=D:\Code\csharp\ezrSquared\Changelog.txt
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=D:\Code\csharp\ezrSquared\Binaries\Installer\
-OutputBaseFilename=ezr² Installer (Windows 64-bit)
-SetupIconFile=D:\Code\csharp\ezrSquared\src\Icon.ico
+OutputDir=D:\Code\csharp\ezrSquared\Binaries\Shell\Release\Installers
+OutputBaseFilename=ezr² Shell Setup (Win64)
+SetupIconFile=D:\Code\csharp\ezrSquared\graphics\Icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -55,16 +60,16 @@ LocalDocumentation=%1 Offline Documentation
 [Types]
 Name: "full"; Description: "Full installation"
 Name: "compact"; Description: "Compact installation - Without documentation"
-Name: "bareMinimum"; Description: "The bare minimum - Excludes the standard libraries"
+Name: "bareMinimum"; Description: "The bare minimum - Just the shell and interpreter"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "main"; Description: "ezr² Code Executor"; Types: full compact bareMinimum custom; Flags: fixed
-Name: "libs"; Description: "ezr² Standard Libraries"; Types: full compact
+Name: "main"; Description: "ezr² Shell & Interpreter"; Types: full compact bareMinimum custom; Flags: fixed
+; Name: "libs"; Description: "ezr² Standard Libraries"; Types: full compact
 Name: "docs"; Description: "ezr² Documentation"; Types: full
 
 [Tasks]
-Name: "addtopath"; Description: "Add ezr² to PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
+Name: "addtopath"; Description: "Add the ezr² Shell to the PATH environment variable"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Dirs]
@@ -74,9 +79,8 @@ Name: "{app}\Libraries"
 Source: "D:\Code\csharp\ezrSquared\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net8.0\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net8.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Code\csharp\ezrSquared\docs\offline\_site\*"; DestDir: "{app}\Documentation"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: docs
-Source: "D:\Code\csharp\ezrSquared\bin\Libraries\IO\Release\net7.0-windows10.0.22621.0\win-x64\IO.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
-Source: "D:\Code\csharp\ezrSquared\bin\Libraries\STD\Release\net7.0-windows10.0.22621.0\win-x64\STD.dll"; DestDir: "{app}\Libraries"; Flags: ignoreversion; Components: libs
+Source: "D:\Code\csharp\ezrSquared\docs\_site\docsrc\QuickStartDocumentation.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion; Components: docs
+Source: "D:\Code\csharp\ezrSquared\docs\_site\api\APIReferenceManual.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion; Components: docs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
@@ -102,8 +106,7 @@ end;
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:WebDocumentation,{#MyAppName}}"; Filename: "{#MyAppURL}"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{group}\{cm:LocalDocumentation,{#MyAppName}}"; Filename: "{app}\Documentation\START_HERE.html"; Components: docs
+Name: "{group}\{cm:LocalDocumentation,{#MyAppName}}"; Filename: "{app}\Documentation\QuickStartDocumentation.pdf"; Components: docs
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]

@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputTypes>Library</OutputTypes>
-		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
-		<Platforms>AnyCPU;x64;arm64</Platforms>
+		<RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+		<Platforms>AnyCPU</Platforms>
 		<TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
 		<LangVersion>12</LangVersion>
 
@@ -28,7 +28,7 @@
 		<Title>ezr² Portable Library</Title>
 		<Description>The ezr² programming language, as a portable class library! This can be used to integrate ezr² as an embedded scripting language in your apps, websites and more!</Description>
 		
-		<Version>0.4.0</Version>
+		<Version>0.5.0</Version>
 		
 		<Authors>Udayshankar Ravikumar</Authors>
 		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>

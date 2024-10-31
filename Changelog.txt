@@ -3,6 +3,13 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.5.0 [31-10-24]
+	* [BREAKING CHANGE] `IMutable` has been moved to the `EzrSquared.Runtime` namespace.
+	* [BREAKING CHANGE] The `context` parameter in the constructor for `EzrObject` is no longer nullable.
+	* Added for-each loops! You can now iterate through collections (including strings and character lists) effortlessly.
+	* Strings and character lists are now `IEzrIndexedCollection`-s and can compare against other `IEzrIndexedCollection`-s.
+	* Fixed a cast to `EzrObject` in `Context`.
+
 * ezr² RE - v0.4.0 [27-09-24]
 	* Text objects (strings, characters, character lists), now implement a common interface `IEzrString`.
 	* Runtime errors now implement a common interface `IEzrRuntimeError`.
