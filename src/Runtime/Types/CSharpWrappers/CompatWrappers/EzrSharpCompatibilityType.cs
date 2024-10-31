@@ -24,7 +24,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
     /// The type to wrap.
     /// </summary>
     public readonly Type SharpType;
-    
+
     /// <summary>
     /// The name of the type to wrap, in ezr² format (snake_case).
     /// </summary>

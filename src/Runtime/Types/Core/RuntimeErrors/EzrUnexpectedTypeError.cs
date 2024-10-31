@@ -28,5 +28,6 @@ public class EzrUnexpectedTypeError(string details, Context context, Position st
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

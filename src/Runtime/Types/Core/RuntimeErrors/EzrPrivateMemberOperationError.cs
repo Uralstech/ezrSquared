@@ -28,5 +28,6 @@ public class EzrPrivateMemberOperationError(string details, Context context, Pos
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

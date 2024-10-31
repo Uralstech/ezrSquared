@@ -267,10 +267,10 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     /// <returns>The converted <see cref="IEzrObject"/>.</returns>
     protected internal void PrimitiveToEzrObject(
         object? value,
-        
+
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         Type? valueType,
-        
+
         RuntimeResult result)
     {
         if (value is null || valueType is null)

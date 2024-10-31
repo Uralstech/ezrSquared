@@ -56,7 +56,7 @@ public class SharpAutoCompatibilityWrapperAttribute : Attribute
 
         if (methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper.IsSupportedReturnType(methodInfo.ReturnType))
             return new($"Expected method \"{methodInfo.Name}\"'s return type to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoCompatibilityWrapperAttribute)}\"", nameof(methodInfo));
-    
+
         foreach (ParameterInfo parameterInfo in methodInfo.GetParameters())
         {
             if (!EzrSharpCompatibilityWrapper.IsSupportedPrimitiveType(parameterInfo.ParameterType))

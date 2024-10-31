@@ -1,7 +1,6 @@
 ﻿using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
@@ -42,7 +41,7 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
 
         SharpFunction = (EzrSharpSourceWrappableMethod)function.CreateDelegate(typeof(EzrSharpSourceWrappableMethod));
         (SharpFunctionName, SharpMethodWrapperAttribute attribute) = GetFunctionInfo(function);
-        
+
         AddParameters(attribute);
     }
 
@@ -74,10 +73,10 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
     {
         SharpMethodWrapperAttribute attribute = function.GetCustomAttribute<SharpMethodWrapperAttribute>(true)
             ?? throw new ArgumentException($"No \"{nameof(SharpMethodWrapperAttribute)}\" attribute found in function \"{function.Name}\"!", nameof(function));
-        
+
         if (string.IsNullOrEmpty(attribute.Name))
             throw new ArgumentException($"Name not provided in {nameof(SharpMethodWrapperAttribute)} of function \"{function.Name}\"!", nameof(function));
-        
+
         Tag = $"{Tag}.{attribute.Name}.{Utils.GetNextUniqueId()}";
         return (attribute.Name, attribute);
     }

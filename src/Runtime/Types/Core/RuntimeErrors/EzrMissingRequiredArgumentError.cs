@@ -28,5 +28,6 @@ public class EzrMissingRequiredArgumentError(string details, Context context, Po
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

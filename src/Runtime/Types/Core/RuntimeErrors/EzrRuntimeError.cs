@@ -65,7 +65,8 @@ public class EzrRuntimeError : EzrObject, IEzrRuntimeError
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 
     /// <summary>
     /// Converts the given argument to a string.

@@ -26,7 +26,7 @@ public class SharpTypeWrapperAttribute(string name) : Attribute
     public static Exception? ValidateMethodParameters(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         Type typeInfo,
-        
+
         out (ConstructorInfo Info, SharpMethodWrapperAttribute Attribute)? constructor)
     {
         constructor = null;

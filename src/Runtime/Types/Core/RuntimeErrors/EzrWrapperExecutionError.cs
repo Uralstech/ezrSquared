@@ -28,5 +28,6 @@ public class EzrWrapperExecutionError(string details, Context context, Position 
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

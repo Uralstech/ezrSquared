@@ -156,7 +156,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
                         ? $"Did not expect argument \"{parameterName}\", as it is already specified!"
                         : "Did not expect any more positional arguments!",
                     _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
-                
+
                 return;
             }
 
@@ -173,11 +173,11 @@ public abstract class EzrRuntimeExecutable : EzrObject
         for (int i = currentIndexThroughParameters; i < Parameters.Length; i++)
         {
             (string parameterName, Node parameterCode) = Parameters[i];
-        
+
             // Check if it is defined as a kwarg:
             if (context.IsDefined(parameterName))
                 continue; // If so, continue to the next.
-        
+
             // The accessibility modifiers for the execution.
             AccessMod operationAccessibilityModifiers = AccessMod.None;
             if (parameterCode is VariableAccessNode vaNode)
@@ -191,7 +191,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
             interpreter.VisitNode(parameterCode, context, null, operationAccessibilityModifiers, true);
             if (result.ShouldReturn) // Check for errors and return if necessary.
                 return;
-        
+
             // If the result is empty, i.e. there is no default value:
             if (result.Reference.IsEmpty)
             {
@@ -199,7 +199,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
                 result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{parameterName}\"!", _executionContext, StartPosition, EndPosition));
                 return;
             }
-        
+
             // Otherwise, if it is still not defined due to strange assignment practises by the programmer:
             if (!context.IsDefined(parameterName))
                 context.Set(null, parameterName, ReferencePool.Get(result.Reference.Object, AccessMod.Private)); // Set it.

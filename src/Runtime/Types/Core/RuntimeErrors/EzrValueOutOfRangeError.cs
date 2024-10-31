@@ -28,5 +28,6 @@ public class EzrValueOutOfRangeError(string details, Context context, Position s
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

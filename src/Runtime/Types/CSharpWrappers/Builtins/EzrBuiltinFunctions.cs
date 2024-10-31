@@ -37,7 +37,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrNothing"/>
     /// <br/>
-    /// ezr² errors:
+    /// ezr² errors:<br/>
     /// <see cref="MissingFieldException"/> if no messages provided.<br/>
     /// <see cref="EzrUnexpectedTypeError"/> if "line_end" is not one of the specified types.<br/>
     /// <see cref="EzrUnexpectedTypeError"/> if "separator" is not one of the specified types.

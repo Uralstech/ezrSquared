@@ -28,5 +28,6 @@ public class EzrUnsupportedWrappingError(string details, Context context, Positi
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }

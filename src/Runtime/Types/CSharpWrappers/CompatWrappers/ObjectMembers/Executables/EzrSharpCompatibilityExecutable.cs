@@ -55,7 +55,7 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
     {
         SharpRuntimeExecutableName = name;
         Tag = $"{Tag}.{SharpRuntimeExecutableName}.{Utils.GetNextUniqueId()}";
-        
+
         Executable = sharpMember;
         Parameters = Executable.GetParameters();
         ParameterNames = Array.ConvertAll(Parameters, p => Utils.PascalToSnakeCase(p.Name ?? string.Empty));

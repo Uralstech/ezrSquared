@@ -3,7 +3,6 @@ using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Execu
 using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -232,7 +231,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         EzrSharpCompatibilityFunction wrapper = !string.IsNullOrEmpty(attribute.Name)
             ? new(attribute.Name, method, null, Context, StartPosition, EndPosition)
             : new(method, null, Context, StartPosition, EndPosition);
-        
+
         return (wrapper, wrapper.SharpRuntimeExecutableName);
     }
 

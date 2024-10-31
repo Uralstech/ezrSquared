@@ -28,5 +28,6 @@ public class EzrKeyNotFoundError(string details, Context context, Position start
         arguments.ExecutionContext,
         arguments.StartPosition,
         arguments.EndPosition
-    ) { }
+    )
+    { }
 }
