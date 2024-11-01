@@ -1,4 +1,5 @@
 ﻿using EzrSquared.Runtime.Types;
+using EzrSquared.Runtime.WrapperAttributes;
 using System.Collections.Generic;
 
 namespace EzrSquared.Runtime.Collections;
@@ -18,6 +19,12 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     private readonly IDictionary<int, KeyValuePair<IEzrObject, Reference>> _items;
 
     /// <summary>
+    /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
+    /// </summary>
+    [SharpAutoCompatibilityWrapper(IsReadOnly = true)]
+    public int Length => _items.Count;
+
+    /// <summary>
     /// Creates a new <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
     public RuntimeEzrObjectDictionary()
@@ -32,11 +39,6 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     {
         _items = items;
     }
-
-    /// <summary>
-    /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
-    /// </summary>
-    public int Length => _items.Count;
 
     /// <summary>
     /// Updates the <see cref="RuntimeEzrObjectDictionary"/> with a new value.
@@ -101,6 +103,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     /// </remarks>
     /// <param name="key">The key (hash) to be removed.</param>
     /// <returns><see langword="true"/> if the operation was successful, <see langword="false"/> if not.</returns>
+    [SharpAutoCompatibilityWrapper(Name = "remove_by_hash")]
     public bool RemoveHash(int key)
     {
         return _items.Remove(key);

@@ -5,7 +5,10 @@ using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
+using System;
+using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 
 namespace EzrSquared.Runtime.Types;
 
@@ -30,6 +33,36 @@ internal class EzrRuntimeInvalidObject : EzrObject
 /// </summary>
 public abstract class EzrObject : IEzrObject
 {
+    /// <summary>
+    /// Cache of reflection data for all <see cref="EzrObject"/> types.
+    /// </summary>
+    internal static readonly Lazy<Dictionary<(Type ParentType, string MemberName), MemberInfo>> s_memberMap = new();
+
+    /// <summary>
+    /// Gets cached reflection data about a member of <typeparamref name="TParentType"/>.
+    /// </summary>
+    /// <remarks>
+    /// If there is no cached data, it gets it by reflection and caches the result.
+    /// </remarks>
+    /// <typeparam name="TMemberInfo">The <see cref="MemberInfo"/> type to return.</typeparam>
+    /// <typeparam name="TParentType">The type which the member is a part of.</typeparam>
+    /// <param name="name">The name of the member.</param>
+    /// <returns>The cached member data or the first member with the given <paramref name="name"/>. <see langword="null"/> if not found.</returns>
+    internal static TMemberInfo? GetMemberInfo<TMemberInfo, TParentType>(string name) where TMemberInfo : MemberInfo
+    {
+        (Type ParentType, string MemberName) key = (typeof(TParentType), name);
+
+        if (s_memberMap.Value.TryGetValue(key, out MemberInfo? cachedMemberInfo))
+            return (TMemberInfo)cachedMemberInfo;
+
+        MemberInfo[] members = key.ParentType.GetMember(name);
+        if (members.Length == 0 || members[0] is not TMemberInfo memberInfo)
+            return default;
+
+        s_memberMap.Value[key] = memberInfo;
+        return memberInfo;
+    }
+
     /// <inheritdoc/>
     public virtual string TypeName { get; protected internal set; } = string.Empty;
 

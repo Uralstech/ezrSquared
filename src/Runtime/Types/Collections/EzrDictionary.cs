@@ -1,19 +1,21 @@
 ﻿using EzrSquared.Runtime.Collections;
+using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
+using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.Collections;
 
 /// <summary>
 /// The mutable dictionary type object.
 /// </summary>
-/// <param name="value">The base value.</param>
-/// <param name="parentContext">The parent context.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public class EzrDictionary(RuntimeEzrObjectDictionary value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrMutableObject
+public class EzrDictionary : EzrObject, IEzrMutableObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "dictionary";
@@ -24,7 +26,51 @@ public class EzrDictionary(RuntimeEzrObjectDictionary value, Context parentConte
     /// <summary>
     /// The dictionary value.
     /// </summary>
-    public readonly RuntimeEzrObjectDictionary Value = value;
+    public readonly RuntimeEzrObjectDictionary Value;
+
+    /// <summary>
+    /// Creates a new <see cref="EzrDictionary"/>.
+    /// </summary>
+    /// <param name="value">The base value.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrDictionary(RuntimeEzrObjectDictionary value, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        Value = value;
+
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Length))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(GetMemberInfo<MethodInfo, RuntimeEzrObjectDictionary>(nameof(Value.RemoveHash))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpSourceFunctionWrapper(DictionaryExists, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
+
+    /// <summary>
+    /// Basic key checking function. Implements <see cref="RuntimeEzrObjectDictionary.HasKey(IEzrObject, RuntimeResult)"/>.
+    /// </summary>
+    /// <remarks>
+    /// ezr² parameters:
+    /// <list type="table">
+    ///     <item>
+    ///         <term>key</term>
+    ///         <description>(<see cref="IEzrObject"/>) The key to check for.</description>
+    ///     </item>
+    /// </list>
+    /// 
+    /// ezr² return type:
+    /// <see cref="EzrBoolean"/>
+    /// </remarks>
+    /// <param name="arguments">The constructor arguments.</param>
+    [SharpMethodWrapper("has_key", RequiredParameters = ["key"])]
+    private void DictionaryExists(SharpMethodParameters arguments)
+    {
+        Reference reference = arguments.ArgumentReferences["key"];
+        
+        bool hasKey = Value.HasKey(reference.Object, arguments.Result);
+        if (arguments.Result.ShouldReturn)
+            return;
+
+        arguments.Result.Success(ReferencePool.Get(hasKey ? EzrConstants.True : EzrConstants.False, AccessMod.PrivateConstant));
+    }
 
     /// <inheritdoc/>
     public override void ComparisonEqual(IEzrObject other, RuntimeResult result)

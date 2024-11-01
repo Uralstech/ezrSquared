@@ -1,21 +1,20 @@
 ﻿using EzrSquared.Runtime.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.Collections;
 
 /// <summary>
 /// The mutable, list type object.
 /// </summary>
-/// <param name="elements">The base value.</param>
-/// <param name="parentContext">The parent context.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public class EzrList(RuntimeEzrObjectList elements, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrMutableObject, IEzrIndexedCollection
+public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "list";
@@ -26,10 +25,22 @@ public class EzrList(RuntimeEzrObjectList elements, Context parentContext, Posit
     /// <summary>
     /// The list value.
     /// </summary>
-    public readonly RuntimeEzrObjectList Value = elements;
+    public readonly RuntimeEzrObjectList Value;
 
     /// <inheritdoc/>
+    [SharpAutoCompatibilityWrapper(IsReadOnly = true)]
     public int Length => Value.Count;
+
+    /// <param name="elements">The base value.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrList(RuntimeEzrObjectList elements, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        Value = elements;
+
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrList>(nameof(Length))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
 
     /// <summary>
     /// Compares the current list with another collection.

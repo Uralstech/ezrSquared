@@ -1,10 +1,12 @@
 ﻿using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 
 namespace EzrSquared.Runtime.Types.Core.Text;
@@ -12,11 +14,7 @@ namespace EzrSquared.Runtime.Types.Core.Text;
 /// <summary>
 /// The string type object.
 /// </summary>
-/// <param name="value">The base value.</param>
-/// <param name="parentContext">The parent context.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public class EzrString(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrString, IEzrIndexedCollection
+public class EzrString : EzrObject, IEzrString, IEzrIndexedCollection
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "string";
@@ -27,13 +25,28 @@ public class EzrString(string value, Context parentContext, Position startPositi
     /// <summary>
     /// The string value.
     /// </summary>
-    public readonly string Value = value;
+    public readonly string Value;
 
     /// <inheritdoc/>
     public string StringValue => Value;
 
     /// <inheritdoc/>
-    public int Length => Value.Length;
+    public int Length { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="EzrString"/>.
+    /// </summary>
+    /// <param name="value">The base value.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrString(string value, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        Value = value;
+        Length = value.Length;
+
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrString>(nameof(Length))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
 
     /// <summary>
     /// Compares the current string with another collection.

@@ -1,10 +1,13 @@
 ﻿using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using System.Text;
 
 namespace EzrSquared.Runtime.Types.Core.Text;
@@ -12,11 +15,7 @@ namespace EzrSquared.Runtime.Types.Core.Text;
 /// <summary>
 /// The <see cref="StringBuilder"/> type object.
 /// </summary>
-/// <param name="value">The base <i>string</i> value.</param>
-/// <param name="parentContext">The parent context.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public class EzrCharacterList(string value, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrMutableObject, IEzrString, IEzrIndexedCollection
+public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIndexedCollection
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "character list";
@@ -27,7 +26,7 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     /// <summary>
     /// The <see cref="StringBuilder"/> value.
     /// </summary>
-    public readonly StringBuilder Value = new(value);
+    public readonly StringBuilder Value;
 
     /// <summary>
     /// Calls <see cref="StringBuilder.ToString()"/> and returns the <see cref="StringBuilder"/> value converted to a <see cref="string"/>.
@@ -35,7 +34,22 @@ public class EzrCharacterList(string value, Context parentContext, Position star
     public string StringValue => Value.ToString();
 
     /// <inheritdoc/>
+    [SharpAutoCompatibilityWrapper(IsReadOnly = true)]
     public int Length => Value.Length;
+
+    /// <summary>
+    /// Creates a new <see cref="EzrCharacterList"/>.
+    /// </summary>
+    /// <param name="value">The base <i>string</i> value.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrCharacterList(string value, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        Value = new(value);
+
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrCharacterList>(nameof(Length))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
 
     /// <summary>
     /// Compares the current character list with another collection.

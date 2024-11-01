@@ -49,7 +49,7 @@ public static class EzrBuiltinFunctions
     ///     </item>
     /// </list>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("show", HasExtraPositionalArguments = true, OptionalParameters = ["line_end", "separator"])]
     public static void Show(SharpMethodParameters arguments)
     {
@@ -130,7 +130,7 @@ public static class EzrBuiltinFunctions
     ///     </item>
     /// </list>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("throw_error", RequiredParameters = ["error"])]
     public static void ThrowError(SharpMethodParameters arguments)
     {
@@ -158,7 +158,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("get", OptionalParameters = ["message"])]
     public static void Get(SharpMethodParameters arguments)
     {
@@ -182,7 +182,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrNothing"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("clear")]
     public static void Clear(SharpMethodParameters arguments)
     {
@@ -208,7 +208,7 @@ public static class EzrBuiltinFunctions
     /// ezr² errors:
     /// <see cref="EzrAssertionError"/> if the condition is not met.
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("assert", RequiredParameters = ["condition"])]
     public static void Assert(SharpMethodParameters arguments)
     {
@@ -243,7 +243,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrInteger"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("hash", RequiredParameters = ["to_hash"])]
     public static void Hash(SharpMethodParameters arguments)
     {
@@ -272,7 +272,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("type_of", RequiredParameters = ["to_check"])]
     public static void TypeOf(SharpMethodParameters arguments)
     {
@@ -300,7 +300,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("type_name_of", RequiredParameters = ["to_check"])]
     public static void TypeNameOf(SharpMethodParameters arguments)
     {
@@ -328,7 +328,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("type_hash_of", RequiredParameters = ["to_check"])]
     public static void TypeHashOf(SharpMethodParameters arguments)
     {
@@ -359,7 +359,7 @@ public static class EzrBuiltinFunctions
     /// ezr² errors:
     /// <see cref="EzrUnexpectedTypeError"/> if "to_copy" is not of the expected type.
     /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
+    /// <param name="arguments">The method arguments.</param>
     [SharpMethodWrapper("copy", RequiredParameters = ["to_copy"])]
     public static void Copy(SharpMethodParameters arguments)
     {

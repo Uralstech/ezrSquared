@@ -1,20 +1,18 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.Collections;
 
 /// <summary>
 /// The immutable, array type object.
 /// </summary>
-/// <param name="elements">The base value.</param>
-/// <param name="parentContext">The parent context.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public class EzrArray(IEzrObject[] elements, Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition), IEzrIndexedCollection
+public class EzrArray : EzrObject, IEzrIndexedCollection
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "array";
@@ -25,10 +23,25 @@ public class EzrArray(IEzrObject[] elements, Context parentContext, Position sta
     /// <summary>
     /// The array value.
     /// </summary>
-    public readonly IEzrObject[] Value = elements;
+    public readonly IEzrObject[] Value;
 
     /// <inheritdoc/>
-    public int Length => Value.Length;
+    public int Length { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="EzrArray"/>.
+    /// </summary>
+    /// <param name="elements">The base value.</param>
+    /// <param name="parentContext">The parent context.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrArray(IEzrObject[] elements, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        Value = elements;
+        Length = elements.Length;
+
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrArray>(nameof(Length))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
 
     /// <summary>
     /// Compares the current array with another collection.
