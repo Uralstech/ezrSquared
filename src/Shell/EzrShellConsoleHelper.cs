@@ -7,7 +7,7 @@ internal static class EzrShellConsoleHelper
     private const string ConsoleGraphicsInfo = """
                                                      ▋ ezr² v{0}
                                                      ▋ Online documentation:
-                                                     ▋ https://uralstech.github.io/ezrSquared/Introduction.html
+                                                     ▋ https://uralstech.github.io/ezrSquared/docsrc/Learn-ezrSquared.html
                                                      ▋ Feature requests and bug reports:
                                                      ▋ https://github.com/Uralstech/ezrSquared/issues
                                                      ▋ GitHub repository:
@@ -70,10 +70,10 @@ internal static class EzrShellConsoleHelper
     {
         Console.Clear();
 
-        ShowMessage("e", ConsoleColor.Green, true);
-        ShowMessage("z", ConsoleColor.Red);
-        ShowMessage("r", ConsoleColor.Blue);
-        ShowMessage("²", ConsoleColor.Yellow);
+        ShowMessage("e", ConsoleColor.Green, true, newLine: string.Empty);
+        ShowMessage("z", ConsoleColor.Red, newLine: string.Empty);
+        ShowMessage("r", ConsoleColor.Blue, newLine: string.Empty);
+        ShowMessage("²", ConsoleColor.Yellow, newLine: string.Empty);
         ShowMessage($" v{version}", ConsoleColor.White);
     }
 
@@ -119,13 +119,13 @@ internal static class EzrShellConsoleHelper
         Console.ReadKey();
     }
 
-    private static void ShowMessage(string message, ConsoleColor color, bool resetPosition = false)
+    private static void ShowMessage(string message, ConsoleColor color, bool resetPosition = false, string? newLine = null)
     {
         if (resetPosition)
             Console.SetCursorPosition(0, 0);
 
         Console.BackgroundColor = ConsoleColor.Black;
         Console.ForegroundColor = color;
-        Console.WriteLine(message);
+        Console.Write(message + (newLine ?? Environment.NewLine));
     }
 }

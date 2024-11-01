@@ -1,9 +1,9 @@
-# The `ezr²` Programming Language
-**ezr², or ezrSquared when you can't use the `²` symbol (or it's too inconvenient) - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
+# The ezr² Programming Language
+[![ezr² on NuGet](https://img.shields.io/nuget/v/ezrSquared?label=NuGet)](https://www.nuget.org/packages/ezrSquared)
+
+**ezr², or ezrSquared when you can't use the ² symbol (or it's too inconvenient) - is an easy to learn and practical interpreted programming language for beginners and experts alike made in C#!**
 
 More information, documentation and the reference manual for ezr² is available at ***<https://uralstech.github.io/ezrSquared>***!
-
-ezr² is now up on NuGet! Check it out [***here!***](https://www.nuget.org/packages/ezrSquared/)
 
 ## What's the 'ezrSquared-re' branch?
 ezr² is being rewritten from the ground up! Expect more features, better performance and better code documentation!

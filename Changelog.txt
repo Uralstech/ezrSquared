@@ -3,8 +3,11 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.8.1 [01-11-24]
+	* Fixed shell printouts.
+
 * ezr² RE - v0.8.0 [01-11-24]
-	* Added built-ins for `EzrString`, `EzrArray`, `EzrList`, `EzrDictionary` and `EzrCharacterList`.
+	* Added some built-ins for `EzrString`, `EzrArray`, `EzrList`, `EzrDictionary` and `EzrCharacterList`.
 
 * ezr² RE - v0.7.0 [01-11-24]
 	* Added slightly jank implementation of EKAs for C# source wrappers.

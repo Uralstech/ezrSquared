@@ -12,7 +12,7 @@ namespace EzrSquaredCli;
 /// </summary>
 internal class Shell
 {
-    private const string Version = "0.8.0";
+    private const string Version = "0.8.1";
 
     private static bool s_showLexerOutput;
     private static bool s_showParserOutput;
@@ -107,7 +107,7 @@ internal class Shell
 
     private static void InteractiveMode()
     {
-        if (Console.WindowWidth > 100)
+        if (Console.WindowWidth > 110)
             EzrShellConsoleHelper.PrintBigConsoleGraphics(Version);
         else
             EzrShellConsoleHelper.PrintSmallConsoleGraphics(Version);
