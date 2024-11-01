@@ -17,7 +17,7 @@
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
 		
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">True</IsAotCompatible>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -27,8 +27,8 @@
 
 		<Title>ezr² Portable Library</Title>
 		<Description>The ezr² programming language, as a portable class library! This can be used to integrate ezr² as an embedded scripting language in your apps, websites and more!</Description>
-		
-		<Version>0.7.0</Version>
+
+		<PackageVersion>0.8.0-unstable</PackageVersion>
 		
 		<Authors>Udayshankar Ravikumar</Authors>
 		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
@@ -38,11 +38,13 @@
 
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		
 		<PackageProjectUrl>https://uralstech.github.io/ezrSquared/</PackageProjectUrl>
 		<PackageTags>programming language;portable;embeddable;compact;interpreted</PackageTags>
-		<PackageOutputPath>..\Binaries\ezrSquared\Package</PackageOutputPath>
+		<PackageReleaseNotes>See https://github.com/Uralstech/ezrSquared/releases.</PackageReleaseNotes>
 		
 		<RepositoryUrl>https://github.com/uralstech/ezrSquared</RepositoryUrl>
+		<RepositoryBranch>ezrSquared-re</RepositoryBranch>
 
 		<PackageIcon>Icon (256x256).png</PackageIcon>
 
@@ -70,7 +72,7 @@
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-		<PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
+		<PolySharpIncludeRuntimeSupportedAttributes>True</PolySharpIncludeRuntimeSupportedAttributes>
 		<DefineConstants>MULTI_TARGETING_SUPPORT_ATTRIBUTES</DefineConstants>
 	</PropertyGroup>
 </Project>
