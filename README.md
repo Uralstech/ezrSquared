@@ -3,6 +3,8 @@
 
 More information, documentation and the reference manual for ezr² is available at ***<https://uralstech.github.io/ezrSquared>***!
 
+ezr² is now up on NuGet! Check it out [***here!***](https://www.nuget.org/packages/ezrSquared/)
+
 ## What's the 'ezrSquared-re' branch?
 ezr² is being rewritten from the ground up! Expect more features, better performance and better code documentation!
 
