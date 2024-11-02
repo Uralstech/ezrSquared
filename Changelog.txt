@@ -3,6 +3,9 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.8.2 [02-11-24]
+	* Added portable debug files.
+
 * ezr² RE - v0.8.1 [01-11-24]
 	* Fixed shell printouts.
 
