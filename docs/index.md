@@ -79,7 +79,7 @@ ezr² RE still has a lot missing features, like the `include` expression and man
 It is also very unstable, and the API and syntax may change in updates. So, it is not recommended to use ezr² RE for scripting. If you want to try it
 out, you can download it from the [***releases page on GitHub***](https://github.com/Uralstech/ezrSquared/releases/), or, from here:
 
-# [Windows](#tab/windows)
+# [Windows](#tab/REwindows)
 
 * Download the appropriate installer.
 * Run the installer and go through the installation.
@@ -88,14 +88,14 @@ out, you can download it from the [***releases page on GitHub***](https://github
 [![ezr² RE v0.8.1 for Windows x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28Windows_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.Shell.Setup.Win64.exe)
 [![ezr² RE v0.8.1 for Windows x86](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28Windows_x86%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.Shell.Setup.Win32.exe)
 
-# [NuGet](#tab/nuget)
+# [NuGet](#tab/REnuget)
 
 You can use ezr² RE as a scripting language for your .NET apps by downloading it from NuGet!
 
 [![ezr² RE on NuGet](https://img.shields.io/badge/ezr%C2%B2_RE_on_NuGet-32CD32?style=for-the-badge&logo=nuget&logoColor=white)](https://www.nuget.org/packages/ezrSquared)
 [![ezr² RE v0.8.1 (.nupkg download)](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28.nupkg_download%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.0.8.1-unstable.nupkg)
 
-# [Other](#tab/other)
+# [Other](#tab/REother)
 
 For other OSes you can clone the [***branch***](https://github.com/Uralstech/ezrSquared/tree/ezrSquared-re), and compile your own build.
 
