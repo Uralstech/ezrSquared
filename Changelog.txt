@@ -3,6 +3,12 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.8.5 [02-11-24]
+	* [BREAKING CHANGE] `CodeExecutor.s_runtimeContext` is now public-access-only as `CodeExecutor.RuntimeContext`.
+	* Added option to exclude built-in I/O functions from `CodeExecutor.PopulateRuntimeContext`.
+	* Added `EzrBuiltinsUtility.AddBuiltinIOFunctions` to explicitly add built-in I/O functions.
+	* Fixed command line file input for shell.
+
 * ezr² RE - v0.8.4 [02-11-24]
 	* Fixed debug files, again.
 

@@ -18,9 +18,9 @@ public static class CodeExecutor
     public static readonly Interpreter Interpreter = new();
 
     /// <summary>
-    /// The runtime context, may be null.
+    /// The runtime context, may be <see langword="null"/>.
     /// </summary>
-    private static Context? s_runtimeContext;
+    public static Context? RuntimeContext { get; private set; }
 
     /// <summary>
     /// Creates the runtime context.
@@ -28,7 +28,8 @@ public static class CodeExecutor
     /// <param name="filePath">The file path to the code file this context will be used to execute.</param>
     public static void CreateRuntimeContext(string filePath)
     {
-        s_runtimeContext = new Context($"<\"{filePath}\" context>", true, new Position(0, 0, filePath, string.Empty));
+        RuntimeContext?.Release();
+        RuntimeContext = new Context($"<\"{filePath}\" context>", true, new Position(0, 0, filePath, string.Empty));
     }
 
     /// <summary>
@@ -38,14 +39,18 @@ public static class CodeExecutor
     /// Thrown if the runtime context is <see langword="null"/>.
     /// Use <see cref="CreateRuntimeContext(string)"/> to initialize the runtime context.
     /// </exception>
-    public static void PopulateRuntimeContext()
+    /// <param name="excludeIO">Exclude built-in I/O functions like <see cref="EzrBuiltinFunctions.Show(Runtime.WrapperAttributes.SharpMethodParameters)"/>?</param>
+    public static void PopulateRuntimeContext(bool excludeIO=false)
     {
-        if (s_runtimeContext is null)
-            throw new NullReferenceException($"{nameof(s_runtimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
+        if (RuntimeContext is null)
+            throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
 
-        EzrBuiltinsUtility.AddBuiltinConstants(s_runtimeContext);
-        EzrBuiltinsUtility.AddBuiltinFunctions(s_runtimeContext);
-        EzrBuiltinsUtility.AddBuiltinTypes(s_runtimeContext);
+        EzrBuiltinsUtility.AddBuiltinConstants(RuntimeContext);
+        EzrBuiltinsUtility.AddBuiltinFunctions(RuntimeContext);
+        EzrBuiltinsUtility.AddBuiltinTypes(RuntimeContext);
+
+        if (!excludeIO)
+            EzrBuiltinsUtility.AddBuiltinIOFunctions(RuntimeContext);
     }
 
     /// <summary>
@@ -59,10 +64,10 @@ public static class CodeExecutor
     /// <param name="name">The name of the new symbol.</param>
     public static void AddToContext(Reference reference, string name)
     {
-        if (s_runtimeContext is null)
-            throw new NullReferenceException($"{nameof(s_runtimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
+        if (RuntimeContext is null)
+            throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
 
-        s_runtimeContext.Set(null, name, reference);
+        RuntimeContext.Set(null, name, reference);
     }
 
     /// <summary>
@@ -76,11 +81,11 @@ public static class CodeExecutor
     /// </exception>
     public static ExecutionResult Execute(string script)
     {
-        if (s_runtimeContext is null)
-            throw new NullReferenceException($"{nameof(s_runtimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
+        if (RuntimeContext is null)
+            throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
 
         // Tokenize the script.
-        SyntaxError? lexerError = new Lexer(s_runtimeContext.StartPosition.File, script).Tokenize(out List<Token> tokens);
+        SyntaxError? lexerError = new Lexer(RuntimeContext.StartPosition.File, script).Tokenize(out List<Token> tokens);
         if (lexerError is not null) // Check for errors.
             return new ExecutionResult([.. tokens], lexerError); // Return tokens with lexing error.
 
@@ -90,7 +95,7 @@ public static class CodeExecutor
             return new ExecutionResult([.. tokens], parseResult); // Return the tokens, with the parse error.
 
         // Interpret the Abstract Syntax Tree.
-        RuntimeResult result = Interpreter.Execute(parseResult.Node, s_runtimeContext);
+        RuntimeResult result = Interpreter.Execute(parseResult.Node, RuntimeContext);
 
         // Return result.
         return new ExecutionResult([.. tokens], parseResult.Node, result);

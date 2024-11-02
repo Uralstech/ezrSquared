@@ -10,15 +10,12 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
 public static class EzrBuiltinsUtility
 {
     /// <summary>
-    /// Adds all built-in functions to the given context.
+    /// Adds all built-in functions to the given context, excluding I/O functions.
     /// </summary>
     /// <param name="context">The context to add to.</param>
     public static void AddBuiltinFunctions(Context context)
     {
-        EzrSharpSourceFunctionWrapper show = new(EzrBuiltinFunctions.Show, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper throwError = new(EzrBuiltinFunctions.ThrowError, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper get = new(EzrBuiltinFunctions.Get, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper clear = new(EzrBuiltinFunctions.Clear, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper assert = new(EzrBuiltinFunctions.Assert, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper hash = new(EzrBuiltinFunctions.Hash, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper typeOf = new(EzrBuiltinFunctions.TypeOf, context, Position.None, Position.None);
@@ -26,16 +23,28 @@ public static class EzrBuiltinsUtility
         EzrSharpSourceFunctionWrapper typeHashOf = new(EzrBuiltinFunctions.TypeHashOf, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper copy = new(EzrBuiltinFunctions.Copy, context, Position.None, Position.None);
 
-        context.Set(null, show.SharpFunctionName, ReferencePool.Get(show, AccessMod.Constant));
         context.Set(null, throwError.SharpFunctionName, ReferencePool.Get(throwError, AccessMod.Constant));
-        context.Set(null, get.SharpFunctionName, ReferencePool.Get(get, AccessMod.Constant));
-        context.Set(null, clear.SharpFunctionName, ReferencePool.Get(clear, AccessMod.Constant));
         context.Set(null, assert.SharpFunctionName, ReferencePool.Get(assert, AccessMod.Constant));
         context.Set(null, hash.SharpFunctionName, ReferencePool.Get(hash, AccessMod.Constant));
         context.Set(null, typeOf.SharpFunctionName, ReferencePool.Get(typeOf, AccessMod.Constant));
         context.Set(null, typeNameOf.SharpFunctionName, ReferencePool.Get(typeNameOf, AccessMod.Constant));
         context.Set(null, typeHashOf.SharpFunctionName, ReferencePool.Get(typeHashOf, AccessMod.Constant));
         context.Set(null, copy.SharpFunctionName, ReferencePool.Get(copy, AccessMod.Constant));
+    }
+
+    /// <summary>
+    /// Adds all built-in I/O functions to the given context.
+    /// </summary>
+    /// <param name="context">The context to add to.</param>
+    public static void AddBuiltinIOFunctions(Context context)
+    {
+        EzrSharpSourceFunctionWrapper show = new(EzrBuiltinFunctions.Show, context, Position.None, Position.None);
+        EzrSharpSourceFunctionWrapper get = new(EzrBuiltinFunctions.Get, context, Position.None, Position.None);
+        EzrSharpSourceFunctionWrapper clear = new(EzrBuiltinFunctions.Clear, context, Position.None, Position.None);
+
+        context.Set(null, show.SharpFunctionName, ReferencePool.Get(show, AccessMod.Constant));
+        context.Set(null, get.SharpFunctionName, ReferencePool.Get(get, AccessMod.Constant));
+        context.Set(null, clear.SharpFunctionName, ReferencePool.Get(clear, AccessMod.Constant));
     }
 
     /// <summary>

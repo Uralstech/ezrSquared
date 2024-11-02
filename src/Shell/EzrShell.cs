@@ -12,7 +12,7 @@ namespace EzrSquaredCli;
 /// </summary>
 internal class Shell
 {
-    private const string Version = "0.8.4";
+    private const string Version = "0.8.5";
 
     private static bool s_showLexerOutput;
     private static bool s_showParserOutput;
@@ -68,7 +68,7 @@ internal class Shell
                     Console.ResetColor();
                     return false;
                 default:
-                    if (!string.IsNullOrEmpty(s_filePath) && File.Exists(arguments[i]))
+                    if (string.IsNullOrEmpty(s_filePath) && File.Exists(arguments[i]))
                         s_filePath = arguments[i];
                     else
                     {
