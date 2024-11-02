@@ -19,7 +19,7 @@ For more information, check out the [*learn ezr² page*](docsrc/Learn-ezrSquared
 > ezr² is still in development, and with [ezr² ***REwrite***](https://github.com/Uralstech/ezrSquared/tree/ezrSquared-re) on the horizon,
 > there will be some breaking changes in syntax in upcoming versions.
 
-To install ezr² on your PC, follow the steps for your Operating System:
+To install ezr², follow the steps for your Operating System:
 
 # [Windows](#tab/windows)
 
@@ -49,7 +49,7 @@ If you are interested in how ezr² was embedded to the portable interpreter (a U
 
 # [Other](#tab/other)
 
-For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build. If you're a contributor, feel free to add the build to the latest release.
+For other OSes you can clone the [***repository***](https://github.com/Uralstech/ezrSquared/), and compile your own build.
 
 ---
 
@@ -71,24 +71,35 @@ The documentation is packaged with the Windows installer. For other OSes, downlo
 
 [![ezr² Pre-release v1.5.1.3.0 Offline Documentation](https://img.shields.io/badge/ezr%C2%B2_Pre--release_v1.5.1.3.0_Offline_Documentation-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/prereleaseV1.5.1.3.0/ezrSquared.Offline.Documentation.zip)
 
-## Latest Updates
+## ezr² RE
 
-More frequent development updates will be posted on [***my blog***](https://uralstech.github.io/).
+ezr² is being rewritten, with better performance, more features and better compatibility with existing C# libraries!
 
-### New website
+ezr² RE still has a lot missing features, like the `include` expression and many built in type extension methods like `["list"].insert('2', 0)`.
+It is also very unstable, and the API and syntax may change in updates. So, it is not recommended to use ezr² RE for scripting. If you want to try it
+out, you can download it from the [***releases page on GitHub***](https://github.com/Uralstech/ezrSquared/releases/), or, from here:
 
-The website has been updated! Now, this website also contains the reference documentation! Please note that the reference documentation is only for ezr² ***RE***, not for older versions.
+# [Windows](#tab/windows)
 
-### ezr² ***RE*** Release
+* Download the appropriate installer.
+* Run the installer and go through the installation.
+<br/>
+ 
+[![ezr² RE v0.8.1 for Windows x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28Windows_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.Shell.Setup.Win64.exe)
+[![ezr² RE v0.8.1 for Windows x86](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28Windows_x86%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.Shell.Setup.Win32.exe)
 
-The latest version of ezr² ***RE*** has been released! ezr² ***RE***, or ***REwrite***, is the project's initiative to rewrite ezr². The latest working version of ezr² ***RE***
-has many more features than the latest version of ezr²! But, it is still in development, has some essential features missing. Like the `include` expression, or any built-in object
-methods like `"a string".length` or `["a", "list"].insert`. If you want to help in testing it out and fixing bugs, feel free to download the latest version of ezr² ***RE*** from
-the ezr² GitHub releases page and compiling it using the .NET SDK and/or Visual Studio. 
+# [NuGet](#tab/nuget)
 
-### New Versioning Format
+You can use ezr² RE as a scripting language for your .NET apps by downloading it from NuGet!
 
-ezr² now uses [***Semantic Versioning 2.0.0***](https://semver.org/) for new releases.
+[![ezr² RE on NuGet](https://img.shields.io/badge/ezr%C2%B2_RE_on_NuGet-32CD32?style=for-the-badge&logo=nuget&logoColor=white)](https://www.nuget.org/packages/ezrSquared)
+[![ezr² RE v0.8.1 (.nupkg download)](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.1_%28.nupkg_download%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.1/ezrSquared.0.8.1-unstable.nupkg)
+
+# [Other](#tab/other)
+
+For other OSes you can clone the [***branch***](https://github.com/Uralstech/ezrSquared/tree/ezrSquared-re), and compile your own build.
+
+---
 
 ## Contributing
 
