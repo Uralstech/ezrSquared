@@ -85,15 +85,15 @@ out, you can download it from the [***releases page on GitHub***](https://github
 * Run the installer and go through the installation.
 <br/>
  
-[![ezr² RE v0.8.3 for Windows x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.3_%28Windows_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.3/ezrSquared.Shell.Setup.Win64.exe)
-[![ezr² RE v0.8.3 for Windows x86](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.3_%28Windows_x86%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.3/ezrSquared.Shell.Setup.Win32.exe)
+[![ezr² RE v0.8.4 for Windows x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.4_%28Windows_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.4/ezrSquared.Shell.Setup.Win64.exe)
+[![ezr² RE v0.8.4 for Windows x86](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.4_%28Windows_x86%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.4/ezrSquared.Shell.Setup.Win32.exe)
 
 # [NuGet](#tab/REnuget)
 
 You can use ezr² RE as a scripting language for your .NET apps by downloading it from NuGet!
 
 [![ezr² RE on NuGet](https://img.shields.io/badge/ezr%C2%B2_RE_on_NuGet-32CD32?style=for-the-badge&logo=nuget&logoColor=white)](https://www.nuget.org/packages/ezrSquared)
-[![ezr² RE v0.8.3 (.nupkg download)](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.3_%28.nupkg_download%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.3/ezrSquared.0.8.3-unstable.nupkg)
+[![ezr² RE v0.8.4 (.nupkg download)](https://img.shields.io/badge/ezr%C2%B2_RE_v0.8.4_%28.nupkg_download%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.8.4/ezrSquared.0.8.4-unstable.nupkg)
 
 # [Other](#tab/REother)
 
