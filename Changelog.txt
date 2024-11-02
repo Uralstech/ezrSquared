@@ -3,6 +3,10 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.8.3 [02-11-24]
+	* Fixed warning in `EzrObject` caused by missing `DynamicallyAccessedMembers` attribute.
+	* Fixed debug files.
+
 * ezr² RE - v0.8.2 [02-11-24]
 	* Added portable debug files.
 

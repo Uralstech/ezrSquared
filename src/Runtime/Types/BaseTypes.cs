@@ -7,6 +7,7 @@ using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
 
@@ -48,14 +49,15 @@ public abstract class EzrObject : IEzrObject
     /// <typeparam name="TParentType">The type which the member is a part of.</typeparam>
     /// <param name="name">The name of the member.</param>
     /// <returns>The cached member data or the first member with the given <paramref name="name"/>. <see langword="null"/> if not found.</returns>
-    internal static TMemberInfo? GetMemberInfo<TMemberInfo, TParentType>(string name) where TMemberInfo : MemberInfo
+    internal static TMemberInfo? GetMemberInfo<TMemberInfo, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TParentType>(string name) where TMemberInfo : MemberInfo
     {
-        (Type ParentType, string MemberName) key = (typeof(TParentType), name);
+        Type parentType = typeof(TParentType);
+        (Type, string) key = (parentType, name);
 
         if (s_memberMap.Value.TryGetValue(key, out MemberInfo? cachedMemberInfo))
             return (TMemberInfo)cachedMemberInfo;
 
-        MemberInfo[] members = key.ParentType.GetMember(name);
+        MemberInfo[] members = parentType.GetMember(name);
         if (members.Length == 0 || members[0] is not TMemberInfo memberInfo)
             return default;
 
