@@ -16,6 +16,7 @@
 		
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
+		<DebugType>portable</DebugType>
 		
 		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">True</IsAotCompatible>
 	</PropertyGroup>
@@ -50,6 +51,9 @@
 
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -74,10 +78,5 @@
 	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
 		<PolySharpIncludeRuntimeSupportedAttributes>True</PolySharpIncludeRuntimeSupportedAttributes>
 		<DefineConstants>MULTI_TARGETING_SUPPORT_ATTRIBUTES</DefineConstants>
-		<DebugType>portable</DebugType>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0'">
-	  <DebugType>portable</DebugType>
 	</PropertyGroup>
 </Project>
