@@ -5,25 +5,51 @@ using System.Reflection;
 namespace EzrSquared.Runtime.WrapperAttributes;
 
 /// <summary>
-/// Attribute for C# type members which to be automatically wrapped from primitive C# types into ezr² types.
+/// Attribute for C# type members which to be automatically wrapped from C# types into ezr² types.
 /// </summary>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 public class SharpAutoWrapperAttribute : Attribute
 {
     /// <summary>
     /// The ezr² name for the member.
     /// </summary>
-    public string Name = string.Empty;
+    public readonly string Name = string.Empty;
 
     /// <summary>
     /// Is the member read-only? Only for properties and fields.
     /// </summary>
-    public bool IsReadOnly;
+    public readonly bool IsReadOnly;
 
     /// <summary>
     /// Is the member write-only? Only for properties and fields.
     /// </summary>
-    public bool IsWriteOnly;
+    public readonly bool IsWriteOnly;
+
+    /// <summary>
+    /// Creates a new <see cref="SharpAutoWrapperAttribute"/>.
+    /// </summary>
+    /// <param name="isReadOnly">Is the member read-only? Only for properties and fields.</param>
+    /// <param name="isWriteOnly">Is the member write-only? Only for properties and fields.</param>
+    /// <exception cref="ArgumentException">Thrown if both <see cref="IsReadOnly"/> and <see cref="IsWriteOnly"/> are set to <see langword="true"/>.</exception>
+    public SharpAutoWrapperAttribute(bool isReadOnly = false, bool isWriteOnly = false)
+    {
+        IsReadOnly = isReadOnly;
+        IsWriteOnly = isWriteOnly;
+
+        if (IsWriteOnly && IsReadOnly)
+            throw new ArgumentException("You can't make a property or field both read-only and write-only.");
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="SharpAutoWrapperAttribute"/>.
+    /// </summary>
+    /// <param name="name">The ezr² name for the member.</param>
+    /// <param name="isReadOnly">Is the member read-only? Only for properties and fields.</param>
+    /// <param name="isWriteOnly">Is the member write-only? Only for properties and fields.</param>
+    public SharpAutoWrapperAttribute(string name, bool isReadOnly = false, bool isWriteOnly = false) : this(isReadOnly, isWriteOnly)
+    {
+        Name = name;
+    }
 
     /// <summary>
     /// Checks if the given member is supported for wrapping.

@@ -74,7 +74,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             if (method.IsAbstract || (!method.IsPublic && method.GetCustomAttribute<SharpAutoWrapperAttribute>() is null))
                 continue;
 
-            string methodObjectName = Utils.PascalToSnakeCase(method.Name);
+            EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!methodObject.Validate())
+                continue;
+
+            string methodObjectName = methodObject.SharpMemberName;
             if (duplicateNames.TryGetValue(method.Name, out int duplicates))
             {
                 methodObjectName += $"_{duplicates}";
@@ -82,10 +86,6 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             }
             else
                 duplicateNames.Add(method.Name, 1);
-
-            EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition);
-            if (!methodObject.Validate(result))
-                return;
 
             Context.Set(null, methodObjectName, ReferencePool.Get(methodObject, AccessMod.Constant));
         }
@@ -97,9 +97,9 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             if (property.GetMethod?.IsPublic != true && property.SetMethod?.IsPublic != true && property.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
                 continue;
 
-            EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition);
-            if (!propertyObject.Validate(result))
-                return;
+            EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!propertyObject.Validate())
+                continue;
 
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
@@ -111,9 +111,9 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             if (!field.IsPublic && field.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
                 continue;
 
-            EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition);
-            if (!fieldObject.Validate(result))
-                return;
+            EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!fieldObject.Validate())
+                continue;
 
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
@@ -122,12 +122,12 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
-            if (!constructor.IsPublic)
+            if (!constructor.IsPublic && constructor.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
                 continue;
 
-            EzrSharpCompatibilityConstructor constructorObject = new(this, constructor, Context, StartPosition, EndPosition);
-            if (constructorObject.Validate(result))
-                return;
+            EzrSharpCompatibilityConstructor constructorObject = new(this, constructor, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!constructorObject.Validate())
+                continue;
 
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
         }

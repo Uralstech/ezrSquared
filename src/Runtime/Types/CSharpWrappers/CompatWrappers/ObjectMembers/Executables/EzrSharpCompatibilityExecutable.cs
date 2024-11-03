@@ -53,7 +53,13 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
 
         Executable = sharpMember;
         Parameters = Executable.GetParameters();
-        ParameterNames = Array.ConvertAll(Parameters, p => Utils.PascalToSnakeCase(p.Name ?? string.Empty));
+        
+        ParameterNames = Array.ConvertAll(Parameters, p =>
+        {
+            string? definedName = p.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
+            return string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(p.Name ?? string.Empty) : definedName;
+        });
+
         Instance = instance;
 
         if (!skipValidation)

@@ -7,6 +7,7 @@ using EzrSquared.Util;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
@@ -48,25 +49,42 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
     {
         SharpMember = wrappedMember;
         AutoWrapperAttribute = wrappedMember.GetCustomAttribute<SharpAutoWrapperAttribute>();
-        SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : Utils.PascalToSnakeCase(wrappedMember.Name);
+        SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name);
     }
 
     /// <summary>
     /// Validates the the current object for wrapping.
     /// </summary>
-    /// <param name="result">Optional runtime result for carrying runtime errors.</param>
     /// <returns><see langword="true"/> if the member can be wrapped, <see langword="false"/> otherwise.</returns>
-    public bool Validate(RuntimeResult? result=null)
+    public bool Validate()
     {
         Exception? validationException = SharpAutoWrapperAttribute.Validate(SharpMember);
         if (validationException is null)
             return true;
 
-        if (AutoWrapperAttribute is not null)
-            throw validationException;
+        return AutoWrapperAttribute is not null ? throw validationException : false;
+    }
 
-        result?.Failure(new EzrUnsupportedWrappingError($"C# type member \"{SharpMemberName}\" cannot be wrapped into an ezr² type!", Context, StartPosition, EndPosition));
-        return false;
+    /// <summary>
+    /// Converts a string from PascalCase to snake_case.
+    /// </summary>
+    /// <param name="text">The text to convert in PascalCase.</param>
+    /// <returns>The converted text in snake_case.</returns>
+    internal protected static string PascalToSnakeCase(string text)
+    {
+        StringBuilder result = new();
+        result.Append(char.ToLowerInvariant(text[0]));
+
+        for (int i = 1; i < text.Length; ++i)
+        {
+            char c = text[i];
+            if (char.IsUpper(c))
+                result.Append('_').Append(char.ToLowerInvariant(c));
+            else
+                result.Append(c);
+        }
+
+        return result.ToString();
     }
 
     /// <summary>

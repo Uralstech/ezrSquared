@@ -98,26 +98,4 @@ public static class Utils
 
         return (line, result.ToString());
     }
-
-    /// <summary>
-    /// Converts a string from PascalCase to snake_case.
-    /// </summary>
-    /// <param name="text">The text to convert in PascalCase.</param>
-    /// <returns>The converted text in snake_case.</returns>
-    public static string PascalToSnakeCase(string text)
-    {
-        StringBuilder result = new();
-        result.Append(char.ToLowerInvariant(text[0]));
-
-        for (int i = 1; i < text.Length; ++i)
-        {
-            char c = text[i];
-            if (char.IsUpper(c))
-                result.Append('_').Append(char.ToLowerInvariant(c));
-            else
-                result.Append(c);
-        }
-
-        return result.ToString();
-    }
 }

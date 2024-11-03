@@ -1,5 +1,4 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Reflection;
@@ -36,7 +35,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip field type validation?</param>
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation=false) : base(sharpField, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpField, parentContext, startPosition, endPosition)
     {
         SharpField = sharpField;
         Instance = instance;
@@ -85,7 +84,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
                     result.Failure(new EzrIllegalOperationError($"Cannot get value from CSharp field wrapper \"{SharpMemberName}\" as it is write-only!", Context, StartPosition, EndPosition));
                     break;
                 }
-                
+
                 object? value = SharpField.GetValue(Instance);
                 CSharpToEzrObject(value, result);
                 break;

@@ -1,5 +1,4 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Reflection;
@@ -36,7 +35,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip property type validation?</param>
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation=false) : base(sharpProperty, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpProperty, parentContext, startPosition, endPosition)
     {
         SharpProperty = sharpProperty;
         Instance = instance;

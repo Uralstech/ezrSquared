@@ -14,7 +14,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
 /// <param name="skipValidation">Skip method signature validation?</param>
-public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType constructingTypeWrapper, ConstructorInfo sharpConstructor, Context parentContext, Position startPosition, Position endPosition, bool skipValidation=false) : EzrSharpCompatibilityExecutable(sharpConstructor, null, parentContext, startPosition, endPosition, skipValidation)
+public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType constructingTypeWrapper, ConstructorInfo sharpConstructor, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrSharpCompatibilityExecutable(sharpConstructor, null, parentContext, startPosition, endPosition, skipValidation)
 {
     /// <summary>
     /// The wrapper for this C# constructor's class.
@@ -40,7 +40,7 @@ public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType construc
                 result.Success(NewNothingConstant());
             else
             {
-                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingTypeWrapper.SharpType, result, _executionContext, StartPosition, EndPosition);
+                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingTypeWrapper.SharpType, _executionContext, StartPosition, EndPosition);
                 if (result.ShouldReturn)
                     return;
 

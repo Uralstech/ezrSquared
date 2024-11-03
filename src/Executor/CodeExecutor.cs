@@ -18,6 +18,11 @@ public static class CodeExecutor
     public static readonly Interpreter Interpreter = new();
 
     /// <summary>
+    /// The static <see cref="Runtime.RuntimeResult"/> of <see cref="Interpreter"/>.
+    /// </summary>
+    public static RuntimeResult RuntimeResult => Interpreter.RuntimeResult;
+
+    /// <summary>
     /// The runtime context, may be <see langword="null"/>.
     /// </summary>
     public static Context? RuntimeContext { get; private set; }
@@ -40,7 +45,7 @@ public static class CodeExecutor
     /// Use <see cref="CreateRuntimeContext(string)"/> to initialize the runtime context.
     /// </exception>
     /// <param name="excludeIO">Exclude built-in I/O functions like <see cref="EzrBuiltinFunctions.Show(Runtime.WrapperAttributes.SharpMethodParameters)"/>?</param>
-    public static void PopulateRuntimeContext(bool excludeIO=false)
+    public static void PopulateRuntimeContext(bool excludeIO = false)
     {
         if (RuntimeContext is null)
             throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");

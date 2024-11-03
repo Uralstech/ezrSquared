@@ -64,7 +64,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
     private void DictionaryExists(SharpMethodParameters arguments)
     {
         Reference reference = arguments.ArgumentReferences["key"];
-        
+
         bool hasKey = Value.HasKey(reference.Object, arguments.Result);
         if (arguments.Result.ShouldReturn)
             return;

@@ -34,7 +34,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
     public string StringValue => Value.ToString();
 
     /// <inheritdoc/>
-    [SharpAutoWrapper(IsReadOnly = true)]
+    [SharpAutoWrapper(isReadOnly: true)]
     public int Length => Value.Length;
 
     /// <summary>

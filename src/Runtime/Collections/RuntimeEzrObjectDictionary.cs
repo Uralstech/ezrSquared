@@ -21,7 +21,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     /// <summary>
     /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
-    [SharpAutoWrapper(IsReadOnly = true)]
+    [SharpAutoWrapper(isReadOnly: true)]
     public int Length => _items.Count;
 
     /// <summary>
@@ -103,7 +103,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     /// </remarks>
     /// <param name="key">The key (hash) to be removed.</param>
     /// <returns><see langword="true"/> if the operation was successful, <see langword="false"/> if not.</returns>
-    [SharpAutoWrapper(Name = "remove_by_hash")]
+    [SharpAutoWrapper("remove_by_hash")]
     public bool RemoveHash(int key)
     {
         return _items.Remove(key);
