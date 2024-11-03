@@ -1,7 +1,6 @@
 ﻿global using WrapperArgumentPopulationResult = (System.Collections.Generic.Dictionary<string, EzrSquared.Runtime.Reference> Arguments, System.Collections.Generic.List<EzrSquared.Runtime.Reference>? ExtraPositionalArguments);
 
 using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -57,6 +56,21 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
         }
 
         return result.ToString();
+    }
+
+    /// <summary>
+    /// Converts an index to a power of two, so that the index can be used like an enum flag.
+    /// </summary>
+    /// <remarks>
+    /// This function is used to check if all arguments have been provided to <see cref="Runtime.Types.CSharpWrappers.SourceWrappers.EzrSharpSourceExecutableWrapper"/> and <see cref="Runtime.Types.Executables.EzrRuntimeExecutable"/> types.<br/>
+    /// The indices of the given arguments are converted to powers of two and bitwise-ored together, then bitwise-anded with the index of a defined parameter which is also converted to a power of two.<br/>
+    /// Finally, if the result is the same as the power of two of the parameter's index, this tells the interpreter that the particular required parameter has been provided.
+    /// </remarks>
+    /// <param name="index">The index to be converted.</param>
+    /// <returns>The power of two.</returns>
+    protected internal static int IndexToFlag(int index)
+    {
+        return (index++ < 3) ? index : (4 * index) - 8;
     }
 
     /// <summary>
@@ -149,14 +163,14 @@ public abstract class EzrSharpSourceExecutableWrapper(Context parentContext, Pos
 
             if (parameterIndex > -1)
                 if (flaggedRequiredArguments < 0)
-                    flaggedRequiredArguments = Utils.IndexToFlag(parameterIndex);
+                    flaggedRequiredArguments = IndexToFlag(parameterIndex);
                 else
-                    flaggedRequiredArguments |= Utils.IndexToFlag(parameterIndex);
+                    flaggedRequiredArguments |= IndexToFlag(parameterIndex);
         }
 
         for (int i = 0; i < Parameters.Length; i++)
         {
-            int parameterFlag = Utils.IndexToFlag(i);
+            int parameterFlag = IndexToFlag(i);
             if (Parameters[i].IsRequired && (flaggedRequiredArguments < 0 || (flaggedRequiredArguments & parameterFlag) != parameterFlag))
             {
                 result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{Parameters[i].Name}\"!", _executionContext, StartPosition, EndPosition));

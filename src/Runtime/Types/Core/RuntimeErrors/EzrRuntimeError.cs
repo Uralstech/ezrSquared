@@ -1,6 +1,5 @@
 ﻿using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.WrapperAttributes;
-using EzrSquared.Util;
 using System;
 using System.Text;
 
@@ -153,7 +152,7 @@ public class EzrRuntimeError : EzrObject, IEzrRuntimeError
     /// <inheritdoc/>
     public override string ToPureString(RuntimeResult result)
     {
-        (int adjustedLineNumber, string sourceWithUnderline) = Utils.SourceWithUnderline(ErrorStartPosition, ErrorEndPosition);
+        (int adjustedLineNumber, string sourceWithUnderline) = IEzrError.SourceWithUnderline(ErrorStartPosition, ErrorEndPosition);
 
         return $"{GenerateTraceback(adjustedLineNumber)}\n{Title}: {Details}\n{sourceWithUnderline}";
     }

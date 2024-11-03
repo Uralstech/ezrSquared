@@ -39,7 +39,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     {
         SharpField = sharpField;
         Instance = instance;
-        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         if (!skipValidation)
             Validate();

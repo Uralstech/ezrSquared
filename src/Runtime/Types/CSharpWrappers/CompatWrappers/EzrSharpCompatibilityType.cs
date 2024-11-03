@@ -58,7 +58,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
         RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(type, parentContext, startPosition, endPosition)
     {
         SharpType = type;
-        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         if (SharpType.IsGenericType)
         {

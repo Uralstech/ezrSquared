@@ -156,7 +156,7 @@ public class Context
     public Context(string name, bool isStatic, Position startPosition, Context? parent = null, Context? staticContext = null, int linkedContexts = 0)
     {
         Name = name;
-        Id = Utils.GetNextUniqueId();
+        Id = UIDProvider.Get();
         LinkedContexts = linkedContexts == 0 ? [] : new Context[linkedContexts];
 
         if (isStatic && StaticContext != null)

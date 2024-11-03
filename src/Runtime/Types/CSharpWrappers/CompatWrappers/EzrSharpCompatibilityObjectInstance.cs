@@ -48,7 +48,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
         Context parentContext, Position startPosition, Position endPosition) : base(instanceType, parentContext, startPosition, endPosition)
     {
         Instance = instance;
-        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         MethodInfo[] allMethods = instanceType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         Dictionary<string, int> duplicateNames = new(allMethods.Length);

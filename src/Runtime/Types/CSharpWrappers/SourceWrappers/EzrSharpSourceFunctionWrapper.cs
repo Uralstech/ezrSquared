@@ -77,7 +77,7 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
         if (string.IsNullOrEmpty(attribute.Name))
             throw new ArgumentException($"Name not provided in {nameof(SharpMethodWrapperAttribute)} of function \"{function.Name}\"!", nameof(function));
 
-        Tag = $"{Tag}.{attribute.Name}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{attribute.Name}.{UIDProvider.Get()}";
         return (attribute.Name, attribute);
     }
 

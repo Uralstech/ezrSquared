@@ -49,7 +49,7 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
     /// <param name="skipValidation">Skip method signature validation?</param>
     public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMember, parentContext, startPosition, endPosition)
     {
-        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         Executable = sharpMember;
         Parameters = Executable.GetParameters();

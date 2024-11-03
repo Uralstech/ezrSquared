@@ -60,8 +60,8 @@ public abstract class EzrRuntimeExecutable : EzrObject
     public EzrRuntimeExecutable(string? name, Node body, (string Name, Node Node)[] parameters, OptionalExtraArguments extraKeywordArguments, OptionalExtraArguments extraPositionalArguments, Context parentContext, Position startPosition, Position endPosition, Context? initializationContext = null) : base(initializationContext, parentContext, startPosition, endPosition)
     {
         Tag = name is not null
-            ? $"{Tag}.{name}.{Utils.GetNextUniqueId()}"
-            : $"{Tag}.{Utils.GetNextUniqueId()}";
+            ? $"{Tag}.{name}.{UIDProvider.Get()}"
+            : $"{Tag}.{UIDProvider.Get()}";
         ExecutableName = name ?? $"<anonymous #{HashTag}>";
 
         Body = body;

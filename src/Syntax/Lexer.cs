@@ -85,10 +85,10 @@ public class Lexer
     /// Creates a <see cref="List{T}"/> of <see cref="Token"/> objects from the given script.
     /// </summary>
     /// <param name="tokens">The created <see cref="List{T}"/> of <see cref="Token"/> objects.</param>
-    /// <returns>Any <see cref="SyntaxError"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
-    public SyntaxError? Tokenize(out List<Token> tokens)
+    /// <returns>Any <see cref="EzrSyntaxError"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
+    public EzrSyntaxError? Tokenize(out List<Token> tokens)
     {
-        SyntaxError? error;
+        EzrSyntaxError? error;
         tokens = [];
         while (!_reachedEnd)
         {
@@ -251,7 +251,7 @@ public class Lexer
                     char unknownCharacter = _currentChar;
                     Advance();
 
-                    return new SyntaxError(SyntaxError.UnexpectedCharacter, unknownCharacter.ToString(), errorStartPosition, _position);
+                    return new EzrSyntaxError(EzrSyntaxError.UnexpectedCharacter, unknownCharacter.ToString(), errorStartPosition, _position);
             }
         }
 
@@ -339,9 +339,9 @@ public class Lexer
     /// <summary>
     /// Creates a <see cref="Token"/> of types <see cref="TokenType.String"/>, <see cref="TokenType.Character"/> or <see cref="TokenType.CharacterList"/>, depending on the enclosing character.
     /// </summary>
-    /// <param name="error">Any <see cref="SyntaxError"/> that occurred in creating the stringlike; <see langword="null"/> if none occurred.</param>
+    /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in creating the stringlike; <see langword="null"/> if none occurred.</param>
     /// <returns>The created <see cref="Token"/>.</returns>
-    private Token CompileStringLike(out SyntaxError? error)
+    private Token CompileStringLike(out EzrSyntaxError? error)
     {
         char enclosingChar = _currentChar;
 
@@ -371,14 +371,14 @@ public class Lexer
             Position errorStartPosition = _position.Copy();
             _position.Advance();
 
-            error = new SyntaxError(SyntaxError.InvalidGrammar, $"Expected '{enclosingChar}'!", errorStartPosition, _position);
+            error = new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, $"Expected '{enclosingChar}'!", errorStartPosition, _position);
             return Token.Empty;
         }
 
         Advance();
         if (enclosingChar == '`' && ((toReturn.Length > 1 is bool tooLong && tooLong) || toReturn.Length == 0))
         {
-            error = new SyntaxError(SyntaxError.InvalidGrammar,
+            error = new EzrSyntaxError(EzrSyntaxError.InvalidGrammar,
                 tooLong
                 ? "Value too long to be a character!"
                 : "A character cannot be empty!", startPosition, _position);
@@ -403,8 +403,8 @@ public class Lexer
     /// Processes an escape sequence in a stringlike.
     /// </summary>
     /// <param name="builder">The <see cref="StringBuilder"/> to append the special character to.</param>
-    /// <param name="error">Any <see cref="SyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
-    private void ProcessEscapeSequence(StringBuilder builder, ref SyntaxError? error)
+    /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
+    private void ProcessEscapeSequence(StringBuilder builder, ref EzrSyntaxError? error)
     {
         Position startPosition = _position.Copy();
         Advance();
@@ -453,7 +453,7 @@ public class Lexer
                 Advance();
                 break;
             default:
-                error = new SyntaxError(SyntaxError.UnexpectedCharacter, $"Unknown escape sequence '\\{_currentChar}'.", startPosition, _position);
+                error = new EzrSyntaxError(EzrSyntaxError.UnexpectedCharacter, $"Unknown escape sequence '\\{_currentChar}'.", startPosition, _position);
                 break;
         }
     }
@@ -461,9 +461,9 @@ public class Lexer
     /// <summary>
     /// Processes a UTF-16 escaped sequence in a stringlike.
     /// </summary>
-    /// <param name="error">Any <see cref="SyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
+    /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
     /// <returns>The UTF-16 character.</returns>
-    private char[] ProcessUtf16Sequence(ref SyntaxError? error)
+    private char[] ProcessUtf16Sequence(ref EzrSyntaxError? error)
     {
         int characterCount = 0;
         string hexValue = string.Empty;
@@ -483,7 +483,7 @@ public class Lexer
                 Position endPosition = _position.Copy();
                 endPosition.Advance();
 
-                error = new SyntaxError(SyntaxError.InvalidHexValue, "UTF-16 hexadecimal values must be 4 characters long and only contain digits and the letters A to F!", startPosition, endPosition);
+                error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-16 hexadecimal values must be 4 characters long and only contain digits and the letters A to F!", startPosition, endPosition);
                 return [];
             }
         }
@@ -494,9 +494,9 @@ public class Lexer
     /// <summary>
     /// Processes a UTF-32 escaped sequence in a stringlike.
     /// </summary>
-    /// <param name="error">Any <see cref="SyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
+    /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
     /// <returns>The UTF-32 character.</returns>
-    private string ProcessUtf32Sequence(ref SyntaxError? error)
+    private string ProcessUtf32Sequence(ref EzrSyntaxError? error)
     {
         int characterCount = 0;
         string hexValue = string.Empty;
@@ -516,7 +516,7 @@ public class Lexer
                 Position endPosition = _position.Copy();
                 endPosition.Advance();
 
-                error = new SyntaxError(SyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be 6 characters long and only contain digits and the letters A to F!", startPosition, endPosition);
+                error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be 6 characters long and only contain digits and the letters A to F!", startPosition, endPosition);
                 return string.Empty;
             }
         }
@@ -524,7 +524,7 @@ public class Lexer
         int unicodePoint = Convert.ToInt32(hexValue, 16);
         if (unicodePoint > 0x10FFFF)
         {
-            error = new SyntaxError(SyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be in range 000000 - 10FFFF!", startPosition, _position);
+            error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be in range 000000 - 10FFFF!", startPosition, _position);
             return string.Empty;
         }
 

@@ -123,7 +123,7 @@ public class Parser
     {
         ParseStatements();
         if (_result.Error is null && _currentToken.Type != TokenType.EndOfFile)
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Did not expect this!", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Did not expect this!", _currentToken.StartPosition, _currentToken.EndPosition));
         return _result;
     }
 
@@ -282,7 +282,7 @@ public class Parser
 
         ParseExpression();
         if (_result.Error is not null)
-            _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a statement!", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a statement!", _currentToken.StartPosition, _currentToken.EndPosition));
     }
 
     /// <summary>
@@ -307,7 +307,7 @@ public class Parser
         {
             if ((accessibilityModifiers & AccessMod.Global) == AccessMod.Global)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", startPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", startPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -336,7 +336,7 @@ public class Parser
         {
             ParseQuickExpression(true);
             if (_result.Error is not null)
-                _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -362,7 +362,7 @@ public class Parser
             }
             else if (usedItemKeyword || ((accessibilityModifiers & AccessMod.PrivateConstant) != 0))
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
             else
@@ -370,7 +370,7 @@ public class Parser
         }
         else if (usedItemKeyword)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a variable name! The variable name is where the value will be assigned.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a variable name! The variable name is where the value will be assigned.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
         else
@@ -378,7 +378,7 @@ public class Parser
 
         ParseQuickExpression();
         if (_result.Error is not null)
-            _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an expression!", _currentToken.StartPosition, _currentToken.EndPosition));
     }
 
     /// <summary>
@@ -408,7 +408,7 @@ public class Parser
                     Position errorStartPosition = startPosition.Copy();
                     errorStartPosition.Advance();
 
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", errorStartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", errorStartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -437,7 +437,7 @@ public class Parser
             {
                 ParseJunction();
                 if (_result.Error is not null)
-                    _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a QuickSyntax expression!", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a QuickSyntax expression!", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -463,7 +463,7 @@ public class Parser
                 }
                 else if (usedItemKeyword || ((accessibilityModifiers & AccessMod.PrivateConstant) != 0))
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an assignment symbol! The assignment symbol seperates the variable name and value, and declares how to handle any existing values in the variable, in a variable assignment expression. A few examples of assignment symbols are: (':') - normal assignment, (':+') - adds existing value in variable to new value, assigns the result, (':*') - multiplies existing value with new value, assigns the result, and (':&') - does a bitwise and operation between the existing and new value, assigns the result. There are equivalent symbols for all binary mathematical and bitwise operations.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
                 else
@@ -471,7 +471,7 @@ public class Parser
             }
             else if (usedItemKeyword)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a variable name! The variable name is where the value will be assigned.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a variable name! The variable name is where the value will be assigned.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
             else
@@ -480,7 +480,7 @@ public class Parser
 
         ParseJunction();
         if (_result.Error is not null)
-            _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a QuickSyntax expression!", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a QuickSyntax expression!", _currentToken.StartPosition, _currentToken.EndPosition));
     }
 
     /// <summary>
@@ -535,7 +535,7 @@ public class Parser
 
         ParseContainsCheck();
         if (_result.Error is not null)
-            _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an inversion expression!", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an inversion expression!", _currentToken.StartPosition, _currentToken.EndPosition));
     }
 
     /// <summary>
@@ -552,7 +552,7 @@ public class Parser
             {
                 if (_currentToken.Type != TokenType.KeywordIn)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'in' keyword! The 'in' keyword is the second part of a check-not-in operation.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'in' keyword! The 'in' keyword is the second part of a check-not-in operation.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -700,7 +700,7 @@ public class Parser
             ParseExpression();
             if (_result.Error is not null)
             {
-                _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                 return;
             }
 
@@ -719,7 +719,7 @@ public class Parser
                 ParseExpression();
                 if (_result.Error is not null)
                 {
-                    _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                    _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! The function/object call expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                     return;
                 }
                 arguments.Add(_result.Node);
@@ -730,7 +730,7 @@ public class Parser
 
             if (_currentToken.Type != TokenType.RightParenthesis)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma or right-parenthesis symbol! Commas are used to seperate the arguments of the function/object call expression, and the right-parenthesis is used to end it.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma or right-parenthesis symbol! Commas are used to seperate the arguments of the function/object call expression, and the right-parenthesis is used to end it.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -810,7 +810,7 @@ public class Parser
                     (false, false) => $"Expected a variable assignment expression, variable access expression or the 'function' or 'object' keywords! In this case, a variable assignment expression will assign a global {onStatic}variable, a variable access expression references a global {onStatic}variable and the 'function' or 'object' keywords will declare a global {onStatic}function or class, respectively.",
                 };
 
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
                 break;
             case TokenType.KeywordPrivate:
                 nextToken = PeekNext();
@@ -858,7 +858,7 @@ public class Parser
                     ? $"Expected the 'object' keyword! In this case, the 'object' keyword is used to declare a private {onStatic}{onConstant}read-only class."
                     : $"Expected a variable assignment expression or the 'function' or 'object' keywords! In this case, a variable assignment expression will assign a private {onStatic}{onConstant}{onVariable}and the 'function' or 'object' keywords will declare a private {onStatic}{onConstant}function or class, respectively.";
 
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
                 break;
             case TokenType.KeywordStatic:
                 nextToken = PeekNext();
@@ -913,7 +913,7 @@ public class Parser
                     (false, false) => $"Expected a variable assignment expression, variable access expression or the 'function' or 'object' keywords! In this case, a variable assignment expression will assign a static variable, a variable access expression references a static variable and the 'function' or 'object' keywords will declare a static function or class, respectively.",
                 };
 
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
                 break;
             case TokenType.KeywordConstant:
                 nextToken = PeekNext();
@@ -940,14 +940,14 @@ public class Parser
                     ? "Expected the 'object' keyword! In this case, the 'object' keyword is used to declare a constant read-only class."
                     : "Expected a variable assignment expression or the 'function' or 'object' keywords! In this case, a variable assignment expression will assign a constant, while the 'function' or 'object' keywords will declare a constant function or class, respectively.";
 
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, errorMessage, nextToken.StartPosition, nextToken.EndPosition));
                 break;
             case TokenType.KeywordReadonly:
                 nextToken = PeekNext();
 
                 if (nextToken.Type != TokenType.KeywordObject)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'object' keyword! In this case, the 'object' keyword is used to declare a read-only class.", nextToken.StartPosition, nextToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'object' keyword! In this case, the 'object' keyword is used to declare a read-only class.", nextToken.StartPosition, nextToken.EndPosition));
                     return;
                 }
 
@@ -992,7 +992,7 @@ public class Parser
 
 #pragma warning disable CS0618
             case TokenType.KeywordSpecial:
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "The \"special function\" structure has been removed from ezr². Please use normal functions with dedicated names for operator overloading. Check [DOCUMENTATION LINK HERE] for more info.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "The \"special function\" structure has been removed from ezr². Please use normal functions with dedicated names for operator overloading. Check [DOCUMENTATION LINK HERE] for more info.", _currentToken.StartPosition, _currentToken.EndPosition));
                 break;
 #pragma warning restore CS0618
 
@@ -1012,7 +1012,7 @@ public class Parser
                     return;
                 }
 
-                _result.Failure(4, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an integer, float, string, character, character list, identifier, 'if' expression, 'count' expression, 'while' expression...", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(4, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an integer, float, string, character, character list, identifier, 'if' expression, 'count' expression, 'while' expression...", _currentToken.StartPosition, _currentToken.EndPosition));
                 break;
         }
     }
@@ -1043,7 +1043,7 @@ public class Parser
             ParseExpression();
             if (_result.Error is not null)
             {
-                _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! An array/parenthetical expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! An array/parenthetical expression must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                 return;
             }
 
@@ -1067,7 +1067,7 @@ public class Parser
                 ParseExpression();
                 if (_result.Error is not null)
                 {
-                    _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! An array must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                    _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-parenthesis symbol! An array must end with a right-parenthesis.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                     return;
                 }
 
@@ -1079,9 +1079,9 @@ public class Parser
             if (_currentToken.Type != TokenType.RightParenthesis)
             {
                 if (isArray)
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma or a right-parenthesis symbol! Commas seperate the elements of the array, while the right-parenthesis ends it.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma or a right-parenthesis symbol! Commas seperate the elements of the array, while the right-parenthesis ends it.", _currentToken.StartPosition, _currentToken.EndPosition));
                 else
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma or a right-parenthesis symbol! The comma is used to create an array and seperate its elements, while the right-parenthesis declares the end of a parenthetical expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma or a right-parenthesis symbol! The comma is used to create an array and seperate its elements, while the right-parenthesis declares the end of a parenthetical expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1123,7 +1123,7 @@ public class Parser
             ParseExpression();
             if (_result.Error is not null)
             {
-                _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                 return;
             }
             elements.Add(_result.Node);
@@ -1142,7 +1142,7 @@ public class Parser
                 ParseExpression();
                 if (_result.Error is not null)
                 {
-                    _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                    _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-square-bracket symbol! A list expression must end with a right-square-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                     return;
                 }
                 elements.Add(_result.Node);
@@ -1153,7 +1153,7 @@ public class Parser
 
             if (_currentToken.Type != TokenType.RightSquareBracket)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma or a right-square-bracket symbol! Commas are used to seperate elements in the list, while the right-square-bracket ends it.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma or a right-square-bracket symbol! Commas are used to seperate elements in the list, while the right-square-bracket ends it.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1189,7 +1189,7 @@ public class Parser
             ParseExpression(true);
             if (_result.Error is not null)
             {
-                _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                 return;
             }
 
@@ -1199,7 +1199,7 @@ public class Parser
 
             if (_currentToken.Type != TokenType.Colon)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1228,7 +1228,7 @@ public class Parser
                 ParseExpression(true);
                 if (_result.Error is not null)
                 {
-                    _result.Failure(10, new StackedSyntaxError(_result.Error, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
+                    _result.Failure(10, new EzrStackedSyntaxError(_result.Error, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a right-curly-bracket symbol! A dictionary expression must end with a right-curly-bracket.", possibleErrorToken.StartPosition, possibleErrorToken.EndPosition)));
                     return;
                 }
 
@@ -1238,7 +1238,7 @@ public class Parser
 
                 if (_currentToken.Type != TokenType.Colon)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a colon symbol! The colon is the seperator between a key and its value in a dictionary.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1259,7 +1259,7 @@ public class Parser
 
             if (_currentToken.Type != TokenType.RightCurlyBracket)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma or right-curly-bracket symbol! Commas are used to seperate key-value pairs in the dictionary, and the right-curly-bracket declares its end.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma or right-curly-bracket symbol! Commas are used to seperate key-value pairs in the dictionary, and the right-curly-bracket declares its end.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1288,7 +1288,7 @@ public class Parser
         Node condition = _result.Node;
         if (_currentToken.Type != TokenType.KeywordDo)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1322,7 +1322,7 @@ public class Parser
                     {
                         if (elseCase is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                             return;
                         }
 
@@ -1335,7 +1335,7 @@ public class Parser
                         condition = _result.Node;
                         if (_currentToken.Type != TokenType.KeywordDo)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"else if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"else if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                             return;
                         }
 
@@ -1350,14 +1350,14 @@ public class Parser
                     }
                     else if (_currentToken.Type != TokenType.KeywordDo)
                     {
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'if' or 'do' keywords! The 'if' keyword declares the start of an \"else if\" expression, and the 'do' keyword declares the start of the body of an \"else\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'if' or 'do' keywords! The 'if' keyword declares the start of an \"else if\" expression, and the 'do' keyword declares the start of the body of an \"else\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
                     else
                     {
                         if (elseCase is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                             return;
                         }
 
@@ -1374,9 +1374,9 @@ public class Parser
                 if (_currentToken.Type != TokenType.KeywordEnd)
                 {
                     if (elseCase is null)
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'else' or 'end' keywords! The 'else' keyword defines the start of an \"else\" or \"else if\" expression, and the 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'else' or 'end' keywords! The 'else' keyword defines the start of an \"else\" or \"else if\" expression, and the 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     else
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1385,7 +1385,7 @@ public class Parser
             }
             else
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'else' or 'end' keywords! The 'else' keyword defines the start of an \"else\" or \"else if\" expression, and the 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'else' or 'end' keywords! The 'else' keyword defines the start of an \"else\" or \"else if\" expression, and the 'end' keyword declares the end of the whole \"if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1408,7 +1408,7 @@ public class Parser
             {
                 if (elseCase is not null)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "The \"else-if\" expression cannot be declared before the \"else\" expression! You cannot have \"else\" expressions before or in-between \"else if\" expressions.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1421,7 +1421,7 @@ public class Parser
                 condition = _result.Node;
                 if (_currentToken.Type != TokenType.KeywordDo)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"else if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"else if\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1436,14 +1436,14 @@ public class Parser
             }
             else if (_currentToken.Type != TokenType.KeywordDo)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'if' or 'do' keywords! The 'if' keyword declares the start of an \"else if\" expression, and the 'do' keyword declares the start of the body of an \"else\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'if' or 'do' keywords! The 'if' keyword declares the start of an \"else if\" expression, and the 'do' keyword declares the start of the body of an \"else\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
             else
             {
                 if (elseCase is not null)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There should only be one \"else\" expression! You cannot have multiple \"else\" expressions in an \"if\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1486,9 +1486,9 @@ public class Parser
         if (_currentToken.Type != TokenType.KeywordTo)
         {
             if (from is null)
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'to' or 'from' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop, and the optional 'from' keyword and the following expression is the amount to count from.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'to' or 'from' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop, and the optional 'from' keyword and the following expression is the amount to count from.", _currentToken.StartPosition, _currentToken.EndPosition));
             else
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'to' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'to' keyword! The 'to' keyword and the following expression is the amount to count to in the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1522,11 +1522,11 @@ public class Parser
         if (_currentToken.Type != TokenType.KeywordDo)
         {
             if (step is null && iterationVariable is null)
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do', 'step' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, the optional 'step' keyword and the following expression is the increment, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do', 'step' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, the optional 'step' keyword and the following expression is the increment, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
             else if (iterationVariable is null)
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' or 'as' keyword! The 'do' keyword declares the start of the body of the count loop, and the optional 'as' keyword and the following expression is where the iterations are stored.", _currentToken.StartPosition, _currentToken.EndPosition));
             else
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1545,7 +1545,7 @@ public class Parser
             body = _result.Node;
             if (_currentToken.Type != TokenType.KeywordEnd)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the count loop.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1575,7 +1575,7 @@ public class Parser
 
         if (_currentToken.Type != TokenType.KeywordEach)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'each' keyword! The 'each' keyword is essential for forming a \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'each' keyword! The 'each' keyword is essential for forming a \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1586,13 +1586,13 @@ public class Parser
 
         if (_result.Node is not BinaryOperationNode expression || expression.Operator != TokenType.KeywordIn)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a binary expression in the format \"[iteration variable] in [iterable collection]\".", _result.Node.StartPosition, _result.Node.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a binary expression in the format \"[iteration variable] in [iterable collection]\".", _result.Node.StartPosition, _result.Node.EndPosition));
             return;
         }
 
         if (_currentToken.Type != TokenType.KeywordDo)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1607,7 +1607,7 @@ public class Parser
                 return;
             else if (_currentToken.Type != TokenType.KeywordEnd)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"for each\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1643,7 +1643,7 @@ public class Parser
         Node condition = _result.Node;
         if (_currentToken.Type != TokenType.KeywordDo)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the while loop.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the while loop.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1662,7 +1662,7 @@ public class Parser
             body = _result.Node;
             if (_currentToken.Type != TokenType.KeywordEnd)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the while loop.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the while loop.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1696,7 +1696,7 @@ public class Parser
 
         if (_currentToken.Type != TokenType.KeywordDo)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -1733,7 +1733,7 @@ public class Parser
                     {
                         if (emptyCase is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There should only be one empty \"catch\" expression! You cannot have multiple empty \"catch\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There should only be one empty \"catch\" expression! You cannot have multiple empty \"catch\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                             return;
                         }
 
@@ -1748,7 +1748,7 @@ public class Parser
                             @as = _result.Node;
                             if (_currentToken.Type != TokenType.KeywordDo)
                             {
-                                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                                 return;
                             }
                         }
@@ -1770,7 +1770,7 @@ public class Parser
                         if (emptyCase is not null)
                         {
                             Token previous = PeekPrevious();
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There can't be any \"catch\" expressions after an empty \"catch\" expression!", previous.StartPosition, previous.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There can't be any \"catch\" expressions after an empty \"catch\" expression!", previous.StartPosition, previous.EndPosition));
                             return;
                         }
 
@@ -1784,12 +1784,12 @@ public class Parser
                     }
                     else if (isErrorNull)
                     {
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an expression or the 'as' or 'do' keywords! An expression after the 'catch' keyword defines what error(s) will lead to the \"catch\" expression, the 'as' keyword and the following expression declares where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an expression or the 'as' or 'do' keywords! An expression after the 'catch' keyword defines what error(s) will lead to the \"catch\" expression, the 'as' keyword and the following expression declares where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
                     else
                     {
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' or 'do' keywords! The 'as' keyword and the following expression tells the interpreter where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'as' or 'do' keywords! The 'as' keyword and the following expression tells the interpreter where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
                 }
@@ -1797,9 +1797,9 @@ public class Parser
                 if (_currentToken.Type != TokenType.KeywordEnd)
                 {
                     if (emptyCase is null)
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'catch' or 'end' keywords! The 'catch' keyword defines the start of an \"catch\" expression, and the 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'catch' or 'end' keywords! The 'catch' keyword defines the start of an \"catch\" expression, and the 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     else
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"try\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1808,7 +1808,7 @@ public class Parser
             }
             else
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'catch' or 'end' keywords! The 'catch' keyword defines the start of an \"catch\" expression, and the 'end' keyword declares the end of the whole \"try\" expression. Note: In newer versions of ezr², 'error' has been replaced by 'catch' and is now recognized as an identifier. Check [DOCUMENTATION LINK HERE] for more info.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'catch' or 'end' keywords! The 'catch' keyword defines the start of an \"catch\" expression, and the 'end' keyword declares the end of the whole \"try\" expression. Note: In newer versions of ezr², 'error' has been replaced by 'catch' and is now recognized as an identifier. Check [DOCUMENTATION LINK HERE] for more info.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -1834,7 +1834,7 @@ public class Parser
             {
                 if (emptyCase is not null)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There should only be one empty \"catch\" expression! You cannot have multiple empty \"catch\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There should only be one empty \"catch\" expression! You cannot have multiple empty \"catch\" expressions in a \"try\" expression.", PeekPrevious().StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -1849,7 +1849,7 @@ public class Parser
                     @as = _result.Node;
                     if (_currentToken.Type != TokenType.KeywordDo)
                     {
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'do' keyword! The 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                         return;
                     }
                 }
@@ -1871,7 +1871,7 @@ public class Parser
                 if (emptyCase is not null)
                 {
                     Token previous = PeekPrevious();
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "There can't be any \"catch\" expressions after an empty \"catch\" expression!", previous.StartPosition, previous.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "There can't be any \"catch\" expressions after an empty \"catch\" expression!", previous.StartPosition, previous.EndPosition));
                     return;
                 }
 
@@ -1885,12 +1885,12 @@ public class Parser
             }
             else if (isErrorNull)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an expression or the 'as' or 'do' keywords! An expression after the 'catch' keyword defines what error(s) will lead to the \"catch\" expression, the 'as' keyword and the following expression declares where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an expression or the 'as' or 'do' keywords! An expression after the 'catch' keyword defines what error(s) will lead to the \"catch\" expression, the 'as' keyword and the following expression declares where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
             else
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' or 'do' keywords! The 'as' keyword and the following expression tells the interpreter where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'as' or 'do' keywords! The 'as' keyword and the following expression tells the interpreter where the error will be stored and the 'do' keyword declares the start of the body of the \"catch\" expression.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
         }
@@ -1968,9 +1968,9 @@ public class Parser
                         if (_currentToken.Type != TokenType.KeywordAs)
                         {
                             if (isNamedExtraParamters)
-                                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' keyword! The 'as' keyword comes in-between the 'named' keyword and an expression when declaring extra keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
+                                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'as' keyword! The 'as' keyword comes in-between the 'named' keyword and an expression when declaring extra keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
                             else
-                                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'as' or 'named' keywords! The 'named' keyword starts the definition of extra keyword parameters and the 'as' keyword comes in-between the 'from' or 'named' keyword and an expression when declaring extra positional or keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
+                                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'as' or 'named' keywords! The 'named' keyword starts the definition of extra keyword parameters and the 'as' keyword comes in-between the 'from' or 'named' keyword and an expression when declaring extra positional or keyword parameters for an object.", _currentToken.StartPosition, _currentToken.EndPosition));
 
                             return;
                         }
@@ -1982,12 +1982,12 @@ public class Parser
 
                         if (isNamedExtraParamters && extraKeywordArguments is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Only one extra keyword parameter dictionary can be defined per function!", paramStartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Only one extra keyword parameter dictionary can be defined per function!", paramStartPosition, _currentToken.EndPosition));
                             return;
                         }
                         else if (!isNamedExtraParamters && extraPositionalArguments is not null)
                         {
-                            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Only one extra positional parameter list can be defined per function!", paramStartPosition, _currentToken.EndPosition));
+                            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Only one extra positional parameter list can be defined per function!", paramStartPosition, _currentToken.EndPosition));
                             return;
                         }
 
@@ -2003,7 +2003,7 @@ public class Parser
                     }
                     else if (extraKeywordArguments is not null || extraPositionalArguments is not null)
                     {
-                        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Normal mixed parameters must come before extra positional/keyword parameter list/dictionary definitions.", paramStartPosition, _currentToken.EndPosition));
+                        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Normal mixed parameters must come before extra positional/keyword parameter list/dictionary definitions.", paramStartPosition, _currentToken.EndPosition));
                         return;
                     }
 
@@ -2018,14 +2018,14 @@ public class Parser
 
                 if (_currentToken.Type != TokenType.KeywordDo)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma symbol or the 'do' keyword! The comma symbol and the following expression defines another parameter and the 'do' keyword declares the start of the body of the \"function\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma symbol or the 'do' keyword! The comma symbol and the following expression defines another parameter and the 'do' keyword declares the start of the body of the \"function\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
             }
 
             if (name is null && accessibilityModifiers != AccessMod.None)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "The accessibility of an anonymous function cannot be declared in the definition! Anonymous functions are meant to be stored in variables or constants, where the accessibility is determined.", startPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "The accessibility of an anonymous function cannot be declared in the definition! Anonymous functions are meant to be stored in variables or constants, where the accessibility is determined.", startPosition, _currentToken.EndPosition));
                 return;
             }
 
@@ -2042,7 +2042,7 @@ public class Parser
                 body = _result.Node;
                 if (_currentToken.Type != TokenType.KeywordEnd)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"function\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"function\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -2072,12 +2072,12 @@ public class Parser
         }
         else if (isNameNull)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected an expression or the 'with' or 'do' keywords! An expression after the 'function' keyword defines the name, the 'with' keyword and the following expression(s, seperated by commas) declare(s) the paramenters and the 'do' keyword declares the start of the body of the \"function\".", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected an expression or the 'with' or 'do' keywords! An expression after the 'function' keyword defines the name, the 'with' keyword and the following expression(s, seperated by commas) declare(s) the paramenters and the 'do' keyword declares the start of the body of the \"function\".", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
         else
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'with' or 'do' keywords! The 'with' keyword and the following expression(s, seperated by commas) declare(s) the paramenters and the 'do' keyword declares the start of the body of the \"function\".", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'with' or 'do' keywords! The 'with' keyword and the following expression(s, seperated by commas) declare(s) the paramenters and the 'do' keyword declares the start of the body of the \"function\".", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -2138,7 +2138,7 @@ public class Parser
         }
         else if (accessibilityModifiers != AccessMod.None)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "The accessibility of an anonymous class cannot be declared in the definition! Anonymous classes are meant to be stored in variables or constants, where the accessibility is determined.", startPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "The accessibility of an anonymous class cannot be declared in the definition! Anonymous classes are meant to be stored in variables or constants, where the accessibility is determined.", startPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -2162,7 +2162,7 @@ public class Parser
 
             if (_currentToken.Type != TokenType.KeywordDo)
             {
-                _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected a comma symbol or the 'do' keyword! The comma symbol and the following expression defines another parent and the 'do' keyword declares the start of the body of the class definition.", _currentToken.StartPosition, _currentToken.EndPosition));
+                _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected a comma symbol or the 'do' keyword! The comma symbol and the following expression defines another parent and the 'do' keyword declares the start of the body of the class definition.", _currentToken.StartPosition, _currentToken.EndPosition));
                 return;
             }
         }
@@ -2182,7 +2182,7 @@ public class Parser
 
                 if (_currentToken.Type != TokenType.KeywordEnd)
                 {
-                    _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole class definition.", _currentToken.StartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole class definition.", _currentToken.StartPosition, _currentToken.EndPosition));
                     return;
                 }
 
@@ -2203,7 +2203,7 @@ public class Parser
             return;
         }
 
-        _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar,
+        _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar,
             (name is null && parents.Count == 0)
             ? "Expected an expression or the 'from' or 'do' keywords! An expression after the 'object' keyword defines the name, the 'from' keyword and the following expression(s, seperated by commas) define(s) the parents and the 'do' keyword declares the start of the body of the class."
             : (parents.Count == 0)
@@ -2254,7 +2254,7 @@ public class Parser
         }
         else
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'from' keyword! If a specific object being included from a script (when the object's name is provided after the 'include' keyword) or if the whole script is added to the script (using the 'all' keyword or a comma symbol after the 'include' keyword), the 'from' keyword followed by an expression declaring the script's name or path must be provided.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'from' keyword! If a specific object being included from a script (when the object's name is provided after the 'include' keyword) or if the whole script is added to the script (using the 'all' keyword or a comma symbol after the 'include' keyword), the 'from' keyword followed by an expression declaring the script's name or path must be provided.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -2305,7 +2305,7 @@ public class Parser
 
         if (accessibilityModifiers == AccessMod.None)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'private', 'global', 'static' or 'constant' keywords! The \"define block\" needs at least one accessibility modifier. The 'private' or 'global' keywords declare all variables, constants, functions and classes defined in the block as private or global - not both, the 'static' or 'constant' keywords declare them as statically bound or constants - can be both.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'private', 'global', 'static' or 'constant' keywords! The \"define block\" needs at least one accessibility modifier. The 'private' or 'global' keywords declare all variables, constants, functions and classes defined in the block as private or global - not both, the 'static' or 'constant' keywords declare them as statically bound or constants - can be both.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 
@@ -2316,7 +2316,7 @@ public class Parser
         Node body = _result.Node;
         if (_currentToken.Type != TokenType.KeywordEnd)
         {
-            _result.Failure(10, new SyntaxError(SyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"define block\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
+            _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "Expected the 'end' keyword! The 'end' keyword declares the end of the whole \"define block\" definition.", _currentToken.StartPosition, _currentToken.EndPosition));
             return;
         }
 

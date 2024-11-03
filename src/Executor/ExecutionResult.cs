@@ -19,7 +19,7 @@ public class ExecutionResult
     /// <summary>
     /// Any error that occurred during lexing.
     /// </summary>
-    public readonly SyntaxError? LexerError;
+    public readonly EzrSyntaxError? LexerError;
 
     /// <summary>
     /// The Abstract Syntax Tree of the executed script.
@@ -29,7 +29,7 @@ public class ExecutionResult
     /// <summary>
     /// Any error that occurred during parsing.
     /// </summary>
-    public readonly SyntaxError? ParseError;
+    public readonly EzrSyntaxError? ParseError;
 
     /// <summary>
     /// The result of the execution.
@@ -46,7 +46,7 @@ public class ExecutionResult
     /// </summary>
     /// <param name="tokens">The tokens returned by the lexer.</param>
     /// <param name="error">The error.</param>
-    public ExecutionResult(Token[] tokens, SyntaxError error)
+    public ExecutionResult(Token[] tokens, EzrSyntaxError error)
     {
         Tokens = tokens;
         LexerError = error;

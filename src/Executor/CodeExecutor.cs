@@ -90,7 +90,7 @@ public static class CodeExecutor
             throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
 
         // Tokenize the script.
-        SyntaxError? lexerError = new Lexer(RuntimeContext.StartPosition.File, script).Tokenize(out List<Token> tokens);
+        EzrSyntaxError? lexerError = new Lexer(RuntimeContext.StartPosition.File, script).Tokenize(out List<Token> tokens);
         if (lexerError is not null) // Check for errors.
             return new ExecutionResult([.. tokens], lexerError); // Return tokens with lexing error.
 

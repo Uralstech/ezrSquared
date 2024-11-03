@@ -39,7 +39,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     {
         SharpProperty = sharpProperty;
         Instance = instance;
-        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         if (!skipValidation)
             Validate();

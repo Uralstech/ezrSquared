@@ -74,7 +74,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
 
         // Set name and tag.
         SharpTypeName = typeAttribute.Name;
-        Tag = $"{Tag}.{SharpTypeName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpTypeName}.{UIDProvider.Get()}";
 
         Exception? typeAttributeException = SharpTypeWrapperAttribute.ValidateMethodParameters(type,
             out (ConstructorInfo Info, SharpMethodWrapperAttribute Attribute)? constructor);

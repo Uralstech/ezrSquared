@@ -9,9 +9,9 @@ namespace EzrSquared.Syntax;
 public class ParseResult
 {
     /// <summary>
-    /// The <see cref="SyntaxError"/> that occurred while parsing, if any.
+    /// The <see cref="EzrSyntaxError"/> that occurred while parsing, if any.
     /// </summary>
-    public SyntaxError? Error = null;
+    public EzrSyntaxError? Error = null;
 
     /// <summary>
     /// The <see cref="Runtime.Nodes.Node"/> which is the result of the parsing.
@@ -45,8 +45,8 @@ public class ParseResult
     /// then <paramref name="error"/> will override <see cref="Error"/>.
     /// </remarks>
     /// <param name="priority">The priority/fatality of the failure.</param>
-    /// <param name="error">The <see cref="SyntaxError"/> that occurred in parsing.</param>
-    public void Failure(int priority, SyntaxError error)
+    /// <param name="error">The <see cref="EzrSyntaxError"/> that occurred in parsing.</param>
+    public void Failure(int priority, EzrSyntaxError error)
     {
         if (Error is null || _errorPriority < priority)
         {

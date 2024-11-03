@@ -1,41 +1,32 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
+using System;
 
-namespace EzrSquared.Util;
+namespace EzrSquared;
 
 /// <summary>
-/// Utilities functions used in ezrSquared.
+/// Error interface for all errors.
 /// </summary>
-public static class Utils
+public interface IEzrError
 {
     /// <summary>
-    /// <see cref="long"/> value for the last generated unique identifier.
+    /// The name of the <see cref="IEzrError"/>.
     /// </summary>
-    private static long s_currentId = 0;
+    public string Title { get; }
 
     /// <summary>
-    /// Generates an incremental unique identifier.
+    /// The reason why the <see cref="IEzrError"/> occurred.
     /// </summary>
-    /// <returns>A new unique identifier.</returns>
-    public static long GetNextUniqueId()
-    {
-        return System.Threading.Interlocked.Increment(ref s_currentId);
-    }
+    public string Details { get; }
 
     /// <summary>
-    /// Converts an index to a power of two, so that the index can be used like an enum flag.
+    /// The starting <see cref="Position"/> of the <see cref="IEzrError"/>.
     /// </summary>
-    /// <remarks>
-    /// This function is used to check if all arguments have been provided to <see cref="Runtime.Types.CSharpWrappers.SourceWrappers.EzrSharpSourceExecutableWrapper"/> and <see cref="Runtime.Types.Executables.EzrRuntimeExecutable"/> types.<br/>
-    /// The indices of the given arguments are converted to powers of two and bitwise-ored together, then bitwise-anded with the index of a defined parameter which is also converted to a power of two.<br/>
-    /// Finally, if the result is the same as the power of two of the parameter's index, this tells the interpreter that the particular required parameter has been provided.
-    /// </remarks>
-    /// <param name="index">The index to be converted.</param>
-    /// <returns>The power of two.</returns>
-    public static int IndexToFlag(int index)
-    {
-        return (index++ < 3) ? index : (4 * index) - 8;
-    }
+    public Position ErrorStartPosition { get; }
+
+    /// <summary>
+    /// The ending <see cref="Position"/> of the <see cref="IEzrError"/>.
+    /// </summary>
+    public Position ErrorEndPosition { get; }
 
     /// <summary>
     /// Creates formatted text which contains the text between <paramref name="startPosition"/> and <paramref name="endPosition"/>, underlined with tilde (~) symbols.
@@ -43,7 +34,7 @@ public static class Utils
     /// <param name="startPosition">The starting position of the underlining.</param>
     /// <param name="endPosition">The ending position of the underlining.</param>
     /// <returns>The formatted text and the actual starting line number of the error.</returns>
-    public static (int AdjustedLineNumber, string SourceWithUnderline) SourceWithUnderline(Position startPosition, Position endPosition)
+    internal protected static (int AdjustedLineNumber, string SourceWithUnderline) SourceWithUnderline(Position startPosition, Position endPosition)
     {
         string text = startPosition.Script;
         int textLength = text.Length;

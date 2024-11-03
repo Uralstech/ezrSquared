@@ -30,7 +30,7 @@ public abstract class Node(Position startPosition, Position endPosition)
 }
 
 /// <summary>
-/// The dummy invalid <see cref="Node"/> structure. For returning instead of <see langword="null"/> if an <see cref="SyntaxError"/> occurs during parsing.
+/// The dummy invalid <see cref="Node"/> structure. For returning instead of <see langword="null"/> if an <see cref="EzrSyntaxError"/> occurs during parsing.
 /// </summary>
 public class InvalidNode : Node
 {
