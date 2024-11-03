@@ -117,10 +117,16 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             string methodName;
 
             // Check if method can be wrapped.
-            if (method.GetCustomAttribute<SharpMethodWrapperAttribute>(false) is SharpMethodWrapperAttribute methodAttribute)
-                (wrappedMethod, methodName) = GetWrappedMethod(method);
-            else if (method.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
-                (wrappedMethod, methodName) = GetAutoWrappedMethod(method, autoWrapAttribute);
+            if (method.GetCustomAttribute<SharpMethodWrapperAttribute>(false) is not null)
+            {
+                EzrSharpSourceFunctionWrapper sourceMethod = new(method, Context, StartPosition, EndPosition);
+                (wrappedMethod, methodName) = (sourceMethod, sourceMethod.SharpFunctionName);
+            }
+            else if (method.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
+            {
+                EzrSharpCompatibilityFunction compatMethod = new(method, null, Context, StartPosition, EndPosition);
+                (wrappedMethod, methodName) = (compatMethod, compatMethod.SharpMemberName);
+            }
             else
                 continue;
 
@@ -141,18 +147,10 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             string propertyName;
 
             // Check if property can be wrapped.
-            if (property.GetCustomAttribute<SharpFieldWrapperAttribute>(false) is SharpFieldWrapperAttribute propertyAttribute)
+            if (property.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
             {
-                EzrSharpSourcePropertyWrapper sourceWrapper = new(property, null, Context, StartPosition, EndPosition);
-                (wrappedProperty, propertyName) = (sourceWrapper, sourceWrapper.SharpPropertyName);
-            }
-            else if (property.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
-            {
-                EzrSharpCompatibilityProperty compatWrapper = !string.IsNullOrEmpty(autoWrapAttribute.Name)
-                                                                ? new(autoWrapAttribute.Name, property, null, Context, StartPosition, EndPosition)
-                                                                : new(property, null, Context, StartPosition, EndPosition);
-
-                (wrappedProperty, propertyName) = (compatWrapper, compatWrapper.SharpPropertyName);
+                EzrSharpCompatibilityProperty compatWrapper = new(property, null, Context, StartPosition, EndPosition);
+                (wrappedProperty, propertyName) = (compatWrapper, compatWrapper.SharpMemberName);
             }
             else
                 continue;
@@ -173,18 +171,10 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             string fieldName;
 
             // Check if property can be wrapped.
-            if (field.GetCustomAttribute<SharpFieldWrapperAttribute>(false) is SharpFieldWrapperAttribute fieldAttribute)
+            if (field.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
             {
-                EzrSharpSourceFieldWrapper sourceWrapper = new(field, null, Context, StartPosition, EndPosition);
-                (wrappedField, fieldName) = (sourceWrapper, sourceWrapper.SharpFieldName);
-            }
-            else if (field.GetCustomAttribute<SharpAutoCompatibilityWrapperAttribute>(false) is SharpAutoCompatibilityWrapperAttribute autoWrapAttribute)
-            {
-                EzrSharpCompatibilityField compatWrapper = !string.IsNullOrEmpty(autoWrapAttribute.Name)
-                                                                ? new(autoWrapAttribute.Name, field, null, Context, StartPosition, EndPosition)
-                                                                : new(field, null, Context, StartPosition, EndPosition);
-
-                (wrappedField, fieldName) = (compatWrapper, compatWrapper.SharpFieldName);
+                EzrSharpCompatibilityField compatWrapper = new(field, null, Context, StartPosition, EndPosition);
+                (wrappedField, fieldName) = (compatWrapper, compatWrapper.SharpMemberName);
             }
             else
                 continue;
@@ -195,44 +185,6 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
 
             Context.Set(null, fieldName, ReferencePool.Get(wrappedField, AccessMod.Constant));
         }
-    }
-
-    /// <summary>
-    /// Creates a <see cref="EzrSharpSourceFunctionWrapper"/> from a <see cref="SharpMethodWrapperAttribute"/>-decorated method.
-    /// </summary>
-    /// <param name="method">The method to wrap.</param>
-    /// <returns>The method wrapper and its ezr² (snake_case) formatted name.</returns>
-    private (IEzrObject, string) GetWrappedMethod(MethodInfo method)
-    {
-        // Check if parameters of the method are valid.
-        Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(method);
-        if (parameterException is not null)
-            throw parameterException;
-
-        // Create the wrapper object.
-        EzrSharpSourceFunctionWrapper wrapper = new(method, Context, StartPosition, EndPosition);
-        return (wrapper, wrapper.SharpFunctionName);
-    }
-
-    /// <summary>
-    /// Creates a <see cref="EzrSharpCompatibilityFunction"/> from a <see cref="SharpAutoCompatibilityWrapperAttribute"/>-decorated method.
-    /// </summary>
-    /// <param name="method">The method to wrap.</param>
-    /// <param name="attribute">The wrapper attribute.</param>
-    /// <returns>The method wrapper and its ezr² (snake_case) formatted name.</returns>
-    private (IEzrObject, string) GetAutoWrappedMethod(MethodInfo method, SharpAutoCompatibilityWrapperAttribute attribute)
-    {
-        // Check if the method is eligible for automatic wrapping.
-        ArgumentException? formatException = SharpAutoCompatibilityWrapperAttribute.ValidateMethod(method);
-        if (formatException is not null)
-            throw formatException;
-
-        // Create the wrapper object.
-        EzrSharpCompatibilityFunction wrapper = !string.IsNullOrEmpty(attribute.Name)
-            ? new(attribute.Name, method, null, Context, StartPosition, EndPosition)
-            : new(method, null, Context, StartPosition, EndPosition);
-
-        return (wrapper, wrapper.SharpRuntimeExecutableName);
     }
 
     /// <inheritdoc/>

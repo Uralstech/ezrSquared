@@ -1,4 +1,5 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Reflection;
@@ -27,37 +28,23 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     public readonly object? Instance;
 
     /// <summary>
-    /// The name of the property to wrap, in ezr² format (snake_case).
-    /// </summary>
-    public readonly string SharpPropertyName;
-
-    /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>.
     /// </summary>
-    /// <param name="name">The name of the property to wrap, in ezr² format (snake_case).</param>
     /// <param name="sharpProperty">The property to wrap.</param>
     /// <param name="instance">The object which contains the property, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityProperty(string name, PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    /// <param name="skipValidation">Skip property type validation?</param>
+    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation=false) : base(sharpProperty, parentContext, startPosition, endPosition)
     {
         SharpProperty = sharpProperty;
         Instance = instance;
-        SharpPropertyName = name;
-        Tag = $"{Tag}.{SharpPropertyName}.{Utils.GetNextUniqueId()}";
-    }
+        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
 
-    /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>. Infers the name by converting the member's name to snake_case.
-    /// </summary>
-    /// <param name="sharpProperty">The property to wrap.</param>
-    /// <param name="instance">The object which contains the property, <see langword="null"/> if static.</param>
-    /// <param name="parentContext">The context in which this object was created.</param>
-    /// <param name="startPosition">The starting position of the object.</param>
-    /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition)
-        : this(Utils.PascalToSnakeCase(sharpProperty.Name), sharpProperty, instance, parentContext, startPosition, endPosition) { }
+        if (!skipValidation)
+            Validate();
+    }
 
     /// <summary>
     /// If there are no arguments, accesses the property's value. If the property is not read-only and there is an arguments, sets the property's value.
@@ -67,30 +54,30 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     {
         if (arguments.Length > 1)
         {
-            result.Failure(new EzrUnexpectedArgumentError($"Only expected 0 (for getting the value) or 1 (for setting the value) argument(s) for CSharp property wrapper \"{SharpPropertyName}\"!", Context, StartPosition, EndPosition));
+            result.Failure(new EzrUnexpectedArgumentError($"Only expected 0 (for getting the value) or 1 (for setting the value) argument(s) for CSharp property wrapper \"{SharpMemberName}\"!", Context, StartPosition, EndPosition));
             return;
         }
 
         if (arguments.Length == 0)
         {
-            object? value = SharpProperty.GetValue(Instance);
-            PrimitiveToEzrObject(value, value?.GetType(), result);
-        }
-        else
-        {
-            object? value = EzrObjectToPrimitive(arguments[0].Object, Type.GetTypeCode(SharpProperty.PropertyType), result);
-            if (result.ShouldReturn)
-                return;
-
-            if (!SharpProperty.CanWrite || SharpProperty.SetMethod is null)
+            if (AutoWrapperAttribute?.IsWriteOnly == true || SharpProperty.GetMethod is null || (AutoWrapperAttribute == null && !SharpProperty.GetMethod.IsPublic))
             {
-                result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp property wrapper \"{SharpPropertyName}\" as it is read-only!", Context, StartPosition, EndPosition));
+                result.Failure(new EzrIllegalOperationError($"Cannot get value from CSharp property wrapper \"{SharpMemberName}\" as it is write-only!", Context, StartPosition, EndPosition));
                 return;
             }
 
-            if (!SharpProperty.SetMethod.IsPublic)
+            object? value = SharpProperty.GetValue(Instance);
+            CSharpToEzrObject(value, result);
+        }
+        else
+        {
+            object? value = EzrObjectToCSharp(arguments[0].Object, SharpProperty.PropertyType, result);
+            if (result.ShouldReturn)
+                return;
+
+            if (AutoWrapperAttribute?.IsReadOnly == true || SharpProperty.SetMethod is null || (AutoWrapperAttribute == null && !SharpProperty.SetMethod.IsPublic))
             {
-                result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp property wrapper \"{SharpPropertyName}\" as it does not have a public setter method!", Context, StartPosition, EndPosition));
+                result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp property wrapper \"{SharpMemberName}\" as it is read-only!", Context, StartPosition, EndPosition));
                 return;
             }
 
@@ -125,6 +112,6 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        return $"<{TypeName} \"{SharpPropertyName}\">";
+        return $"<{TypeName} \"{SharpMemberName}\">";
     }
 }

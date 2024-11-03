@@ -1,4 +1,5 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
@@ -38,40 +39,26 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
     public readonly object? Instance;
 
     /// <summary>
-    /// The name of the executable to wrap, in ezr² (snake_case) format.
-    /// </summary>
-    public readonly string SharpRuntimeExecutableName;
-
-    /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityExecutable"/>.
     /// </summary>
-    /// <param name="name">The name of the executable to wrap, in ezr² format (snake_case).</param>
     /// <param name="sharpMember">The executable to wrap.</param>
     /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityExecutable(string name, MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    /// <param name="skipValidation">Skip method signature validation?</param>
+    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMember, parentContext, startPosition, endPosition)
     {
-        SharpRuntimeExecutableName = name;
-        Tag = $"{Tag}.{SharpRuntimeExecutableName}.{Utils.GetNextUniqueId()}";
+        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
 
         Executable = sharpMember;
         Parameters = Executable.GetParameters();
         ParameterNames = Array.ConvertAll(Parameters, p => Utils.PascalToSnakeCase(p.Name ?? string.Empty));
         Instance = instance;
-    }
 
-    /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityExecutable"/>. Infers the name by converting the member's name to snake_case.
-    /// </summary>
-    /// <param name="sharpMember">The executable to wrap.</param>
-    /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
-    /// <param name="parentContext">The parent context.</param>
-    /// <param name="startPosition">The starting position of the object.</param>
-    /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition)
-        : this(Utils.PascalToSnakeCase(sharpMember.Name), sharpMember, instance, parentContext, startPosition, endPosition) { }
+        if (!skipValidation)
+            Validate();
+    }
 
     /// <summary>
     /// Converts an array of arguments from ezr² code to an ordered dictionary.
@@ -146,7 +133,7 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
             ParameterInfo parameter = Parameters[i];
             if (!string.IsNullOrEmpty(parameter.Name) && arguments.TryGetValue(ParameterNames[i], out IEzrObject? argument))
             {
-                object? primitiveArgument = EzrObjectToPrimitive(argument, Type.GetTypeCode(parameter.ParameterType), result);
+                object? primitiveArgument = EzrObjectToCSharp(argument, parameter.ParameterType, result);
                 if (result.ShouldReturn)
                     return [];
 

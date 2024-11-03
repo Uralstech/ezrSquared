@@ -1,4 +1,5 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Reflection;
@@ -27,37 +28,23 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     public readonly object? Instance;
 
     /// <summary>
-    /// The name of the field to wrap, in ezr² format (snake_case).
-    /// </summary>
-    public readonly string SharpFieldName;
-
-    /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityField"/>.
     /// </summary>
-    /// <param name="name">The name of the field to wrap, in ezr² format (snake_case).</param>
     /// <param name="sharpField">The field to wrap.</param>
     /// <param name="instance">The object which contains the field, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityField(string name, FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    /// <param name="skipValidation">Skip field type validation?</param>
+    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation=false) : base(sharpField, parentContext, startPosition, endPosition)
     {
         SharpField = sharpField;
         Instance = instance;
-        SharpFieldName = name;
-        Tag = $"{Tag}.{SharpFieldName}.{Utils.GetNextUniqueId()}";
-    }
+        Tag = $"{Tag}.{SharpMemberName}.{Utils.GetNextUniqueId()}";
 
-    /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityField"/>. Infers the name by converting the member's name to snake_case.
-    /// </summary>
-    /// <param name="sharpField">The field to wrap.</param>
-    /// <param name="instance">The object which contains the field, <see langword="null"/> if static.</param>
-    /// <param name="parentContext">The context in which this object was created.</param>
-    /// <param name="startPosition">The starting position of the object.</param>
-    /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition)
-        : this(Utils.PascalToSnakeCase(sharpField.Name), sharpField, instance, parentContext, startPosition, endPosition) { }
+        if (!skipValidation)
+            Validate();
+    }
 
     /// <summary>
     /// If there are no arguments, accesses the field's value. If the field is not read-only and there is an arguments, sets the field's value.
@@ -65,33 +52,43 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        if (arguments.Length > 1)
+        switch (arguments)
         {
-            result.Failure(new EzrUnexpectedArgumentError($"Only expected 0 (for getting the value) or 1 (for setting the value) argument(s) for CSharp field wrapper \"{SharpFieldName}\"!", Context, StartPosition, EndPosition));
-            return;
-        }
+            case { Length: > 1 }:
+                result.Failure(new EzrUnexpectedArgumentError($"Only expected 0 (for getting the value) or 1 (for setting the value) argument(s) for CSharp field wrapper \"{SharpMemberName}\"!", Context, StartPosition, EndPosition));
+                break;
 
-        if (arguments.Length == 0)
-        {
-            object? value = SharpField.GetValue(Instance);
-            PrimitiveToEzrObject(value, value?.GetType(), result);
-        }
-        else
-        {
-            object? value = EzrObjectToPrimitive(arguments[0].Object, Type.GetTypeCode(SharpField.FieldType), result);
-            if (result.ShouldReturn)
-                return;
+            case { Length: 1 } when AutoWrapperAttribute?.IsReadOnly == true:
+                result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp field wrapper \"{SharpMemberName}\" as it is read-only!", Context, StartPosition, EndPosition));
+                break;
 
-            try
-            {
-                SharpField.SetValue(Instance, value);
-                result.Success(NewNothingConstant());
-            }
-            catch (Exception error)
-            {
-                result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
-                return;
-            }
+            case { Length: 1 }:
+                object? argumentAsPrimitive = EzrObjectToCSharp(arguments[0].Object, SharpField.FieldType, result);
+                if (result.ShouldReturn)
+                    break;
+
+                try
+                {
+                    SharpField.SetValue(Instance, argumentAsPrimitive);
+                    result.Success(NewNothingConstant());
+                }
+                catch (Exception error)
+                {
+                    result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
+                    break;
+                }
+                break;
+
+            default:
+                if (AutoWrapperAttribute?.IsWriteOnly == true)
+                {
+                    result.Failure(new EzrIllegalOperationError($"Cannot get value from CSharp field wrapper \"{SharpMemberName}\" as it is write-only!", Context, StartPosition, EndPosition));
+                    break;
+                }
+                
+                object? value = SharpField.GetValue(Instance);
+                CSharpToEzrObject(value, result);
+                break;
         }
     }
 
@@ -113,6 +110,6 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        return $"<{TypeName} \"{SharpFieldName}\">";
+        return $"<{TypeName} \"{SharpMemberName}\">";
     }
 }

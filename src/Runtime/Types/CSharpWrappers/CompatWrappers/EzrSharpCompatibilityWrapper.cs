@@ -2,6 +2,8 @@
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
+using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Util;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -12,10 +14,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// <summary>
 /// Parent class for all automatic wrappers which wrap existing C# objects and members so that they can be used in ezr².
 /// </summary>
-/// <param name="parentContext">The context in which this object was created.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Position startPosition, Position endPosition) : EzrObject(parentContext, startPosition, endPosition)
+public abstract class EzrSharpCompatibilityWrapper : EzrObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp wrapper";
@@ -24,15 +23,60 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpWrapper";
 
     /// <summary>
-    /// Checks if the given type is supported by the primitive compatibility wrappers.
+    /// The <see cref="SharpAutoWrapperAttribute"/> of the wrapped object, if defined.
+    /// </summary>
+    public readonly SharpAutoWrapperAttribute? AutoWrapperAttribute;
+
+    /// <summary>
+    /// The name of the wrapped member in snake_case.
+    /// </summary>
+    public readonly string SharpMemberName;
+
+    /// <summary>
+    /// Reflection info for the current object being wrapped.
+    /// </summary>
+    public readonly MemberInfo SharpMember;
+
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityWrapper"/>.
+    /// </summary>
+    /// <param name="wrappedMember">Reflection info on the wrapped C# member.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrSharpCompatibilityWrapper(MemberInfo wrappedMember, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    {
+        SharpMember = wrappedMember;
+        AutoWrapperAttribute = wrappedMember.GetCustomAttribute<SharpAutoWrapperAttribute>();
+        SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : Utils.PascalToSnakeCase(wrappedMember.Name);
+    }
+
+    /// <summary>
+    /// Validates the the current object for wrapping.
+    /// </summary>
+    /// <param name="result">Optional runtime result for carrying runtime errors.</param>
+    /// <returns><see langword="true"/> if the member can be wrapped, <see langword="false"/> otherwise.</returns>
+    public bool Validate(RuntimeResult? result=null)
+    {
+        Exception? validationException = SharpAutoWrapperAttribute.Validate(SharpMember);
+        if (validationException is null)
+            return true;
+
+        if (AutoWrapperAttribute is not null)
+            throw validationException;
+
+        result?.Failure(new EzrUnsupportedWrappingError($"C# type member \"{SharpMemberName}\" cannot be wrapped into an ezr² type!", Context, StartPosition, EndPosition));
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if the given type is supported by the compatibility wrappers.
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
-    public static bool IsSupportedPrimitiveType(Type type)
+    public static bool IsSupportedType(Type type)
     {
-        TypeCode typeCode = Type.GetTypeCode(type);
-
-        return typeCode is TypeCode.Empty
+        return typeof(IEzrObject).IsAssignableFrom(type) || Type.GetTypeCode(type) is TypeCode.Empty
                         or TypeCode.Int16
                         or TypeCode.Int32
                         or TypeCode.Int64
@@ -50,7 +94,7 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     }
 
     /// <summary>
-    /// Checks if the given type is supported by the primitive compatibility wrappers, including generic <see cref="Task"/> objects.
+    /// Checks if the given type is supported by the compatibility wrappers, including generic <see cref="Task"/> objects.
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
@@ -58,21 +102,29 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     {
         return Type.GetTypeCode(type) switch
         {
-            TypeCode.Object when typeof(Task).IsAssignableFrom(type) => type.GenericTypeArguments.Length == 0 || IsSupportedPrimitiveType(type.GenericTypeArguments[0]),
-            _ => IsSupportedPrimitiveType(type),
+            TypeCode.Object when typeof(Task).IsAssignableFrom(type) => type.GenericTypeArguments.Length == 0 || IsSupportedType(type.GenericTypeArguments[0]),
+            _ => IsSupportedType(type),
         };
     }
 
     /// <summary>
-    /// Converts an ezr² type to a C# primitive type.
+    /// Converts an ezr² type to a C# type.
     /// </summary>
     /// <param name="value">The <see cref="IEzrObject"/> to convert.</param>
-    /// <param name="typeCode">The primitive type to convert it to.</param>
+    /// <param name="targetType">The type to convert it to.</param>
     /// <param name="result">Runtime result for carrying any errors.</param>
     /// <returns>The converted object.</returns>
-    protected internal object? EzrObjectToPrimitive(IEzrObject value, TypeCode typeCode, RuntimeResult result)
+    protected internal object? EzrObjectToCSharp(IEzrObject value, Type targetType, RuntimeResult result)
     {
-        switch (typeCode)
+        if (targetType.IsAssignableFrom(value.GetType()))
+            return value;
+        else if (typeof(IEzrObject).IsAssignableFrom(targetType))
+        {
+            result.Failure(new EzrUnexpectedTypeError($"Expected ezr² object of type \"{targetType.Name}\" (this is the name of the object in C#), but got object of type \"{value.TypeName}\".", Context, value.StartPosition, value.EndPosition));
+            return null;
+        }
+
+        switch (Type.GetTypeCode(targetType))
         {
             case TypeCode.Int16:
                 if (value is EzrInteger integer16Value)
@@ -235,12 +287,8 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
                 result.Failure(new EzrUnexpectedTypeError($"Expected character, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             case TypeCode.String:
-                if (value is EzrString stringValue)
-                    return stringValue.Value;
-                else if (value is EzrCharacterList characterListValue)
-                    return characterListValue.StringValue;
-                else if (value is EzrCharacter stringCharacterValue)
-                    return stringCharacterValue.Value.ToString();
+                if (value is IEzrString ezrString)
+                    return ezrString.StringValue;
 
                 result.Failure(new EzrUnexpectedTypeError($"Expected string, character or character list, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
@@ -251,7 +299,7 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
                 result.Failure(new EzrUnexpectedTypeError($"Expected type nothing, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
             default:
-                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted to CSharp type \"{typeCode}\"!", Context, value.StartPosition, value.EndPosition));
+                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted to CSharp type \"{targetType.Name}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
         }
 
@@ -262,17 +310,11 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
     /// Converts a C# primitive type object or a task which returns a C# primitive type object to an ezr² object.
     /// </summary>
     /// <param name="value">The C# object to convert.</param>
-    /// <param name="valueType">The type to convert from.</param>
     /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <returns>The converted <see cref="IEzrObject"/>.</returns>
-    protected internal void PrimitiveToEzrObject(
-        object? value,
-
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
-        Type? valueType,
-
-        RuntimeResult result)
+    protected internal void CSharpToEzrObject(object? value, RuntimeResult result)
     {
+        Type? valueType = value?.GetType();
         if (value is null || valueType is null)
         {
             result.Success(NewNothingConstant());
@@ -323,6 +365,9 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
             case TypeCode.String:
                 result.Success(NewStringConstant((string)value));
                 break;
+            case TypeCode.Object when typeof(IEzrObject).IsAssignableFrom(valueType):
+                result.Success(ReferencePool.Get((IEzrObject)value, AccessMod.PrivateConstant));
+                break;
             case TypeCode.Object when typeof(Task).IsAssignableFrom(valueType):
                 HandleAsynchronousObject(value, valueType, result);
                 break;
@@ -359,7 +404,7 @@ public abstract class EzrSharpCompatibilityWrapper(Context parentContext, Positi
                 // Get the value of the Result property
                 object taskResult = resultProperty.GetValue(value)!;
 
-                PrimitiveToEzrObject(taskResult, taskResult.GetType(), result);
+                CSharpToEzrObject(taskResult, result);
             }
             else
                 result.Success(NewNothingConstant());
