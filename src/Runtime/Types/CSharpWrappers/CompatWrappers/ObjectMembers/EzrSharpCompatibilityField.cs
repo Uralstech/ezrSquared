@@ -8,23 +8,13 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 /// <summary>
 /// Class to automatically wrap C# fields so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
+public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp field";
 
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpField";
-
-    /// <summary>
-    /// Reflection information about the wrapped field.
-    /// </summary>
-    public readonly FieldInfo SharpField;
-
-    /// <summary>
-    /// The object which contains the field, <see langword="null"/> if static.
-    /// </summary>
-    public readonly object? Instance;
 
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityField"/>.
@@ -35,10 +25,8 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip field type validation?</param>
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpField, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpField, instance, parentContext, startPosition, endPosition)
     {
-        SharpField = sharpField;
-        Instance = instance;
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         if (!skipValidation)
@@ -62,13 +50,13 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
                 break;
 
             case { Length: 1 }:
-                object? argumentAsPrimitive = EzrObjectToCSharp(arguments[0].Object, SharpField.FieldType, result);
+                object? argumentAsPrimitive = EzrObjectToCSharp(arguments[0].Object, SharpMember.FieldType, result);
                 if (result.ShouldReturn)
                     break;
 
                 try
                 {
-                    SharpField.SetValue(Instance, argumentAsPrimitive);
+                    SharpMember.SetValue(Instance, argumentAsPrimitive);
                     result.Success(NewNothingConstant());
                 }
                 catch (Exception error)
@@ -85,25 +73,10 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper
                     break;
                 }
 
-                object? value = SharpField.GetValue(Instance);
+                object? value = SharpMember.GetValue(Instance);
                 CSharpToEzrObject(value, result);
                 break;
         }
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return other is EzrSharpCompatibilityField field
-            && field.SharpField == SharpField
-            && field.Instance?.GetHashCode() == Instance?.GetHashCode()
-            && other.HashTag == HashTag;
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, SharpField);
     }
 
     /// <inheritdoc/>

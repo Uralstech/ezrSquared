@@ -1,6 +1,8 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
@@ -8,18 +10,51 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <summary>
 /// Class to automatically wrap C# constructors so that they can be used in ezr².
 /// </summary>
-/// <param name="constructingTypeWrapper">The wrapper for this C# constructor's class.</param>
-/// <param name="sharpConstructor">The constructor to wrap.</param>
-/// <param name="parentContext">The context in which this object was created.</param>
-/// <param name="startPosition">The starting position of the object.</param>
-/// <param name="endPosition">The ending position of the object.</param>
-/// <param name="skipValidation">Skip method signature validation?</param>
-public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType constructingTypeWrapper, ConstructorInfo sharpConstructor, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrSharpCompatibilityExecutable(sharpConstructor, null, parentContext, startPosition, endPosition, skipValidation)
+public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<ConstructorInfo>
 {
     /// <summary>
-    /// The wrapper for this C# constructor's class.
+    /// This C# constructor's class.
     /// </summary>
-    public readonly EzrSharpCompatibilityType ConstructingTypeWrapper = constructingTypeWrapper;
+    [DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods
+        | DynamicallyAccessedMemberTypes.NonPublicMethods
+        | DynamicallyAccessedMemberTypes.PublicProperties
+        | DynamicallyAccessedMemberTypes.NonPublicProperties
+        | DynamicallyAccessedMemberTypes.PublicFields
+        | DynamicallyAccessedMemberTypes.NonPublicFields)]
+    public readonly Type ConstructingType;
+
+    /// <summary>
+    /// The name of the constructing type in snake_case.
+    /// </summary>
+    public readonly string ConstructingTypeName;
+
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityConstructor"/>.
+    /// </summary>
+    /// <param name="constructingType">This C# constructor's class.</param>
+    /// <param name="sharpConstructor">The constructor to wrap.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    /// <param name="skipValidation">Skip method signature validation?</param>
+    public EzrSharpCompatibilityConstructor(
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.NonPublicProperties
+            | DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type constructingType,
+        
+        ConstructorInfo sharpConstructor, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpConstructor, null, parentContext, startPosition, endPosition, skipValidation)
+    {
+        ConstructingType = constructingType;
+
+        SharpAutoWrapperAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<SharpAutoWrapperAttribute>();
+        ConstructingTypeName = !string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? autoWrapperAttribute.Name : PascalToSnakeCase(constructingType.Name);
+    }
 
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
@@ -34,13 +69,13 @@ public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType construc
 
         try
         {
-            object? output = ((ConstructorInfo)Executable).Invoke(mappedArguments);
+            object? output = SharpMember.Invoke(mappedArguments);
 
             if (output is null)
                 result.Success(NewNothingConstant());
             else
             {
-                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingTypeWrapper.SharpType, _executionContext, StartPosition, EndPosition);
+                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingType, _executionContext, StartPosition, EndPosition);
                 if (result.ShouldReturn)
                     return;
 
@@ -57,7 +92,7 @@ public class EzrSharpCompatibilityConstructor(EzrSharpCompatibilityType construc
     public override string ToString(RuntimeResult result)
     {
         return ParameterNames.Length > 0
-            ? $"<{TypeName} for type \"{ConstructingTypeWrapper.SharpMemberName}\", with \"{string.Join("\", \"", ParameterNames)}\">"
-            : $"<{TypeName} for \"{ConstructingTypeWrapper.SharpMemberName}\">";
+            ? $"<{TypeName} for type \"{ConstructingTypeName}\", with \"{string.Join("\", \"", ParameterNames)}\">"
+            : $"<{TypeName} for \"{ConstructingTypeName}\">";
     }
 }

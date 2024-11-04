@@ -10,20 +10,15 @@ using System.Reflection;
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 
 /// <summary>
-/// Class to automatically wrap <i>instances</i> of already-wrapped C# types so that they can be used in ezr².
+/// Class to automatically wrap <i>instances</i> of C# types so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
+public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<Type>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp object instance";
 
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpObjectInstance";
-
-    /// <summary>
-    /// The object to wrap.
-    /// </summary>
-    public readonly object Instance;
 
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityObjectInstance"/>.
@@ -45,10 +40,9 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
             | DynamicallyAccessedMemberTypes.NonPublicFields)]
         Type instanceType,
         
-        Context parentContext, Position startPosition, Position endPosition) : base(instanceType, parentContext, startPosition, endPosition)
+        Context parentContext, Position startPosition, Position endPosition) : base(instanceType, instance, parentContext, startPosition, endPosition)
     {
-        Instance = instance;
-        Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
+        Tag = $"{Tag}.{SharpMemberName}.{SharpMember.GetHashCode()}";
 
         MethodInfo[] allMethods = instanceType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         Dictionary<string, int> duplicateNames = new(allMethods.Length);
@@ -101,18 +95,6 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper
 
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, Instance);
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return (other as EzrSharpCompatibilityObjectInstance)?.Instance.GetHashCode() == Instance.GetHashCode() && other.HashTag == HashTag;
     }
 
     /// <inheritdoc/>

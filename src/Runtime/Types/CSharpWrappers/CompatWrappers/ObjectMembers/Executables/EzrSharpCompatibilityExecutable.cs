@@ -10,7 +10,8 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <summary>
 /// Base class for all automatic wrappers which wrap C# executables so that they can be used in ezr².
 /// </summary>
-public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWrapper
+public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCompatibilityWrapper<TMethodBase>
+    where TMethodBase : MethodBase
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp runtime executable";
@@ -29,38 +30,25 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
     public readonly string[] ParameterNames;
 
     /// <summary>
-    /// The executable to wrap.
+    /// Creates a new <see cref="EzrSharpCompatibilityExecutable{TMethodBase}"/>.
     /// </summary>
-    public readonly MethodBase Executable;
-
-    /// <summary>
-    /// The object which contains the executable, <see langword="null"/> if static.
-    /// </summary>
-    public readonly object? Instance;
-
-    /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityExecutable"/>.
-    /// </summary>
-    /// <param name="sharpMember">The executable to wrap.</param>
+    /// <param name="sharpMethodBase">The executable to wrap.</param>
     /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The parent context.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip method signature validation?</param>
-    public EzrSharpCompatibilityExecutable(MethodBase sharpMember, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMember, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityExecutable(TMethodBase sharpMethodBase, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMethodBase, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
-        Executable = sharpMember;
-        Parameters = Executable.GetParameters();
+        Parameters = SharpMember.GetParameters();
         
         ParameterNames = Array.ConvertAll(Parameters, p =>
         {
             string? definedName = p.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
             return string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(p.Name ?? string.Empty) : definedName;
         });
-
-        Instance = instance;
 
         if (!skipValidation)
             Validate();
@@ -171,20 +159,5 @@ public abstract class EzrSharpCompatibilityExecutable : EzrSharpCompatibilityWra
         }
 
         return formattedArguments;
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, Executable);
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return other is EzrSharpCompatibilityExecutable executable
-            && executable.Executable == Executable
-            && executable.Instance?.GetHashCode() == Instance?.GetHashCode()
-            && other.HashTag == HashTag;
     }
 }

@@ -74,7 +74,7 @@ public class SharpAutoWrapperAttribute : Attribute
     /// <returns><see langword="null"/> if the check was successful, an <see cref="ArgumentException"/> otherwise.</returns>
     public static ArgumentException? ValidateField(FieldInfo fieldInfo)
     {
-        return !EzrSharpCompatibilityWrapper.IsSupportedType(fieldInfo.FieldType)
+        return !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(fieldInfo.FieldType)
             ? new($"Expected field \"{fieldInfo.Name}\" to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(fieldInfo))
             : null;
     }
@@ -86,7 +86,7 @@ public class SharpAutoWrapperAttribute : Attribute
     /// <returns><see langword="null"/> if the check was successful, an <see cref="ArgumentException"/> otherwise.</returns>
     public static ArgumentException? ValidateProperty(PropertyInfo propertyInfo)
     {
-        return !EzrSharpCompatibilityWrapper.IsSupportedType(propertyInfo.PropertyType)
+        return !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(propertyInfo.PropertyType)
             ? new($"Expected property \"{propertyInfo.Name}\" to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(propertyInfo))
             : null;
     }
@@ -101,12 +101,12 @@ public class SharpAutoWrapperAttribute : Attribute
         if (methodBase.IsGenericMethod || methodBase.ContainsGenericParameters)
             return new($"The \"{nameof(SharpAutoWrapperAttribute)}\" attribute does not support generic method/constructor \"{methodBase.Name}\".", nameof(methodBase));
 
-        if (methodBase is MethodInfo methodInfo && methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper.IsSupportedReturnType(methodInfo.ReturnType))
+        if (methodBase is MethodInfo methodInfo && methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedReturnType(methodInfo.ReturnType))
             return new($"Expected method \"{methodBase.Name}\"'s return type to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(methodBase));
 
         foreach (ParameterInfo parameterInfo in methodBase.GetParameters())
         {
-            if (!EzrSharpCompatibilityWrapper.IsSupportedType(parameterInfo.ParameterType))
+            if (!EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(parameterInfo.ParameterType))
                 return new($"Expected all of method/constructor \"{methodBase.Name}\"'s parameters to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\", but found parameter \"{parameterInfo.Name}\" of type \"{parameterInfo.ParameterType.Name}\"", nameof(methodBase));
         }
 

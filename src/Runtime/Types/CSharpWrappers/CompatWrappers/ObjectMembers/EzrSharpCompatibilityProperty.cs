@@ -8,23 +8,13 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 /// <summary>
 /// Class to automatically wrap C# properties so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
+public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<PropertyInfo>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp property";
 
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpProperty";
-
-    /// <summary>
-    /// Reflection information about the wrapped property.
-    /// </summary>
-    public readonly PropertyInfo SharpProperty;
-
-    /// <summary>
-    /// The object which contains the property, <see langword="null"/> if static.
-    /// </summary>
-    public readonly object? Instance;
 
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>.
@@ -35,10 +25,8 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip property type validation?</param>
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpProperty, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpProperty, instance, parentContext, startPosition, endPosition)
     {
-        SharpProperty = sharpProperty;
-        Instance = instance;
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         if (!skipValidation)
@@ -59,22 +47,22 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
 
         if (arguments.Length == 0)
         {
-            if (AutoWrapperAttribute?.IsWriteOnly == true || SharpProperty.GetMethod is null || (AutoWrapperAttribute == null && !SharpProperty.GetMethod.IsPublic))
+            if (AutoWrapperAttribute?.IsWriteOnly == true || SharpMember.GetMethod is null || (AutoWrapperAttribute == null && !SharpMember.GetMethod.IsPublic))
             {
                 result.Failure(new EzrIllegalOperationError($"Cannot get value from CSharp property wrapper \"{SharpMemberName}\" as it is write-only!", Context, StartPosition, EndPosition));
                 return;
             }
 
-            object? value = SharpProperty.GetValue(Instance);
+            object? value = SharpMember.GetValue(Instance);
             CSharpToEzrObject(value, result);
         }
         else
         {
-            object? value = EzrObjectToCSharp(arguments[0].Object, SharpProperty.PropertyType, result);
+            object? value = EzrObjectToCSharp(arguments[0].Object, SharpMember.PropertyType, result);
             if (result.ShouldReturn)
                 return;
 
-            if (AutoWrapperAttribute?.IsReadOnly == true || SharpProperty.SetMethod is null || (AutoWrapperAttribute == null && !SharpProperty.SetMethod.IsPublic))
+            if (AutoWrapperAttribute?.IsReadOnly == true || SharpMember.SetMethod is null || (AutoWrapperAttribute == null && !SharpMember.SetMethod.IsPublic))
             {
                 result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp property wrapper \"{SharpMemberName}\" as it is read-only!", Context, StartPosition, EndPosition));
                 return;
@@ -82,7 +70,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
 
             try
             {
-                SharpProperty.SetValue(Instance, value);
+                SharpMember.SetValue(Instance, value);
                 result.Success(NewNothingConstant());
             }
             catch (Exception error)
@@ -91,21 +79,6 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper
                 return;
             }
         }
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, SharpProperty);
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return other is EzrSharpCompatibilityProperty property
-            && property.SharpProperty == SharpProperty
-            && property.Instance?.GetHashCode() == Instance?.GetHashCode()
-            && other.HashTag == HashTag;
     }
 
     /// <inheritdoc/>

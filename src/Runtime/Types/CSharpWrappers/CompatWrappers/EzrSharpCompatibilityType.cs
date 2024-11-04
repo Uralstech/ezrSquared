@@ -13,7 +13,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// <summary>
 /// Class to automatically wrap C# types so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
+public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp type";
@@ -22,23 +22,9 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpType";
 
     /// <summary>
-    /// The type to wrap.
-    /// </summary>
-    [DynamicallyAccessedMembers(
-            DynamicallyAccessedMemberTypes.PublicFields
-            | DynamicallyAccessedMemberTypes.NonPublicFields
-            | DynamicallyAccessedMemberTypes.PublicMethods
-            | DynamicallyAccessedMemberTypes.NonPublicMethods
-            | DynamicallyAccessedMemberTypes.PublicProperties
-            | DynamicallyAccessedMemberTypes.NonPublicProperties
-            | DynamicallyAccessedMemberTypes.PublicConstructors
-            | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
-    public readonly Type SharpType;
-
-    /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityType"/>.
     /// </summary>
-    /// <param name="type">The type to wrap.</param>
+    /// <param name="sharpType">The type to wrap.</param>
     /// <param name="result">Runtime result for carrying any errors.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
@@ -53,20 +39,19 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             | DynamicallyAccessedMemberTypes.NonPublicProperties
             | DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
-        Type type,
+        Type sharpType,
 
-        RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(type, parentContext, startPosition, endPosition)
+        RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(sharpType, null, parentContext, startPosition, endPosition)
     {
-        SharpType = type;
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
-        if (SharpType.IsGenericType)
+        if (sharpType.IsGenericType)
         {
-            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic CSharp type \"{SharpType.Name}\"!", Context, StartPosition, EndPosition));
+            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic CSharp type \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
             return;
         }
 
-        MethodInfo[] allStaticMethods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        MethodInfo[] allStaticMethods = sharpType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         Dictionary<string, int> duplicateNames = new(allStaticMethods.Length);
         for (int i = 0; i < allStaticMethods.Length; i++)
         {
@@ -90,7 +75,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             Context.Set(null, methodObjectName, ReferencePool.Get(methodObject, AccessMod.Constant));
         }
 
-        PropertyInfo[] allStaticProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        PropertyInfo[] allStaticProperties = sharpType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         for (int i = 0; i < allStaticProperties.Length; i++)
         {
             PropertyInfo property = allStaticProperties[i];
@@ -104,7 +89,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
 
-        FieldInfo[] allStaticFields = type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        FieldInfo[] allStaticFields = sharpType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         for (int i = 0; i < allStaticFields.Length; i++)
         {
             FieldInfo field = allStaticFields[i];
@@ -118,31 +103,19 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
 
-        ConstructorInfo[] publicConstructors = type.GetConstructors();
+        ConstructorInfo[] publicConstructors = sharpType.GetConstructors();
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
             if (!constructor.IsPublic && constructor.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
                 continue;
 
-            EzrSharpCompatibilityConstructor constructorObject = new(this, constructor, Context, StartPosition, EndPosition, skipValidation: true);
+            EzrSharpCompatibilityConstructor constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
             if (!constructorObject.Validate())
                 continue;
 
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
         }
-    }
-
-    /// <inheritdoc/>
-    public override int ComputeHashCode(RuntimeResult result)
-    {
-        return HashCode.Combine(HashTag, SharpType);
-    }
-
-    /// <inheritdoc/>
-    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
-    {
-        return (other as EzrSharpCompatibilityType)?.SharpType == SharpType && other.HashTag == HashTag;
     }
 
     /// <inheritdoc/>

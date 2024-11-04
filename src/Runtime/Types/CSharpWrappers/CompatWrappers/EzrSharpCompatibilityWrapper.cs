@@ -3,7 +3,6 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.WrapperAttributes;
-using EzrSquared.Util;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -15,7 +14,9 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// <summary>
 /// Parent class for all automatic wrappers which wrap existing C# objects and members so that they can be used in ezr².
 /// </summary>
-public abstract class EzrSharpCompatibilityWrapper : EzrObject
+/// <typeparam name="TMemberInfo">The <see cref="MemberInfo"/> type for the C# member being wrapped.</typeparam>
+public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
+    where TMemberInfo : MemberInfo
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp wrapper";
@@ -36,20 +37,27 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
     /// <summary>
     /// Reflection info for the current object being wrapped.
     /// </summary>
-    public readonly MemberInfo SharpMember;
+    public readonly TMemberInfo SharpMember;
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityWrapper"/>.
+    /// The object which contains the wrapped member, <see langword="null"/> if static.
+    /// </summary>
+    public readonly object? Instance;
+
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityWrapper{TMemberInfo}"/>.
     /// </summary>
     /// <param name="wrappedMember">Reflection info on the wrapped C# member.</param>
+    /// <param name="instance">The object which contains the wrapped member, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityWrapper(MemberInfo wrappedMember, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityWrapper(TMemberInfo wrappedMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpMember = wrappedMember;
         AutoWrapperAttribute = wrappedMember.GetCustomAttribute<SharpAutoWrapperAttribute>();
         SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name);
+        Instance = instance;
     }
 
     /// <summary>
@@ -457,5 +465,22 @@ public abstract class EzrSharpCompatibilityWrapper : EzrObject
     public override bool EvaluateBoolean(RuntimeResult result)
     {
         return true;
+    }
+
+    /// <inheritdoc/>
+    public override bool StrictEquals(IEzrObject other, RuntimeResult result)
+    {
+        return other is EzrSharpCompatibilityWrapper<TMemberInfo> otherWrapper
+            && otherWrapper.SharpMember == SharpMember
+            && otherWrapper.Instance?.GetHashCode() == Instance?.GetHashCode()
+            && other.HashTag == HashTag;
+    }
+
+    /// <inheritdoc/>
+    public override int ComputeHashCode(RuntimeResult result)
+    {
+        return Instance is not null
+            ? HashCode.Combine(HashTag, SharpMember, Instance)
+            : HashCode.Combine(HashTag, SharpMember);
     }
 }

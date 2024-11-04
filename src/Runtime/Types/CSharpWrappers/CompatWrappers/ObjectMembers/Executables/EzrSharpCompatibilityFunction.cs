@@ -14,7 +14,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
 /// <param name="skipValidation">Skip method signature validation?</param>
-public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrSharpCompatibilityExecutable(sharpFunction, instance, parentContext, startPosition, endPosition, skipValidation)
+public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrSharpCompatibilityExecutable<MethodInfo>(sharpFunction, instance, parentContext, startPosition, endPosition, skipValidation)
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp function";
@@ -35,7 +35,7 @@ public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? ins
 
         try
         {
-            object? output = Executable.Invoke(Instance, mappedArguments);
+            object? output = SharpMember.Invoke(Instance, mappedArguments);
 
             if (output is null)
                 result.Success(NewNothingConstant());
