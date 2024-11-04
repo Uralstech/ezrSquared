@@ -1,4 +1,6 @@
 ﻿using EzrSquared.Runtime.Types;
+using EzrSquared.Runtime.Types.Collections;
+using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.WrapperAttributes;
 using System.Collections.Generic;
 
@@ -113,10 +115,47 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
     /// Merges a <see cref="RuntimeEzrObjectDictionary"/> to the current <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
     /// <param name="other">The other <see cref="RuntimeEzrObjectDictionary"/> to be merged.</param>
-    public void Merge(RuntimeEzrObjectDictionary other)
+    /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
+    public void Merge(RuntimeEzrObjectDictionary other, RuntimeResult result)
     {
         foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> pair in other._items)
-            _items[pair.Key] = pair.Value;
+        {
+            IEzrObject keyObject = pair.Value.Key;
+            if (keyObject is IEzrMutableObject mutableElement)
+            {
+                IEzrObject? keyCopy = (IEzrObject?)mutableElement.DeepCopy(result);
+                if (result.ShouldReturn)
+                    return;
+
+                keyObject = keyCopy!;
+            }
+
+            _items[pair.Key] = new KeyValuePair<IEzrObject, Reference>(keyObject, pair.Value.Value);
+        }
+    }
+
+    /// <summary>
+    /// Merges an <see cref="IEzrDictionary"/> to the current <see cref="RuntimeEzrObjectDictionary"/>.
+    /// </summary>
+    /// <param name="other">The other <see cref="IEzrDictionary"/> to be merged.</param>
+    /// <param name="executionContext">The context under which this operation is being executed.</param>
+    /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
+    public void Merge(IEzrDictionary other, Context executionContext, RuntimeResult result)
+    {
+        foreach (IEzrIndexedCollection pair in other)
+        {
+            if (pair.Count is > 2 or < 2)
+            {
+                result.Failure(new EzrUnexpectedTypeError($"Object of type \"{other.TypeName}\" is in an unexpected format and cannot be merged into this dictionary!", executionContext, other.StartPosition, other.EndPosition));
+                return;
+            }
+
+            (IEzrObject keyObject, IEzrObject valueObject) = (pair.At(0), pair.At(1));
+            
+            Update(keyObject, valueObject, result);
+            if (result.ShouldReturn)
+                return;
+        }
     }
 
     /// <summary>
@@ -165,6 +204,44 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
                 return false;
 
             bool valueEquals = pair.Value.Value.Object.StrictEquals(otherPair.Value.Object, result);
+            if (result.ShouldReturn || !valueEquals)
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Checks if the current dictionary is equal to the given keyed collection.
+    /// </summary>
+    /// <param name="other">The other keyed collection.</param>
+    /// <param name="executionContext">The context under which this operation is being executed.</param>
+    /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
+    /// <returns>The comparison result.</returns>
+    public bool IsEqual(IEzrDictionary other, Context executionContext, RuntimeResult result)
+    {
+        if (other.Count != _items.Count)
+            return false;
+
+        foreach (IEzrIndexedCollection pair in other)
+        {
+            if (pair.Count is > 2 or < 2)
+            {
+                result.Failure(new EzrUnexpectedTypeError($"Object of type \"{other.TypeName}\" is in an unexpected format and cannot be compared with this dictionary!", executionContext, other.StartPosition, other.EndPosition));
+                return false;
+            }
+
+            (IEzrObject keyObject, IEzrObject valueObject) = (pair.At(0), pair.At(1));
+            
+            int keyHashCode = keyObject.ComputeHashCode(result);
+            if (result.ShouldReturn || !_items.TryGetValue(keyHashCode, out KeyValuePair<IEzrObject, Reference> thisPair))
+                return false;
+
+            bool keyEquals = keyObject.StrictEquals(thisPair.Key, result);
+            if (result.ShouldReturn || !keyEquals)
+                return false;
+
+            bool valueEquals = valueObject.StrictEquals(thisPair.Value.Object, result);
             if (result.ShouldReturn || !valueEquals)
                 return false;
         }

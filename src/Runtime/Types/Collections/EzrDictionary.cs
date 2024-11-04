@@ -7,6 +7,7 @@ using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Execu
 using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -15,7 +16,7 @@ namespace EzrSquared.Runtime.Types.Collections;
 /// <summary>
 /// The mutable dictionary type object.
 /// </summary>
-public class EzrDictionary : EzrObject, IEzrMutableObject
+public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "dictionary";
@@ -27,6 +28,9 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
     /// The dictionary value.
     /// </summary>
     public readonly RuntimeEzrObjectDictionary Value;
+
+    /// <inheritdoc/>
+    public int Count => Value.Length;
 
     /// <summary>
     /// Creates a new <see cref="EzrDictionary"/>.
@@ -42,6 +46,36 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
         Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Length))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(GetMemberInfo<MethodInfo, RuntimeEzrObjectDictionary>(nameof(Value.RemoveHash))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpSourceFunctionWrapper(DictionaryExists, Context, StartPosition, EndPosition), AccessMod.Constant));
+    }
+
+    /// <inheritdoc/>
+    /// <exception cref="KeyNotFoundException">Thrown if the key could not be hashed or was not found.</exception>
+    public IEzrObject At(IEzrObject key, RuntimeResult result)
+    {
+        Reference value = Value.Get(key, result);
+        return !value.IsEmpty
+            ? value.Object
+            : throw new KeyNotFoundException("The key could not be hashed or was not found in the dictionary!");
+    }
+
+    /// <inheritdoc/>
+    public IEzrObject? TryAt(IEzrObject key, RuntimeResult result)
+    {
+        Reference value = Value.Get(key, result);
+        return !value.IsEmpty ? value.Object : null;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<IEzrIndexedCollection> GetEnumerator()
+    {
+        EzrArray[] pairs = Array.ConvertAll(Value.GetPairs(), pair => new EzrArray([pair.Key, pair.Value], _executionContext, StartPosition, EndPosition));
+        return ((IEnumerable<EzrArray>)pairs).GetEnumerator();
+    }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 
     /// <summary>
@@ -78,11 +112,18 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
         switch (other)
         {
             case EzrDictionary otherDictionary:
-                bool equal = Value.IsEqual(otherDictionary.Value, result);
+                bool equalDictionaries = Value.IsEqual(otherDictionary.Value, result);
                 if (result.ShouldReturn)
                     return;
 
-                result.Success(NewBooleanConstant(equal)); break;
+                result.Success(NewBooleanConstant(equalDictionaries)); break;
+
+            case IEzrDictionary otherIDictionary:
+                bool equalIDictionaries = Value.IsEqual(otherIDictionary, _executionContext, result);
+                if (result.ShouldReturn)
+                    break;
+
+                result.Success(NewBooleanConstant(equalIDictionaries)); break;
 
             default:
                 result.Success(NewBooleanConstant(false)); break;
@@ -95,11 +136,19 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
         switch (other)
         {
             case EzrDictionary otherDictionary:
-                bool equal = Value.IsEqual(otherDictionary.Value, result);
+                bool equalDictionaries = Value.IsEqual(otherDictionary.Value, result);
                 if (result.ShouldReturn)
                     return;
 
-                result.Success(NewBooleanConstant(!equal)); break;
+                result.Success(NewBooleanConstant(!equalDictionaries)); break;
+
+
+            case IEzrDictionary otherIDictionary:
+                bool equalIDictionaries = Value.IsEqual(otherIDictionary, _executionContext, result);
+                if (result.ShouldReturn)
+                    break;
+
+                result.Success(NewBooleanConstant(!equalIDictionaries)); break;
 
             default:
                 result.Success(NewBooleanConstant(true)); break;
@@ -136,24 +185,32 @@ public class EzrDictionary : EzrObject, IEzrMutableObject
     {
         switch (other)
         {
-            case IEzrIndexedCollection { Length: < 2 }:
+            case IEzrIndexedCollection { Count: < 2 }:
                 result.Failure(new EzrIllegalOperationError($"The {other.TypeName} must contain two values, the key and value!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
-            case IEzrIndexedCollection { Length: > 2 }:
+            case IEzrIndexedCollection { Count: > 2 }:
                 result.Failure(new EzrIllegalOperationError($"The {other.TypeName} must only contain two values, the key and value!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
             case IEzrIndexedCollection otherCollection:
                 Value.Update(otherCollection.At(0), otherCollection.At(1), result);
                 if (result.ShouldReturn)
-                    return;
+                    break;
 
                 result.Success(NewNothingConstant()); break;
 
             case EzrDictionary otherDictionary:
-                Value.Merge(otherDictionary.Value);
-                result.Success(NewNothingConstant());
+                Value.Merge(otherDictionary.Value, result);
+                if (result.ShouldReturn)
+                    break;
 
-                break;
+                result.Success(NewNothingConstant()); break;
+
+            case IEzrDictionary otherIDictionary:
+                Value.Merge(otherIDictionary, _executionContext, result);
+                if (result.ShouldReturn)
+                    break;
+
+                result.Success(NewNothingConstant()); break;
 
             default:
                 result.Failure(IllegalOperation(other)); break;

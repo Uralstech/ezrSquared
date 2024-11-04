@@ -26,7 +26,7 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
     public readonly IEzrObject[] Value;
 
     /// <inheritdoc/>
-    public int Length { get; }
+    public int Count { get; }
 
     /// <summary>
     /// Creates a new <see cref="EzrArray"/>.
@@ -38,9 +38,9 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
     public EzrArray(IEzrObject[] elements, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         Value = elements;
-        Length = elements.Length;
+        Count = elements.Length;
 
-        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrArray>(nameof(Length))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrArray>(nameof(Count))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
     /// <summary>
@@ -51,7 +51,7 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
     /// <returns>The result of the comparison.</returns>
     private bool Compare(IEzrIndexedCollection other, RuntimeResult result)
     {
-        if (Value.Length != other.Length)
+        if (Value.Length != other.Count)
             return false;
 
         for (int i = 0; i < Value.Length; i++)
@@ -154,10 +154,10 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
             case EzrInteger:
                 result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
-            case IEzrIndexedCollection { Length: < 2 }:
+            case IEzrIndexedCollection { Count: < 2 }:
                 result.Failure(new EzrIllegalOperationError($"The indices {other.TypeName} must contain two values, the starting index and the ending index!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
-            case IEzrIndexedCollection { Length: > 2 }:
+            case IEzrIndexedCollection { Count: > 2 }:
                 result.Failure(new EzrIllegalOperationError($"The indices {other.TypeName} must only contain two values, the starting index and the ending index!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
             case IEzrIndexedCollection otherCollection:
@@ -231,10 +231,10 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
         switch (other)
         {
             case EzrArray otherArray:
-                newArray = new IEzrObject[Value.Length + otherArray.Length];
+                newArray = new IEzrObject[Value.Length + otherArray.Count];
 
                 Array.Copy(Value, newArray, Value.Length);
-                Array.Copy(otherArray.Value, 0, newArray, Value.Length, otherArray.Length);
+                Array.Copy(otherArray.Value, 0, newArray, Value.Length, otherArray.Count);
 
                 break;
 
@@ -279,10 +279,10 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
             case EzrInteger:
                 result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
-            case IEzrIndexedCollection { Length: < 2 }:
+            case IEzrIndexedCollection { Count: < 2 }:
                 result.Failure(new EzrIllegalOperationError($"The indices {other.TypeName} must contain two values, the starting index and the ending index!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
-            case IEzrIndexedCollection { Length: > 2 }:
+            case IEzrIndexedCollection { Count: > 2 }:
                 result.Failure(new EzrIllegalOperationError($"The indices {other.TypeName} must only contain two values, the starting index and the ending index!", _executionContext, other.StartPosition, other.EndPosition)); break;
 
             case IEzrIndexedCollection otherCollection:

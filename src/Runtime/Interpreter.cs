@@ -440,7 +440,7 @@ public class Interpreter
 
         switch (value)
         {
-            case IEzrIndexedCollection otherCollection when otherCollection.Length != variables.Length:
+            case IEzrIndexedCollection otherCollection when otherCollection.Count != variables.Length:
                 RuntimeResult.Failure(new EzrIllegalOperationError("Mismatched number of variables and values in assignment!", executionContext, node.StartPosition, node.EndPosition));
                 return;
 
@@ -1037,13 +1037,13 @@ public class Interpreter
             return;
 
         Reference iterableObjectReference = RuntimeResult.Reference;
-        if (iterableObjectReference.Object is not IEzrIndexedCollection iterableObject)
+        if (iterableObjectReference.Object is not IReadOnlyCollection<IEzrObject> iterableObject)
         {
             RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected an iterable object to iterate, but got object of type \"{iterableObjectReference.Object.TypeName}\"!", executionContext, node.Expression.Right.StartPosition, node.Expression.Right.EndPosition));
             return;
         }
 
-        List<IEzrObject> returns = new(iterableObject.Length);
+        List<IEzrObject> returns = new(iterableObject.Count);
         foreach (IEzrObject ezrObject in iterableObject)
         {
             ezrObject.Update(executionContext, node.Expression.StartPosition, node.Expression.EndPosition);
