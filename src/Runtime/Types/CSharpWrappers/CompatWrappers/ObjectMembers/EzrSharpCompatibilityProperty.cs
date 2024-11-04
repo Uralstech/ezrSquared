@@ -47,7 +47,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
 
         if (arguments.Length == 0)
         {
-            if (AutoWrapperAttribute?.IsWriteOnly == true || SharpMember.GetMethod is null || (AutoWrapperAttribute == null && !SharpMember.GetMethod.IsPublic))
+            if (AutoWrapperAttribute?.IsWriteOnly == true || SharpMember.GetMethod is null || (AutoWrapperAttribute is null && !SharpMember.GetMethod.IsPublic))
             {
                 result.Failure(new EzrIllegalOperationError($"Cannot get value from CSharp property wrapper \"{SharpMemberName}\" as it is write-only!", Context, StartPosition, EndPosition));
                 return;
@@ -62,7 +62,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
             if (result.ShouldReturn)
                 return;
 
-            if (AutoWrapperAttribute?.IsReadOnly == true || SharpMember.SetMethod is null || (AutoWrapperAttribute == null && !SharpMember.SetMethod.IsPublic))
+            if (AutoWrapperAttribute?.IsReadOnly == true || SharpMember.SetMethod is null || (AutoWrapperAttribute is null && !SharpMember.SetMethod.IsPublic))
             {
                 result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp property wrapper \"{SharpMemberName}\" as it is read-only!", Context, StartPosition, EndPosition));
                 return;

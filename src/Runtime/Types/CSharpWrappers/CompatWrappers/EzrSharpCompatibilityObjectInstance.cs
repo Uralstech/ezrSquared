@@ -1,7 +1,6 @@
 ﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 using EzrSquared.Runtime.WrapperAttributes;
-using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -39,7 +38,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
             | DynamicallyAccessedMemberTypes.PublicFields
             | DynamicallyAccessedMemberTypes.NonPublicFields)]
         Type instanceType,
-        
+
         Context parentContext, Position startPosition, Position endPosition) : base(instanceType, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{SharpMember.GetHashCode()}";

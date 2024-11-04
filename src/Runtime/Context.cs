@@ -159,7 +159,7 @@ public class Context
         Id = UIDProvider.Get();
         LinkedContexts = linkedContexts == 0 ? [] : new Context[linkedContexts];
 
-        if (isStatic && StaticContext != null)
+        if (isStatic && StaticContext is not null)
             throw new ArgumentException("A context cannot be static AND have a static context assigned to it.", nameof(staticContext));
 
         IsStatic = isStatic;

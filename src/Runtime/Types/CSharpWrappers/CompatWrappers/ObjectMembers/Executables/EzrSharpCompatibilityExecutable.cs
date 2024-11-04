@@ -43,7 +43,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         Parameters = SharpMember.GetParameters();
-        
+
         ParameterNames = Array.ConvertAll(Parameters, p =>
         {
             string? definedName = p.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;

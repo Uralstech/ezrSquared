@@ -47,7 +47,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
             | DynamicallyAccessedMemberTypes.PublicFields
             | DynamicallyAccessedMemberTypes.NonPublicFields)]
         Type constructingType,
-        
+
         ConstructorInfo sharpConstructor, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpConstructor, null, parentContext, startPosition, endPosition, skipValidation)
     {
         ConstructingType = constructingType;
