@@ -20,7 +20,7 @@ internal class Shell
 
     public static void Main()
     {
-        Console.OutputEncoding = Encoding.Unicode;
+        Console.OutputEncoding = Encoding.UTF8;
 
         string[] commandLineArguments = Environment.GetCommandLineArgs();
         if (!ParseCommandLineArguments(commandLineArguments))
