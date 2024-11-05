@@ -130,6 +130,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
                 keyObject = keyCopy!;
             }
 
+            // This is possibly too naive as it assumes that the hash of a copied IEzrMutableObject does not change.
             _items[pair.Key] = new KeyValuePair<IEzrObject, Reference>(keyObject, pair.Value.Value);
         }
     }
@@ -146,12 +147,12 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
         {
             if (pair.Count is > 2 or < 2)
             {
-                result.Failure(new EzrUnexpectedTypeError($"Object of type \"{other.TypeName}\" is in an unexpected format and cannot be merged into this dictionary!", executionContext, other.StartPosition, other.EndPosition));
+                result.Failure(new EzrUnexpectedTypeError($"Object of type \"{other.TypeName}\" is in an unexpected format and could not be fully merged into this dictionary!", executionContext, other.StartPosition, other.EndPosition));
                 return;
             }
 
             (IEzrObject keyObject, IEzrObject valueObject) = (pair.At(0), pair.At(1));
-            
+
             Update(keyObject, valueObject, result);
             if (result.ShouldReturn)
                 return;
@@ -232,7 +233,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>
             }
 
             (IEzrObject keyObject, IEzrObject valueObject) = (pair.At(0), pair.At(1));
-            
+
             int keyHashCode = keyObject.ComputeHashCode(result);
             if (result.ShouldReturn || !_items.TryGetValue(keyHashCode, out KeyValuePair<IEzrObject, Reference> thisPair))
                 return false;
