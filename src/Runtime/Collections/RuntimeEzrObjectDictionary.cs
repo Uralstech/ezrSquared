@@ -119,7 +119,15 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     [SharpAutoWrapper("remove_by_hash")]
     public bool RemoveHash(int key)
     {
-        return _items.Remove(key);
+        if (_items.TryGetValue(key, out KeyValuePair<IEzrObject, Reference> pair))
+        {
+            pair.Value.UpdateRegister(false);
+            ReferencePool.TryRelease(pair.Value);
+
+            return _items.Remove(key);
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -134,7 +142,10 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
             if (TryCopyObject(pair.Value.Key, result) is not IEzrObject keyObject)
                 return;
 
-            _items[pair.Key] = new KeyValuePair<IEzrObject, Reference>(keyObject, pair.Value.Value);
+            Reference newReference = ReferencePool.Get(pair.Value.Value.Object);
+            newReference.UpdateRegister(true);
+
+            _items[pair.Key] = new KeyValuePair<IEzrObject, Reference>(keyObject, newReference);
         }
     }
 
