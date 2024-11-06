@@ -56,7 +56,7 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
             result.Reference.UpdateRegisteredContext(Context, newContext);
         else if (result.Reference.Object.CreationContext.Id == newContext.Id)
             result.Reference.Object.UpdateCreationContext(newContext);
-        
+
         result.Success(result.Reference);
         newContext.Release();
     }

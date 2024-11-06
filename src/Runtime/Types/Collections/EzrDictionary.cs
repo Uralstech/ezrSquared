@@ -326,7 +326,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
         foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> keyValuePair in Value)
         {
             int keyHash = keyValuePair.Key;
-            
+
             int valueHash = keyValuePair.Value.Value.Object.ComputeHashCode(result);
             if (result.ShouldReturn)
                 return int.MinValue;
