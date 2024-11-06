@@ -238,10 +238,7 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
                 Value.AddRange(otherList.Value); break;
 
             default:
-                Reference reference = ReferencePool.Get(other);
-                reference.UpdateRegister(true);
-
-                Value.Add(reference); break;
+                Value.Add(ReferencePool.Get(other)); break;
         }
 
         result.Success(NewNothingConstant());
@@ -379,23 +376,11 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
 
                 int i;
                 for (i = 0; i < loops; i++)
-                    Value.AddRange(Array.ConvertAll(original, element =>
-                    {
-                        Reference copy = element.ShallowCopy();
-                        copy.UpdateRegister(true);
-
-                        return copy;
-                    }));
+                    Value.AddRange(original);
 
                 int currentEnd = (loops == 0 ? 1 : i + 1) * original.Length;
                 if (newLength > currentEnd)
-                    Value.AddRange(Array.ConvertAll(original[..(newLength - currentEnd)], element =>
-                    {
-                        Reference copy = element.ShallowCopy();
-                        copy.UpdateRegister(true);
-
-                        return copy;
-                    }));
+                    Value.AddRange(original[..(newLength - currentEnd)]);
 
                 break;
         }
@@ -442,23 +427,11 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
 
                     int i;
                     for (i = 0; i < loops; i++)
-                        Value.AddRange(Array.ConvertAll(original, element =>
-                        {
-                            Reference copy = element.ShallowCopy();
-                            copy.UpdateRegister(true);
-
-                            return copy;
-                        }));
+                        Value.AddRange(original);
 
                     int currentEnd = (loops == 0 ? 1 : i + 1) * original.Length;
                     if (newLength > currentEnd)
-                        Value.AddRange(Array.ConvertAll(original[..(newLength - currentEnd)], element =>
-                        {
-                            Reference copy = element.ShallowCopy();
-                            copy.UpdateRegister(true);
-
-                            return copy;
-                        }));
+                        Value.AddRange(original[..(newLength - currentEnd)]);
                 }
 
                 result.Success(NewNothingConstant());

@@ -138,12 +138,8 @@ public abstract class EzrRuntimeExecutable : EzrObject
             // If the argument is not a kwarg and there are no more parameters to define and EPAs are allowed:
             if (!isKeywordArgument && currentIndexThroughParameters >= Parameters.Length && extraPositionalArguments is not null)
             {
-                // Create a new reference.
-                Reference newReference = ReferencePool.Get(argumentObject);
-                newReference.UpdateRegister(true);
-
-                // And add it to the EPA list.
-                extraPositionalArguments.Add(newReference);
+                // And a reference to it to the EPA list.
+                extraPositionalArguments.Add(ReferencePool.Get(argumentObject));
                 ReferencePool.TryRelease(argument);
 
                 continue;

@@ -26,6 +26,29 @@ public class RuntimeEzrObjectList : List<Reference>, IMutable<RuntimeEzrObjectLi
     public RuntimeEzrObjectList(IEnumerable<Reference> collection) : base(collection) { }
 
     /// <summary>
+    /// Adds a new reference to the list.
+    /// </summary>
+    /// <param name="reference">The reference to add.</param>
+    public new void Add(Reference reference)
+    {
+        reference.UpdateRegister(true);
+        base.Add(reference);
+    }
+
+    /// <summary>
+    /// Adds multiple new reference to the list.
+    /// </summary>
+    /// <remarks>
+    /// This actually creates a new <see cref="Reference"/> object for each added reference.
+    /// </remarks>
+    /// <param name="references">The references to add.</param>
+    public new void AddRange(IEnumerable<Reference> references)
+    {
+        foreach (Reference reference in references)
+            Add(ReferencePool.Get(reference.Object));
+    }
+
+    /// <summary>
     /// Removes an element in the list at the given index.
     /// </summary>
     /// <param name="index">The index.</param>
@@ -73,8 +96,6 @@ public class RuntimeEzrObjectList : List<Reference>, IMutable<RuntimeEzrObjectLi
         for (int i = 0; i < Count; i++)
         {
             Reference newReference = ReferencePool.Get(this[i].Object, this[i].AccessibilityModifiers);
-            newReference.UpdateRegister(true);
-
             if (newReference.Object is IEzrMutableObject mutableElement)
             {
                 IEzrObject? objectCopy = (IEzrObject?)mutableElement.DeepCopy(result);

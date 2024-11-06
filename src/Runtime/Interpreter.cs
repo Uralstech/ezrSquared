@@ -221,10 +221,7 @@ public class Interpreter
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            Reference reference = ReferencePool.Get(RuntimeResult.Reference.Object);
-            reference.UpdateRegister(true);
-
-            elementsReferences.Add(reference);
+            elementsReferences.Add(ReferencePool.Get(RuntimeResult.Reference.Object));
         }
 
         RuntimeResult.Success(ReferencePool.Get(new EzrList(elementsReferences, executionContext, node.StartPosition, node.EndPosition), AccessMod.PrivateConstant));
