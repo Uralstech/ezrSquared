@@ -1037,15 +1037,18 @@ public class Interpreter
             return;
 
         Reference iterableObjectReference = RuntimeResult.Reference;
-        if (iterableObjectReference.Object is not IReadOnlyCollection<IEzrObject> iterableObject)
+        if (iterableObjectReference.Object is not IEzrEnumerable iterableObject)
         {
             RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected an iterable object to iterate, but got object of type \"{iterableObjectReference.Object.TypeName}\"!", executionContext, node.Expression.Right.StartPosition, node.Expression.Right.EndPosition));
             return;
         }
 
-        List<IEzrObject> returns = new(iterableObject.Count);
-        foreach (IEzrObject ezrObject in iterableObject)
+        List<IEzrObject> returns = [];
+        using IEnumerator<IEzrObject> enumerator = iterableObject.GetEnumerator(RuntimeResult);
+
+        while (enumerator.MoveNext())
         {
+            IEzrObject ezrObject = enumerator.Current;
             ezrObject.Update(executionContext, node.Expression.StartPosition, node.Expression.EndPosition);
             (IEzrObject Object, string Name) newIterationVariable = (ezrObject, iterationVariableName);
 
@@ -1075,6 +1078,9 @@ public class Interpreter
 
             returns.Add(RuntimeResult.Reference.Object);
         }
+
+        if (RuntimeResult.ShouldReturn)
+            return;
 
         RuntimeResult.Success(ReferencePool.Get(new EzrArray([.. returns], executionContext, node.StartPosition, node.EndPosition), AccessMod.PrivateConstant));
     }

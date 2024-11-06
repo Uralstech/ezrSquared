@@ -43,18 +43,21 @@ public class EzrFunction(string? name, Node body, (string Name, Node Node)[] par
 
         interpreter.VisitNode(Body, newContext, null, AccessMod.None);
         if (result.ShouldReturnFunction)
+            return;
+
+        if (result.Reference.IsEmpty)
         {
-            Context.Release();
+            result.Success(NewNothingConstant());
+            newContext.Release();
             return;
         }
 
-        if (result.Reference.IsEmpty)
-            result.Success(NewNothingConstant());
-        else if (result.Reference.RegisteredContext?.Id == newContext.Id)
-            result.Success(ReferencePool.Get(result.Reference.Object, AccessMod.PrivateConstant));
-        else
-            result.Success(result.Reference);
-
+        if (result.Reference.RegisteredContext?.Id == newContext.Id)
+            result.Reference.UpdateRegisteredContext(Context, newContext);
+        else if (result.Reference.Object.CreationContext.Id == newContext.Id)
+            result.Reference.Object.UpdateCreationContext(newContext);
+        
+        result.Success(result.Reference);
         newContext.Release();
     }
 

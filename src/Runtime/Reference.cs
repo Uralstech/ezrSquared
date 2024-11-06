@@ -102,11 +102,15 @@ public class Reference(IEzrObject? @object = null, AccessMod accessibilityModifi
     /// but it changes the <i>reference</i> to the <see cref="Context"/> this is defined in.<br/>
     /// </remarks>
     /// <param name="context">The new context.</param>
-    public void UpdateRegisteredContext(Context? context)
+    /// <param name="releasingContext">
+    /// The context that may be deleted after this is called. If the referenced object's creation context
+    /// matches this, it is updated.
+    /// </param>
+    public void UpdateRegisteredContext(Context? context, Context? releasingContext = null)
     {
         RegisteredContext = context;
 
-        if (context is not null && ReferenceEquals(Object.CreationContext, Context.Empty))
+        if (context is not null && (ReferenceEquals(Object.CreationContext, Context.Empty) || Object.CreationContext.Id == releasingContext?.Id))
             Object.UpdateCreationContext(context);
     }
 

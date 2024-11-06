@@ -91,6 +91,12 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
     }
 
     /// <inheritdoc/>
+    public IEnumerator<IEzrObject> GetEnumerator(RuntimeResult result)
+    {
+        return GetEnumerator();
+    }
+
+    /// <inheritdoc/>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

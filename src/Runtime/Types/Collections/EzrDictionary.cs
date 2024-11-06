@@ -30,7 +30,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     public readonly RuntimeEzrObjectDictionary Value;
 
     /// <inheritdoc/>
-    public int Count => Value.Length;
+    public int Count => Value.Count;
 
     /// <summary>
     /// Creates a new <see cref="EzrDictionary"/>.
@@ -43,7 +43,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     {
         Value = value;
 
-        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Length))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Count))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(GetMemberInfo<MethodInfo, RuntimeEzrObjectDictionary>(nameof(Value.RemoveHash))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpSourceFunctionWrapper(DictionaryExists, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
@@ -66,10 +66,21 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     }
 
     /// <inheritdoc/>
-    public IEnumerator<IEzrIndexedCollection> GetEnumerator()
+    public IEnumerator<IEzrObject> GetEnumerator(RuntimeResult result)
     {
-        EzrArray[] pairs = Array.ConvertAll(Value.GetPairs(), pair => new EzrArray([pair.Key, pair.Value], _executionContext, StartPosition, EndPosition));
-        return ((IEnumerable<EzrArray>)pairs).GetEnumerator();
+        KeyValuePair<IEzrObject, IEzrObject>[]? pairs = Value.GetPairs(result);
+        if (result.ShouldReturn)
+            yield break;
+
+        foreach (KeyValuePair<IEzrObject, IEzrObject> pair in pairs!)
+            yield return new EzrArray([pair.Key, pair.Value], _executionContext, StartPosition, EndPosition);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<IEzrObject> GetEnumerator()
+    {
+        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> keyValuePair in Value)
+            yield return new EzrArray([keyValuePair.Value.Key, keyValuePair.Value.Value.Object], _executionContext, StartPosition, EndPosition);
     }
 
     /// <inheritdoc/>
@@ -244,22 +255,22 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
             case EzrInteger otherInteger when otherInteger.Value <= 0:
                 result.Failure(new EzrMathError("Division error", "Divisor cannot be less than or equal to zero in dictionary division!", _executionContext, other.StartPosition, other.EndPosition)); return;
 
-            case EzrFloat when Value.Length == 0:
-            case EzrInteger when Value.Length == 0:
+            case EzrFloat when Value.Count == 0:
+            case EzrInteger when Value.Count == 0:
                 result.Success(NewNothingConstant()); return;
 
             case EzrInteger otherInteger when otherInteger.TryGetIntRepresentation(out int divisor):
-                newLength = Value.Length / divisor; break;
+                newLength = Value.Count / divisor; break;
 
             case EzrInteger:
                 result.Failure(new EzrValueOutOfRangeError("The value is too large for this operation!", _executionContext, other.StartPosition, other.EndPosition)); return;
 
             case EzrFloat otherFloat:
-                newLength = (int)(Value.Length / otherFloat.Value);
+                newLength = (int)(Value.Count / otherFloat.Value);
 
-                if (newLength > Value.Length)
+                if (newLength > Value.Count)
                 {
-                    result.Failure(new EzrIllegalOperationError($"Divided length of dictionary is greater than its length ({Value.Length} / {otherFloat.Value} = {newLength})!", _executionContext, other.StartPosition, other.EndPosition));
+                    result.Failure(new EzrIllegalOperationError($"Divided length of dictionary is greater than its length ({Value.Count} / {otherFloat.Value} = {newLength})!", _executionContext, other.StartPosition, other.EndPosition));
                     return;
                 }
 
@@ -270,7 +281,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
         }
 
         int[] keys = Value.GetRealKeys();
-        for (int i = Value.Length - 1; i >= newLength; i--)
+        for (int i = Value.Count - 1; i >= newLength; i--)
         {
             if (!Value.RemoveHash(keys[i]))
             {
@@ -311,20 +322,16 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     /// <inheritdoc/>
     public override int ComputeHashCode(RuntimeResult result)
     {
-        KeyValuePair<IEzrObject, IEzrObject>[] pairs = Value.GetPairs();
         int hash = HashTag;
-
-        for (int i = 0; i < pairs.Length; i++)
+        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> keyValuePair in Value)
         {
-            int hash1 = pairs[i].Key.ComputeHashCode(result);
+            int keyHash = keyValuePair.Key;
+            
+            int valueHash = keyValuePair.Value.Value.Object.ComputeHashCode(result);
             if (result.ShouldReturn)
                 return int.MinValue;
 
-            int hash2 = pairs[i].Value.ComputeHashCode(result);
-            if (result.ShouldReturn)
-                return int.MinValue;
-
-            hash = HashCode.Combine(hash, hash1, hash2);
+            hash = HashCode.Combine(hash, keyHash, valueHash);
         }
 
         return hash;
@@ -333,16 +340,19 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        KeyValuePair<IEzrObject, IEzrObject>[] pairs = Value.GetPairs();
-        string[] pairsAsString = new string[pairs.Length];
+        using IEnumerator<KeyValuePair<int, KeyValuePair<IEzrObject, Reference>>> keyValuePairs = Value.GetEnumerator();
 
-        for (int i = 0; i < pairs.Length; i++)
+        string[] pairsAsString = new string[Value.Count];
+        for (int i = 0; i < pairsAsString.Length; i++)
         {
-            string key = pairs[i].Key.ToString(result);
+            keyValuePairs.MoveNext();
+            KeyValuePair<IEzrObject, Reference> pair = keyValuePairs.Current.Value;
+
+            string key = pair.Key.ToString(result);
             if (result.ShouldReturn)
                 return string.Empty;
 
-            string value = pairs[i].Value.ToString(result);
+            string value = pair.Value.Object.ToString(result);
             if (result.ShouldReturn)
                 return string.Empty;
 

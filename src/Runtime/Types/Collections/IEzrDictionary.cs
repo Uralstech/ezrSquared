@@ -5,7 +5,7 @@ namespace EzrSquared.Runtime.Types.Collections;
 /// <summary>
 /// Interface for a keyed collection of ezr² objects.
 /// </summary>
-public interface IEzrDictionary : IEzrObject, IReadOnlyCollection<IEzrIndexedCollection>
+public interface IEzrDictionary : IEzrObject, IEzrEnumerable, IReadOnlyCollection<IEzrObject>
 {
     /// <summary>
     /// Gets the object at the specified key.
