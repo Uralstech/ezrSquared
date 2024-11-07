@@ -17,7 +17,7 @@
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
 		
-		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">True</IsAotCompatible>
+		<IsAotCompatible>False</IsAotCompatible>
 	</PropertyGroup>
 
 	<PropertyGroup>
