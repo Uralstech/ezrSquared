@@ -53,7 +53,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
         ConstructingType = constructingType;
 
         SharpAutoWrapperAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<SharpAutoWrapperAttribute>();
-        ConstructingTypeName = !string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? autoWrapperAttribute.Name : PascalToSnakeCase(constructingType.Name);
+        ConstructingTypeName = !string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? autoWrapperAttribute.Name : PascalToSnakeCase(constructingType.Name)!;
     }
 
     /// <inheritdoc/>

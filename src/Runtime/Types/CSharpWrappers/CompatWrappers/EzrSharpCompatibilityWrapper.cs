@@ -63,7 +63,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     {
         SharpMember = wrappedMember;
         AutoWrapperAttribute = wrappedMember.GetCustomAttribute<SharpAutoWrapperAttribute>();
-        SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name);
+        SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name)!;
         Instance = instance;
     }
 
@@ -85,18 +85,21 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// </summary>
     /// <param name="text">The text to convert in PascalCase.</param>
     /// <returns>The converted text in snake_case.</returns>
-    internal protected static string PascalToSnakeCase(string text)
+    internal protected static string? PascalToSnakeCase(string? text)
     {
+        if (string.IsNullOrEmpty(text))
+            return null;
+
         StringBuilder result = new();
         result.Append(char.ToLowerInvariant(text[0]));
 
         for (int i = 1; i < text.Length; ++i)
         {
             char c = text[i];
-            if (char.IsUpper(c))
-                result.Append('_').Append(char.ToLowerInvariant(c));
-            else
-                result.Append(c);
+            if (c == '_')
+                continue;
+
+            result.Append(char.IsUpper(c) ? $"_{char.ToLowerInvariant(c)}" : c);
         }
 
         return result.ToString();

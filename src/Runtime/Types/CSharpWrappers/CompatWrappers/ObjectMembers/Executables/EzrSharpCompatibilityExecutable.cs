@@ -43,12 +43,15 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
         Parameters = SharpMember.GetParameters();
+        ParameterNames = new string[Parameters.Length];
 
-        ParameterNames = Array.ConvertAll(Parameters, p =>
+        for (int i = 0; i < Parameters.Length; i++)
         {
-            string? definedName = p.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
-            return string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(p.Name ?? string.Empty) : definedName;
-        });
+            ParameterInfo parameter = Parameters[i];
+            string? definedName = parameter.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
+            
+            ParameterNames[i] = string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(parameter.Name) ?? $"param_{i}" : definedName;
+        }
 
         if (!skipValidation)
             Validate();
@@ -125,7 +128,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
         for (int i = 0; i < Parameters.Length; i++)
         {
             ParameterInfo parameter = Parameters[i];
-            if (!string.IsNullOrEmpty(parameter.Name) && arguments.TryGetValue(ParameterNames[i], out IEzrObject? argument))
+            if (arguments.TryGetValue(ParameterNames[i], out IEzrObject? argument))
             {
                 object? primitiveArgument = EzrObjectToCSharp(argument, parameter.ParameterType, result);
                 if (result.ShouldReturn)
@@ -151,7 +154,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
 
         if (arguments.Count > 0)
         {
-            Dictionary<string, IEzrObject>.Enumerator argumentsEnumerator = arguments.GetEnumerator();
+            using Dictionary<string, IEzrObject>.Enumerator argumentsEnumerator = arguments.GetEnumerator();
             argumentsEnumerator.MoveNext();
 
             KeyValuePair<string, IEzrObject> first = argumentsEnumerator.Current;
