@@ -12,7 +12,7 @@ namespace EzrSquaredCli;
 /// </summary>
 internal class Shell
 {
-    private const string Version = "0.11.0";
+    private const string Version = "0.11.1";
 
     private static bool s_showLexerOutput;
     private static bool s_showParserOutput;

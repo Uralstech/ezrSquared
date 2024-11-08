@@ -3,6 +3,11 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.11.1 [08-11-24]
+	* Fixed bug in C# compatibility wrappers where they won't wrap compliant methods and constructors.
+	* C# type wrappers should now fail when given abstract types.
+	* Improved PascalCase to snake_case converter even more.
+
 * ezr² RE - v0.11.0 [08-11-24]
 	* [BREAKING CHANGE] The ezr² library is no longer officially AOT compatible.
 	* [BREAKING CHANGE] `EzrSharpCompatibilityWrapper.Validate` has been removed. Use `SharpAutoWrapperAttribute.ValidateMethod` instead.
