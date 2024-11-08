@@ -64,9 +64,9 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
     {
         SharpType = type;
 
-        // Check generics.
-        if (type.IsGenericTypeDefinition)
-            throw new ArgumentException($"Cannot wrap generic CSharp type definition {type.Name}!", nameof(type));
+        // Check if generic or abstract.
+        if (type.IsAbstract || type.IsGenericTypeDefinition)
+            throw new ArgumentException($"Cannot wrap generic/abstract C# type \"{type.Name}\"!", nameof(type));
 
         // Check for type attribute.
         SharpTypeWrapperAttribute typeAttribute = type.GetCustomAttribute<SharpTypeWrapperAttribute>(true)
@@ -108,10 +108,6 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         for (int i = 0; i < staticMethods.Length; i++)
         {
             MethodInfo method = staticMethods[i];
-
-            // Check if abstract.
-            if (method.IsAbstract)
-                continue;
 
             IEzrObject wrappedMethod;
             string methodName;

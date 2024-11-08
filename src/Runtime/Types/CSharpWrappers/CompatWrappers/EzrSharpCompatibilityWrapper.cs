@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
@@ -67,6 +67,20 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
         Instance = instance;
     }
 
+
+#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
+    /// <summary>
+    /// Regex for converting PascalCase/camelCase to snake_case.
+    /// </summary>
+    /// <remarks>
+    /// Regex explanation:<br/>
+    /// 1. (?&lt;!^)(?=[A-Z][a-z]) - Add underscore before capital letter followed by a lowercase letter, except at the start.<br/>
+    /// 2. (?&lt;=[a-z0-9])(?=[A-Z]) - Add underscore when transitioning from lowercase or number to uppercase.<br/>
+    /// 3. (?&lt;=[A-Z])(?=[A-Z][a-z]) - Add underscore between uppercase sequences followed by lowercase (e.g., "TCProtocol").
+    /// </remarks>
+    private static readonly Regex s_caseConverterRegex = new(@"(?<!^)(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
+
     /// <summary>
     /// Converts a string from PascalCase to snake_case.
     /// </summary>
@@ -75,21 +89,16 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     internal protected static string? PascalToSnakeCase(string? text)
     {
         if (string.IsNullOrEmpty(text))
-            return null;
+            return text;
 
-        StringBuilder result = new();
-        result.Append(char.ToLowerInvariant(text[0]));
+        // Remove any leading underscore
+        if (text.StartsWith('_'))
+            text = text[1..];
 
-        for (int i = 1; i < text.Length; ++i)
-        {
-            char c = text[i];
-            if (c == '_')
-                continue;
+        string snakeCase = s_caseConverterRegex.Replace(text, "_");
 
-            result.Append(char.IsUpper(c) ? $"_{char.ToLowerInvariant(c)}" : c);
-        }
-
-        return result.ToString();
+        // Convert entire string to lowercase
+        return snakeCase.ToLower();
     }
 
     /// <summary>

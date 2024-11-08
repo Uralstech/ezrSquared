@@ -52,7 +52,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            if (!SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;

@@ -45,9 +45,9 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
-        if (sharpType.IsGenericTypeDefinition)
+        if (sharpType.IsAbstract || sharpType.IsGenericTypeDefinition)
         {
-            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic CSharp type definition \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
+            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic/abstract C# type \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
             return;
         }
 
@@ -60,7 +60,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            if (!SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -105,7 +105,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
                 continue;
 
             EzrSharpCompatibilityConstructor constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
-            if (SharpAutoWrapperAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
+            if (!SharpAutoWrapperAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
