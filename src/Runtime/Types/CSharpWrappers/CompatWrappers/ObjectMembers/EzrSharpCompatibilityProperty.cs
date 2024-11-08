@@ -24,13 +24,9 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    /// <param name="skipValidation">Skip property type validation?</param>
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpProperty, instance, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpProperty, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
-
-        if (!skipValidation)
-            Validate();
     }
 
     /// <summary>

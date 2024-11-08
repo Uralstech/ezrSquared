@@ -65,8 +65,8 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         SharpType = type;
 
         // Check generics.
-        if (type.IsGenericType)
-            throw new ArgumentException($"Cannot wrap generic CSharp type {type.Name}!", nameof(type));
+        if (type.IsGenericTypeDefinition)
+            throw new ArgumentException($"Cannot wrap generic CSharp type definition {type.Name}!", nameof(type));
 
         // Check for type attribute.
         SharpTypeWrapperAttribute typeAttribute = type.GetCustomAttribute<SharpTypeWrapperAttribute>(true)
@@ -122,7 +122,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
                 EzrSharpSourceFunctionWrapper sourceMethod = new(method, Context, StartPosition, EndPosition);
                 (wrappedMethod, methodName) = (sourceMethod, sourceMethod.SharpFunctionName);
             }
-            else if (method.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
+            else if (method.GetCustomAttribute<SharpAutoWrapperAttribute>() is not null)
             {
                 EzrSharpCompatibilityFunction compatMethod = new(method, null, Context, StartPosition, EndPosition);
                 (wrappedMethod, methodName) = (compatMethod, compatMethod.SharpMemberName);
@@ -147,7 +147,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             string propertyName;
 
             // Check if property can be wrapped.
-            if (property.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
+            if (property.GetCustomAttribute<SharpAutoWrapperAttribute>() is not null)
             {
                 EzrSharpCompatibilityProperty compatWrapper = new(property, null, Context, StartPosition, EndPosition);
                 (wrappedProperty, propertyName) = (compatWrapper, compatWrapper.SharpMemberName);
@@ -171,7 +171,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             string fieldName;
 
             // Check if property can be wrapped.
-            if (field.GetCustomAttribute<SharpAutoWrapperAttribute>(false) is not null)
+            if (field.GetCustomAttribute<SharpAutoWrapperAttribute>() is not null)
             {
                 EzrSharpCompatibilityField compatWrapper = new(field, null, Context, StartPosition, EndPosition);
                 (wrappedField, fieldName) = (compatWrapper, compatWrapper.SharpMemberName);

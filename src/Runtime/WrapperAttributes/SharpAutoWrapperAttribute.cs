@@ -1,5 +1,4 @@
-﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
-using System;
+﻿using System;
 using System.Reflection;
 
 namespace EzrSquared.Runtime.WrapperAttributes;
@@ -52,64 +51,44 @@ public class SharpAutoWrapperAttribute : Attribute
     }
 
     /// <summary>
-    /// Checks if the given member is supported for wrapping.
-    /// </summary>
-    /// <param name="memberInfo">The member.</param>
-    /// <returns><see langword="null"/> if the check was successful, an <see cref="Exception"/> otherwise.</returns>
-    public static Exception? Validate(MemberInfo memberInfo)
-    {
-        return memberInfo switch
-        {
-            FieldInfo field => ValidateField(field),
-            PropertyInfo property => ValidateProperty(property),
-            MethodBase method => ValidateMethod(method),
-            _ => throw new ArgumentException($"Unsupported {nameof(MemberInfo)} type {memberInfo.GetType().Name} for validation!", nameof(memberInfo))
-        };
-    }
-
-    /// <summary>
-    /// Checks if the given field is a supported type for wrapping.
-    /// </summary>
-    /// <param name="fieldInfo">The field.</param>
-    /// <returns><see langword="null"/> if the check was successful, an <see cref="ArgumentException"/> otherwise.</returns>
-    public static ArgumentException? ValidateField(FieldInfo fieldInfo)
-    {
-        return !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(fieldInfo.FieldType)
-            ? new($"Expected field \"{fieldInfo.Name}\" to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(fieldInfo))
-            : null;
-    }
-
-    /// <summary>
-    /// Checks if the given property is a supported type for wrapping.
-    /// </summary>
-    /// <param name="propertyInfo">The property.</param>
-    /// <returns><see langword="null"/> if the check was successful, an <see cref="ArgumentException"/> otherwise.</returns>
-    public static ArgumentException? ValidateProperty(PropertyInfo propertyInfo)
-    {
-        return !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(propertyInfo.PropertyType)
-            ? new($"Expected property \"{propertyInfo.Name}\" to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(propertyInfo))
-            : null;
-    }
-
-    /// <summary>
     /// Checks if the given method has the supported signature for wrapping.
     /// </summary>
     /// <param name="methodBase">The method.</param>
-    /// <returns><see langword="null"/> if the check was successful, an <see cref="ArgumentException"/> otherwise.</returns>
-    public static ArgumentException? ValidateMethod(MethodBase methodBase)
+    /// <param name="dontThrow">Disable exception throwing.</param>
+    /// <returns><see langword="true"/> if valid, an exception or <see langword="false"/> otherwise.</returns>
+    /// <exception cref="ArgumentException">Thrown if the method is generic or has generic parameters.</exception>
+    public static bool ValidateMethod(MethodBase methodBase, bool dontThrow = false)
     {
-        if (methodBase.IsGenericMethod || methodBase.ContainsGenericParameters)
-            return new($"The \"{nameof(SharpAutoWrapperAttribute)}\" attribute does not support generic method/constructor \"{methodBase.Name}\".", nameof(methodBase));
+        if (methodBase.IsGenericMethodDefinition || methodBase.ContainsGenericParameters)
+            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(SharpAutoWrapperAttribute)}\" attribute does not support generic method/constructor \"{methodBase.Name}\".", nameof(methodBase));
 
-        if (methodBase is MethodInfo methodInfo && methodInfo.ReturnType != typeof(void) && !EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedReturnType(methodInfo.ReturnType))
-            return new($"Expected method \"{methodBase.Name}\"'s return type to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\"", nameof(methodBase));
+        return true;
+    }
 
-        foreach (ParameterInfo parameterInfo in methodBase.GetParameters())
+    /// <summary>
+    /// Is the member eligible to be wrapped?
+    /// </summary>
+    /// <param name="member">The member to be wrapped.</param>
+    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
+    public static bool ShouldBeWrapped(MemberInfo member)
+    {
+        return member.GetCustomAttribute<SharpDoNotWrapAttribute>() is null && (GetIsPublic(member) || member.GetCustomAttribute<SharpAutoWrapperAttribute>() is not null);
+    }
+
+    /// <summary>
+    /// Is the member publicly accessible in some way?
+    /// </summary>
+    /// <param name="member">The member to check.</param>
+    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
+    /// <exception cref="ArgumentException">If <paramref name="member"/> is of an unknown or unsupported type.</exception>
+    public static bool GetIsPublic(MemberInfo member)
+    {
+        return member switch
         {
-            if (!EzrSharpCompatibilityWrapper<MemberInfo>.IsSupportedType(parameterInfo.ParameterType))
-                return new($"Expected all of method/constructor \"{methodBase.Name}\"'s parameters to be of a supported primitive type, as it uses the attribute \"{nameof(SharpAutoWrapperAttribute)}\", but found parameter \"{parameterInfo.Name}\" of type \"{parameterInfo.ParameterType.Name}\"", nameof(methodBase));
-        }
-
-        return null;
+            MethodBase method => method.IsPublic,
+            FieldInfo field => field.IsPublic,
+            PropertyInfo property => property.GetMethod?.IsPublic == true || property.SetMethod?.IsPublic == true,
+            _ => throw new ArgumentException($"Unknown or unsupported {nameof(MemberInfo)} type {member.GetType().Name}!", nameof(member))
+        };
     }
 }

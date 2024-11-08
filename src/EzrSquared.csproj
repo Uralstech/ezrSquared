@@ -16,7 +16,7 @@
 		
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
-		
+
 		<IsAotCompatible>False</IsAotCompatible>
 	</PropertyGroup>
 
@@ -28,7 +28,7 @@
 		<Title>ezr² Portable Library</Title>
 		<Description>The ezr² programming language, as a portable class library! This can be used to integrate ezr² as an embedded scripting language in your apps, websites and more!</Description>
 
-		<PackageVersion>0.10.0-unstable</PackageVersion>
+		<PackageVersion>0.11.0-unstable</PackageVersion>
 		
 		<Authors>Udayshankar Ravikumar</Authors>
 		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
@@ -51,7 +51,7 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
-		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 

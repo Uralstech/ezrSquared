@@ -45,9 +45,9 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
 
-        if (sharpType.IsGenericType)
+        if (sharpType.IsGenericTypeDefinition)
         {
-            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic CSharp type \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
+            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic CSharp type definition \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
             return;
         }
 
@@ -56,11 +56,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticMethods.Length; i++)
         {
             MethodInfo method = allStaticMethods[i];
-            if (method.IsAbstract || (!method.IsPublic && method.GetCustomAttribute<SharpAutoWrapperAttribute>() is null))
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(method))
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!methodObject.Validate())
+            if (SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -79,13 +79,10 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticProperties.Length; i++)
         {
             PropertyInfo property = allStaticProperties[i];
-            if (property.GetMethod?.IsPublic != true && property.SetMethod?.IsPublic != true && property.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(property))
                 continue;
 
-            EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!propertyObject.Validate())
-                continue;
-
+            EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition);
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
 
@@ -93,13 +90,10 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticFields.Length; i++)
         {
             FieldInfo field = allStaticFields[i];
-            if (!field.IsPublic && field.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(field))
                 continue;
 
-            EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!fieldObject.Validate())
-                continue;
-
+            EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition);
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
 
@@ -107,11 +101,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
-            if (!constructor.IsPublic && constructor.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(constructor))
                 continue;
 
             EzrSharpCompatibilityConstructor constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!constructorObject.Validate())
+            if (SharpAutoWrapperAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
             Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));

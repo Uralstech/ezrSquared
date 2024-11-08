@@ -24,13 +24,9 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    /// <param name="skipValidation">Skip field type validation?</param>
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : base(sharpField, instance, parentContext, startPosition, endPosition)
+    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpField, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
-
-        if (!skipValidation)
-            Validate();
     }
 
     /// <summary>

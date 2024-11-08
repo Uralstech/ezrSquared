@@ -23,7 +23,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// <summary>
     /// Reflection info for <see cref="Task.FromResult{TResult}(TResult)"/>/
     /// </summary>
-    private static readonly MethodInfo s_completedTaskMethodReflectionInfo = typeof(Task).GetMethod(nameof(Task.FromResult))!;
+    private static readonly MethodInfo s_taskFromResultMethod = typeof(Task).GetMethod(nameof(Task.FromResult))!;
 
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp wrapper";
@@ -68,19 +68,6 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     }
 
     /// <summary>
-    /// Validates the the current object for wrapping.
-    /// </summary>
-    /// <returns><see langword="true"/> if the member can be wrapped, <see langword="false"/> otherwise.</returns>
-    public bool Validate()
-    {
-        Exception? validationException = SharpAutoWrapperAttribute.Validate(SharpMember);
-        if (validationException is null)
-            return true;
-
-        return AutoWrapperAttribute is not null ? throw validationException : false;
-    }
-
-    /// <summary>
     /// Converts a string from PascalCase to snake_case.
     /// </summary>
     /// <param name="text">The text to convert in PascalCase.</param>
@@ -103,46 +90,6 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
         }
 
         return result.ToString();
-    }
-
-    /// <summary>
-    /// Checks if the given type is supported by the compatibility wrappers.
-    /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
-    public static bool IsSupportedType(Type type)
-    {
-        return typeof(IEzrObject).IsAssignableFrom(type)
-            || (type.IsArray && type.HasElementType && IsSupportedType(type.GetElementType()!))
-            || Type.GetTypeCode(type) is TypeCode.Empty
-                        or TypeCode.Int16
-                        or TypeCode.Int32
-                        or TypeCode.Int64
-                        or TypeCode.UInt16
-                        or TypeCode.UInt32
-                        or TypeCode.UInt64
-                        or TypeCode.Byte
-                        or TypeCode.SByte
-                        or TypeCode.Single
-                        or TypeCode.Double
-                        or TypeCode.Decimal
-                        or TypeCode.Boolean
-                        or TypeCode.Char
-                        or TypeCode.String;
-    }
-
-    /// <summary>
-    /// Checks if the given type is supported by the compatibility wrappers, including generic <see cref="Task"/> objects.
-    /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
-    public static bool IsSupportedReturnType(Type type)
-    {
-        return Type.GetTypeCode(type) switch
-        {
-            TypeCode.Object when typeof(Task).IsAssignableFrom(type) => type.GenericTypeArguments.Length == 0 || IsSupportedType(type.GenericTypeArguments[0]),
-            _ => IsSupportedType(type),
-        };
     }
 
     /// <summary>
@@ -280,17 +227,20 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 result.Failure(new EzrUnexpectedTypeError($"Expected ezr² object of type \"{targetType.Name}\" (this is the name of the type in C#), but got object of type \"{value.TypeName}\".", Context, value.StartPosition, value.EndPosition));
                 break;
 
-            case TypeCode.Object when targetType == typeof(Task):
-                return Task.CompletedTask;
-
             case TypeCode.Object when targetType.IsArray && targetType.HasElementType:
                 return HandleEzrArrayLikeToCSharp(value, targetType, result);
 
-            case TypeCode.Object when targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Task<>):
-                Type taskTargetType = targetType.GetGenericArguments()[0];
-                MethodInfo completedTaskMethod = s_completedTaskMethodReflectionInfo.MakeGenericMethod(taskTargetType);
+            case TypeCode.Object when targetType == typeof(Task):
+                return Task.CompletedTask;
 
-                return completedTaskMethod.Invoke(null, [EzrObjectToCSharp(value, taskTargetType, result)]);
+            case TypeCode.Object when typeof(Task).IsAssignableFrom(targetType) && !targetType.IsGenericTypeDefinition:
+                Type taskTargetType = targetType.GetGenericArguments()[0];
+                object? convertedObject = EzrObjectToCSharp(value, taskTargetType, result);
+                if (result.ShouldReturn)
+                    break;
+
+                MethodInfo completedTaskMethod = s_taskFromResultMethod.MakeGenericMethod(taskTargetType);
+                return completedTaskMethod.Invoke(null, [convertedObject]);
 
             case TypeCode.Empty:
                 if (value is not EzrNothing)
@@ -299,7 +249,10 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 break;
 
             default:
-                result.Failure(new EzrUnsupportedWrappingError($"Object of type \"{value.TypeName}\" cannot be converted to CSharp type \"{targetType.Name}\"!", Context, value.StartPosition, value.EndPosition));
+                if (value is EzrSharpCompatibilityObjectInstance wrapper && wrapper.SharpMember == targetType)
+                    return wrapper.Instance;
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected wrapped object of C# type \"{targetType.Name}\", but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
         }
 
@@ -329,7 +282,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             object? element = EzrObjectToCSharp(enumerator.Current, arrayElementType, result);
             if (result.ShouldReturn)
                 return null;
-        
+
             array.SetValue(element, i);
         }
 
@@ -408,7 +361,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 result.Success(NewNothingConstant());
                 break;
             default:
-                result.Failure(new EzrUnsupportedWrappingError($"CSharp type \"{value.GetType().Name}\" cannot be converted to an ezr² type!", Context, StartPosition, EndPosition));
+                result.Success(ReferencePool.Get(new EzrSharpCompatibilityObjectInstance(value, valueType, _executionContext, StartPosition, EndPosition), AccessMod.PrivateConstant));
                 break;
         }
     }

@@ -49,12 +49,12 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
         {
             ParameterInfo parameter = Parameters[i];
             string? definedName = parameter.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
-            
+
             ParameterNames[i] = string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(parameter.Name) ?? $"param_{i}" : definedName;
         }
 
         if (!skipValidation)
-            Validate();
+            SharpAutoWrapperAttribute.ValidateMethod(SharpMember, AutoWrapperAttribute is null);
     }
 
     /// <summary>

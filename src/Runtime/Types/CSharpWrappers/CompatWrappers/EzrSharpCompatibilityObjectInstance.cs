@@ -48,11 +48,11 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allMethods.Length; i++)
         {
             MethodInfo method = allMethods[i];
-            if (method.IsAbstract || (!method.IsPublic && method.GetCustomAttribute<SharpAutoWrapperAttribute>() is null))
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(method))
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!methodObject.Validate())
+            if (SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -71,13 +71,10 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allProperties.Length; i++)
         {
             PropertyInfo property = allProperties[i];
-            if (property.GetMethod?.IsPublic != true && property.SetMethod?.IsPublic != true && property.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(property))
                 continue;
 
-            EzrSharpCompatibilityProperty propertyObject = new(property, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!propertyObject.Validate())
-                continue;
-
+            EzrSharpCompatibilityProperty propertyObject = new(property, Instance, Context, StartPosition, EndPosition);
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
 
@@ -85,13 +82,10 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allFields.Length; i++)
         {
             FieldInfo field = allFields[i];
-            if (!field.IsPublic && field.GetCustomAttribute<SharpAutoWrapperAttribute>() is null)
+            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(field))
                 continue;
 
-            EzrSharpCompatibilityField fieldObject = new(field, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!fieldObject.Validate())
-                continue;
-
+            EzrSharpCompatibilityField fieldObject = new(field, Instance, Context, StartPosition, EndPosition);
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
     }
