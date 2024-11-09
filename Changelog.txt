@@ -3,6 +3,12 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.11.2 [09-11-24]
+	* Tasks are no longer awaited before being wrapped and are now wrapped like any other C# object.
+	* Wrapped constructors are now named "make" then "make_1" and so on for variations.
+	* Improved case converter to account for non-alphanum+underscore characters.
+	* Added new method in `CodeExecutor` for adding wrappers to the context.
+
 * ezr² RE - v0.11.1 [08-11-24]
 	* Fixed bug in C# compatibility wrappers where they won't wrap compliant methods and constructors.
 	* C# type wrappers should now fail when given abstract types.
