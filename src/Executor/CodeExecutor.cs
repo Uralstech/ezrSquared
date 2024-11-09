@@ -1,9 +1,11 @@
 ﻿using EzrSquared.Runtime;
 using EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 using EzrSquared.Syntax;
 using EzrSquared.Syntax.Errors;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace EzrSquared.Executor;
 
@@ -73,6 +75,25 @@ public static class CodeExecutor
             throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
 
         RuntimeContext.Set(null, name, reference);
+    }
+
+    /// <summary>
+    /// Adds the given wrapped C# object to the runtime context.
+    /// </summary>
+    /// <exception cref="NullReferenceException">
+    /// Thrown if the runtime context is <see langword="null"/>.
+    /// Use <see cref="CreateRuntimeContext(string)"/> to initialize the runtime context.
+    /// </exception>
+    /// <param name="wrapper">The wrapped object to add.</param>
+    /// <param name="accessibilityModifiers">The accessibility modifiers for the reference. Defaults to <see cref="AccessMod.Constant"/>.</param>
+    /// <typeparam name="TMemberInfo">See <see cref="EzrSharpCompatibilityWrapper{TMemberInfo}"/>.</typeparam>
+    public static void AddToContext<TMemberInfo>(EzrSharpCompatibilityWrapper<TMemberInfo> wrapper, AccessMod accessibilityModifiers = AccessMod.Constant)
+        where TMemberInfo : MemberInfo
+    {
+        if (RuntimeContext is null)
+            throw new NullReferenceException($"{nameof(RuntimeContext)} is null! Call {nameof(CreateRuntimeContext)} to create it!");
+
+        RuntimeContext.Set(null, wrapper.SharpMemberName, ReferencePool.Get(wrapper, accessibilityModifiers));
     }
 
     /// <summary>

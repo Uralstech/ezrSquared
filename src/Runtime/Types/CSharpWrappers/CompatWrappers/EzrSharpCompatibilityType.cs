@@ -97,6 +97,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
 
+        int definedConstructors = 0;
         ConstructorInfo[] publicConstructors = sharpType.GetConstructors();
         for (int i = 0; i < publicConstructors.Length; i++)
         {
@@ -108,7 +109,8 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
             if (!SharpAutoWrapperAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
-            Context.Set(null, $"make_{i}", ReferencePool.Get(constructorObject, AccessMod.Constant));
+            Context.Set(null, definedConstructors == 0 ? "make" : $"make_{definedConstructors}", ReferencePool.Get(constructorObject, AccessMod.Constant));
+            definedConstructors++;
         }
     }
 

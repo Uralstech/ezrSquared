@@ -79,6 +79,11 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// 3. (?&lt;=[A-Z])(?=[A-Z][a-z]) - Add underscore between uppercase sequences followed by lowercase (e.g., "TCProtocol").
     /// </remarks>
     private static readonly Regex s_caseConverterRegex = new(@"(?<!^)(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Regex for matching non-alphanumeric + underscore characters.
+    /// </summary>
+    private static readonly Regex s_alphaNumericUnderscoreOnlyFilterRegex = new(@"[^a-zA-Z0-9_]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 #pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 
     /// <summary>
@@ -95,7 +100,8 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
         if (text.StartsWith('_'))
             text = text[1..];
 
-        string snakeCase = s_caseConverterRegex.Replace(text, "_");
+        string alphaNumPlusUnderscoreFiltered = s_alphaNumericUnderscoreOnlyFilterRegex.Replace(text, string.Empty);
+        string snakeCase = s_caseConverterRegex.Replace(alphaNumPlusUnderscoreFiltered, "_");
 
         // Convert entire string to lowercase
         return snakeCase.ToLower();
@@ -363,9 +369,6 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             case TypeCode.Object when typeof(IEzrObject).IsAssignableFrom(valueType):
                 result.Success(ReferencePool.Get((IEzrObject)value, AccessMod.PrivateConstant));
                 break;
-            case TypeCode.Object when typeof(Task).IsAssignableFrom(valueType):
-                HandleAsynchronousObjectToEzrObject(value, valueType, result);
-                break;
             case TypeCode.Empty:
                 result.Success(NewNothingConstant());
                 break;
@@ -396,44 +399,6 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
         }
 
         result.Success(NewArrayConstant(elements));
-    }
-
-    /// <summary>
-    /// Waits for a task to complete and returns the result as an ezr² object.
-    /// </summary>
-    /// <param name="value">The task to await.</param>
-    /// <param name="type">The type of the task.</param>
-    /// <param name="result">Runtime result for carrying the result and any errors.</param>
-    protected internal void HandleAsynchronousObjectToEzrObject(
-        object value,
-
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
-        Type type,
-
-        RuntimeResult result)
-    {
-        try
-        {
-            ((Task)value).Wait();
-
-            // Get the Result property of the Task<TResult>
-            PropertyInfo? resultProperty = type.GetProperty("Result");
-
-            // Check if it's a Task<TResult>
-            if (resultProperty is not null)
-            {
-                // Get the value of the Result property
-                object taskResult = resultProperty.GetValue(value)!;
-
-                CSharpToEzrObject(taskResult, result);
-            }
-            else
-                result.Success(NewNothingConstant());
-        }
-        catch (Exception error)
-        {
-            result.Failure(new EzrWrapperExecutionError(error.InnerException?.Message ?? error.Message, Context, StartPosition, EndPosition));
-        }
     }
 
     /// <inheritdoc/>
