@@ -1,6 +1,7 @@
 ﻿using EzrSquared.Runtime.Types;
 using EzrSquared.Util;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace EzrSquared.Runtime;
@@ -8,7 +9,7 @@ namespace EzrSquared.Runtime;
 /// <summary>
 /// Stores all user defined variables/constant references, called symbols.
 /// </summary>
-public class Context
+public class Context : IEnumerable<KeyValuePair<string, Reference>>
 {
     /// <summary>
     /// Represents the status of a <see cref="Get(Context?, string, out Reference, AccessMod, bool)"/> call.
@@ -471,6 +472,18 @@ public class Context
 
         for (int i = 0; i < LinkedContexts.Length; i++)
             LinkedContexts[i]?.Release();
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<KeyValuePair<string, Reference>> GetEnumerator()
+    {
+        return _symbols.GetEnumerator();
+    }
+
+    /// <inheritdoc/>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 
     /// <summary>Destructor.</summary>

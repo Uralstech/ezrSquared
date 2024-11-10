@@ -22,6 +22,8 @@ public static class EzrBuiltinsUtility
         EzrSharpSourceFunctionWrapper typeNameOf = new(EzrBuiltinFunctions.TypeNameOf, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper typeHashOf = new(EzrBuiltinFunctions.TypeHashOf, context, Position.None, Position.None);
         EzrSharpSourceFunctionWrapper copy = new(EzrBuiltinFunctions.Copy, context, Position.None, Position.None);
+        EzrSharpSourceFunctionWrapper getRaw = new(EzrBuiltinFunctions.GetRaw, context, Position.None, Position.None);
+        EzrSharpSourceFunctionWrapper getContext = new(EzrBuiltinFunctions.GetContext, context, Position.None, Position.None);
 
         context.Set(null, throwError.SharpFunctionName, ReferencePool.Get(throwError, AccessMod.Constant));
         context.Set(null, assert.SharpFunctionName, ReferencePool.Get(assert, AccessMod.Constant));
@@ -30,6 +32,8 @@ public static class EzrBuiltinsUtility
         context.Set(null, typeNameOf.SharpFunctionName, ReferencePool.Get(typeNameOf, AccessMod.Constant));
         context.Set(null, typeHashOf.SharpFunctionName, ReferencePool.Get(typeHashOf, AccessMod.Constant));
         context.Set(null, copy.SharpFunctionName, ReferencePool.Get(copy, AccessMod.Constant));
+        context.Set(null, getRaw.SharpFunctionName, ReferencePool.Get(getRaw, AccessMod.Constant));
+        context.Set(null, getContext.SharpFunctionName, ReferencePool.Get(getContext, AccessMod.Constant));
     }
 
     /// <summary>

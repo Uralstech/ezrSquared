@@ -28,7 +28,7 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
     public readonly RuntimeEzrObjectList Value;
 
     /// <inheritdoc/>
-    [SharpAutoWrapper(isReadOnly: true)]
+    [SharpAutoWrapper("length", isReadOnly: true)]
     public int Count => Value.Count;
 
     /// <param name="elements">The base value.</param>

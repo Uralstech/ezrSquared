@@ -46,13 +46,13 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
                 break;
 
             case { Length: 1 }:
-                object? argumentAsPrimitive = EzrObjectToCSharp(arguments[0].Object, SharpMember.FieldType, result);
+                object? convertedArgument = EzrObjectToCSharp(arguments[0].Object, SharpMember.FieldType, result);
                 if (result.ShouldReturn)
                     break;
 
                 try
                 {
-                    SharpMember.SetValue(Instance, argumentAsPrimitive);
+                    SharpMember.SetValue(Instance, convertedArgument);
                     result.Success(NewNothingConstant());
                 }
                 catch (Exception error)

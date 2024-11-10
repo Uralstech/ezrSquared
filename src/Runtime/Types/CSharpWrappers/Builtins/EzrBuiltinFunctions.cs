@@ -1,7 +1,10 @@
-﻿using EzrSquared.Runtime.Types.Core;
+﻿using EzrSquared.Runtime.Collections;
+using EzrSquared.Runtime.Types.Collections;
+using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
@@ -376,5 +379,68 @@ public static class EzrBuiltinFunctions
             return;
 
         result.Success(ReferencePool.Get(copy, AccessMod.PrivateConstant));
+    }
+
+    /// <summary>
+    /// Wraps the given ezr² object so that the runtime has access to its raw C# object.
+    /// </summary>
+    /// <remarks>
+    /// ezr² parameters:
+    /// <list type="table">
+    ///     <item>
+    ///         <term>to_wrap</term>
+    ///         <description>(<see cref="IEzrObject"/>) The object to wrap.</description>
+    ///     </item>
+    /// </list>
+    /// 
+    /// ezr² return type:
+    /// <see cref="IEzrObject"/>
+    /// </remarks>
+    /// <param name="arguments">The method arguments.</param>
+    [SharpMethodWrapper("get_raw", RequiredParameters = ["to_wrap"])]
+    public static void GetRaw(SharpMethodParameters arguments)
+    {
+        RuntimeResult result = arguments.Result;
+        IEzrObject objectToWrap = arguments.ArgumentReferences["to_wrap"].Object;
+        
+        IEzrObject wrapped = new EzrSharpCompatibilityObjectInstance(objectToWrap, objectToWrap.GetType(), arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition);
+        result.Success(ReferencePool.Get(wrapped, AccessMod.PrivateConstant));
+    }
+
+    /// <summary>
+    /// Returns an <see cref="EzrDictionary"/> of the references (as &lt;name, object&gt;) contained in the <see cref="Context"/> of the given object.
+    /// </summary>
+    /// <remarks>
+    /// ezr² parameters:
+    /// <list type="table">
+    ///     <item>
+    ///         <term>to_get</term>
+    ///         <description>(<see cref="IEzrObject"/>) The object to get the context of.</description>
+    ///     </item>
+    /// </list>
+    /// 
+    /// ezr² return type:
+    /// <see cref="EzrDictionary"/>
+    /// </remarks>
+    /// <param name="arguments">The method arguments.</param>
+    [SharpMethodWrapper("get_context", RequiredParameters = ["to_get"])]
+    public static void GetContext(SharpMethodParameters arguments)
+    {
+        RuntimeResult result = arguments.Result;
+        IEzrObject objectToWrap = arguments.ArgumentReferences["to_get"].Object;
+
+        RuntimeEzrObjectDictionary context = new();
+        foreach (KeyValuePair<string, Reference> pair in objectToWrap.Context)
+        {
+            if (pair.Value.AccessibilityModifiers.HasFlag(AccessMod.Private))
+                continue;
+
+            context.Update(new EzrString(pair.Key, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), pair.Value.Object, result);
+            if (result.ShouldReturn)
+                return;
+        }
+
+        IEzrObject dictionary = new EzrDictionary(context, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition);
+        result.Success(ReferencePool.Get(dictionary, AccessMod.PrivateConstant));
     }
 }

@@ -30,6 +30,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     public readonly RuntimeEzrObjectDictionary Value;
 
     /// <inheritdoc/>
+    [SharpAutoWrapper("length")]
     public int Count => Value.Count;
 
     /// <summary>
