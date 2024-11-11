@@ -4,7 +4,7 @@ using System.Reflection;
 namespace EzrSquared.Runtime.WrapperAttributes;
 
 /// <summary>
-/// Attribute for C# type members which to be automatically wrapped from C# types into ezr² types.
+/// Attribute for C# types and members to be automatically wrapped from C# types into ezr² types.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 public class SharpAutoWrapperAttribute : Attribute

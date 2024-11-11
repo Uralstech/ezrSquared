@@ -365,5 +365,4 @@ FodyWeavers.xsd
 # --------------------------------------------------
 
 [Ll]ibraries/
-[Dd]ocs/offline/_site/
-[Dd]ocs/offline/ezrSquared.Offline.Documentation.zip
+/NOCOMMIT
