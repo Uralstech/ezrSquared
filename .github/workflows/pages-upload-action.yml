@@ -25,13 +25,20 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Dotnet Setup
+    
+    - name: Setup Signing
+      run: |
+        mkdir Secrets
+        echo "${{ secrets.LIB_SIGNING_KEY }}" > Secrets/sgKey.txt
+        openssl base64 -d -in Secrets/sgKey.txt -out Secrets/sgKey.snk
+
+    - name: .NET Setup
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.x
 
+    # Build ezr², install docfx and generate the docs.
     - run: dotnet build ezrSquared.sln -c Release
-
     - run: dotnet tool update -g docfx
     - run: docfx docs/docfx.json
 
@@ -40,6 +47,7 @@ jobs:
       with:
         # Upload entire repository
         path: 'docs/_site'
+
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
