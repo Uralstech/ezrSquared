@@ -34,7 +34,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
     public string StringValue => Value.ToString();
 
     /// <inheritdoc/>
-    [SharpAutoWrapper("length", isReadOnly: true)]
+    [SharpAutoWrapper("length")]
     public int Count => Value.Length;
 
     /// <summary>
@@ -269,7 +269,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
                 break;
         }
 
-        result.Success(NewNothingConstant());
+        result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
 
             case EzrInteger otherInteger when otherInteger.TryGetIntRepresentation(out int index):
                 Value.Remove(index >= 0 ? index : Value.Length + index, 1);
-                result.Success(NewNothingConstant());
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
                 break;
 
             case EzrInteger:
@@ -336,7 +336,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
                     }
 
                     Value.Remove(Value.Length + endIndexInt, startIndexInt - endIndexInt + 1);
-                    result.Success(NewNothingConstant());
+                    result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
                     break;
                 }
 
@@ -347,7 +347,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
                 }
 
                 Value.Remove(startIndexInt, endIndexInt - startIndexInt + 1);
-                result.Success(NewNothingConstant());
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
                 break;
 
             default:
@@ -414,7 +414,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
                 break;
         }
 
-        result.Success(NewNothingConstant());
+        result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
     }
 
     /// <remarks>Here, "divide" means "duplicate/decrease the current value X times".</remarks>
@@ -430,13 +430,13 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
 
             case EzrFloat when Value.Length == 0:
             case EzrInteger when Value.Length == 0:
-                result.Success(NewNothingConstant()); break;
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant)); break;
 
             case EzrInteger otherInteger when otherInteger.TryGetIntRepresentation(out int divisor):
                 newLength = Value.Length / divisor;
                 Value.Remove(newLength, Value.Length - newLength);
 
-                result.Success(NewNothingConstant());
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
                 break;
 
             case EzrInteger:
@@ -454,7 +454,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
                         Value.Append(originalValue[..Math.Clamp(newLength - originalValue.Length, 0, originalValue.Length)]);
                 }
 
-                result.Success(NewNothingConstant());
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
                 break;
 
             default:

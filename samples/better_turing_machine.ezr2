@@ -1,0 +1,92 @@
+@ A turing machine written in ezr²
+@ Based on https://python-course.eu/applications-python/turing-machine.php
+
+object tape do
+    private static constant blank_symbol: ` `
+
+    private tape: []
+    constant function initialize with tape_string: "" do
+        for each char in tape_string do
+            tape + char
+        end
+    end
+
+    constant function to_string do
+        str: ''
+        for each char in tape do
+            str + char
+        end
+
+        return str
+    end
+
+    constant function is_less_than with other do
+        if type_of(other) ! "ezrSquared.Integer" do
+            throw_error(unexpected_type_error("Expected an integer but got object of type \"" + type_name_of(other) + "\"!"))
+        end
+
+        return if other >= 0 and other < this.tape.length() do (this.tape < other) else do (static blank_symbol)
+    end
+end
+
+object turing_machine do
+
+    private tape: nothing
+    private final_states: ()
+    private transition_functions: {}
+
+    private head_position: 0
+    private current_state: nothing
+
+    constant function initialize with tape, initial_state, final_states: nothing, transition_functions: nothing do
+        this.tape: global tape(tape)
+        this.current_state: initial_state
+
+        if transition_functions ! nothing do
+            this.transition_functions: transition_functions
+        end
+
+        if final_states ! nothing do
+            this.final_states: final_states
+        end
+    end
+
+    function get_tape do tape.to_string()
+
+    function do_step do
+        char_under_head: tape < head_position
+        x: (current_state, char_under_head)
+
+        if x in transition_functions do
+            y: transition_functions < x
+            this.tape < this.head_position: y < 1
+
+            if y < 2 = `R` do
+                this.head_position:+ 1
+            else if y < 2 = `L` do
+                this.head_position:- 1
+            end
+
+            this.current_state: y < 0
+        end
+    end
+
+    function final do current_state in final_states
+end
+
+initial_state: "init"
+accepting_states: ("final",)
+transition_functions: {("init",`0`):("init", `1`, `R`),
+                       ("init",`1`):("init", `0`, `R`),
+                       ("init",` `):("final",` `, `N`)}
+final_states: ("final",)
+
+machine: turing_machine("010011001 ", initial_state, final_states, transition_functions)
+
+show("Input on tape: ", machine.get_tape())
+
+while not machine.final() do
+    machine.do_step()
+end
+
+show("Tape after processing: ", machine.get_tape())

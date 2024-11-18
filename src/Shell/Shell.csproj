@@ -3,8 +3,8 @@
 		<OutputType>Exe</OutputType>
 		<RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Platforms>AnyCPU</Platforms>
-		<TargetFramework>net8.0</TargetFramework>
-		<LangVersion>12</LangVersion>
+		<TargetFramework>net9.0</TargetFramework>
+		<LangVersion>13</LangVersion>
 		
 		<ImplicitUsings>Disable</ImplicitUsings>
 		<Nullable>Enable</Nullable>
@@ -24,7 +24,7 @@
 		<Title>The ezrSquared Command Line Interface</Title>
 		<Description>The Command Line Interface for the ezrSquared programming language.</Description>
 		
-		<Version>0.11.2</Version>
+		<Version>0.11.3</Version>
 		
 		<Authors>Udayshankar Ravikumar</Authors>
 		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
@@ -43,7 +43,7 @@
 	
 	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <Reference Include="ezrSquared-lib">
-	    <HintPath>..\..\Binaries\ezrSquared\Release\net8.0\ezrSquared-lib.dll</HintPath>
+	    <HintPath>..\..\Binaries\ezrSquared\Release\net9.0\ezrSquared-lib.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 

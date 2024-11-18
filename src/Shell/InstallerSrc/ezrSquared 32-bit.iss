@@ -4,7 +4,7 @@
 #include "environment.iss"
 
 #define MyAppName "ezr² Shell"
-#define MyAppVersion "0.11.2"
+#define MyAppVersion "0.11.3"
 #define MyAppPublisher "Urav Advanced Learning Systems Pvt Ltd"
 #define MyAppURL "https://uralstech.github.io/ezrSquared/"
 #define MyAppExeName "ezrSquared.exe"
@@ -68,10 +68,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "{app}\Libraries"
 
 [Files]
-Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net8.0\win-x86\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net9.0\win-x86\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Code\csharp\ezrSquared\docs\_site\api\APIReferenceManual.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion; Components: docs
 Source: "D:\Code\csharp\ezrSquared\docs\_site\docsrc\QuickStartDocumentation.pdf"; DestDir: "{app}\Documentation"; Flags: ignoreversion; Components: docs
-Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net8.0\win-x86\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Code\csharp\ezrSquared\Binaries\Shell\Release\net9.0\win-x86\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "D:\Code\csharp\ezrSquared\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

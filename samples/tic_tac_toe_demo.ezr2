@@ -1,135 +1,150 @@
 @ A demo for the ezr² programming language
 @ https://github.com/Uralstech/ezrSquared
 
+static object POSITION do
+    EMPTY: `-`
+    X: `X`
+    O: `O`
+    ANY: `/`
+end
+
 @ Main game matrix
-game: [["-", "-", "-"],
-       ["-", "-", "-"],
-       ["-", "-", "-"]]
+game: ([POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY],
+       [POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY],
+       [POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY])
 
 @ Winning cases
-wins: [[["n", "n", "n"],
-        ["-", "-", "-"],
-        ["-", "-", "-"]],
+wins: (((POSITION.ANY, POSITION.ANY, POSITION.ANY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY)),
 
-       [["-", "-", "-"],
-        ["n", "n", "n"],
-        ["-", "-", "-"]],
+       ((POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.ANY, POSITION.ANY, POSITION.ANY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY)),
 
-       [["-", "-", "-"],
-        ["-", "-", "-"],
-        ["n", "n", "n"]],
+       ((POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.ANY, POSITION.ANY, POSITION.ANY)),
 
-       [["n", "-", "-"],
-        ["n", "-", "-"],
-        ["n", "-", "-"]],
+       ((POSITION.ANY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.ANY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.ANY, POSITION.EMPTY, POSITION.EMPTY)),
 
-       [["-", "n", "-"],
-        ["-", "n", "-"],
-        ["-", "n", "-"]],
+       ((POSITION.EMPTY, POSITION.ANY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.ANY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.ANY, POSITION.EMPTY)),
 
-       [["-", "-", "n"],
-        ["-", "-", "n"],
-        ["-", "-", "n"]],
+       ((POSITION.EMPTY, POSITION.EMPTY, POSITION.ANY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.ANY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.ANY)),
 
-       [["-", "-", "n"],
-        ["-", "n", "-"],
-        ["n", "-", "-"]],
+       ((POSITION.EMPTY, POSITION.EMPTY, POSITION.ANY),
+        (POSITION.EMPTY, POSITION.ANY, POSITION.EMPTY),
+        (POSITION.ANY, POSITION.EMPTY, POSITION.EMPTY)),
 
-       [["n", "-", "-"],
-        ["-", "n", "-"],
-        ["-", "-", "n"]]]
+       ((POSITION.ANY, POSITION.EMPTY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.ANY, POSITION.EMPTY),
+        (POSITION.EMPTY, POSITION.EMPTY, POSITION.ANY)))
 
 @ Function to show game matrix in more readable form
 function show_game do
-    count to game.length as i do
-        s: ""
-        count to (game <= i).length as j do s: s + game <= i <= j + " "
+    for each i in game do
+        row: ''
         
-        show(s)
+        for each j in i do
+            row + j
+            row + ` `
+        end
+
+        show(row)
     end
 end
 
 @ Function for checking if the game is over, and who has won
 function check_result do
     full: true
-    count to wins.length as i do
-        x_pts: 0
-        o_pts: 0
-        count to game.length as j do
-            count to (game <= j).length as k do
-                if wins <= i <= j <= k = "n" do
-                    if game <= j <= k = "x" do x_pts: x_pts + 1
-                    if game <= j <= k = "o" do o_pts: o_pts + 1
+
+    for each case in wins do
+        x_points: 0
+        o_points: 0
+
+        count to game.length() as i do
+            count to (game < i).length() as j do
+                if game < i < j = POSITION.EMPTY do
+                    full: false
+                    skip
+                else if case < i < j = POSITION.EMPTY do
+                    skip
                 end
 
-                if game <= j <= k = "-" do full: false
+                if game < i < j = POSITION.X do
+                    x_points:+ 1
+                else if game < i < j = POSITION.O do
+                    o_points:+ 1
+                end
             end
 
-            if x_pts >= 3 do
-                return "x"
-            else if o_pts >= 3 do
-                return "o"
+            if x_points >= 3 do
+                return POSITION.X
+            else if o_points >= 3 do
+                return POSITION.O
             end
         end
     end
 
-    return full.as_integer().as_string()
+    return if full do "FULL" else do false
 end
 
-@ Function to register the players" current move
+@ Function to register the player's current move
 function move_game with position, char do
     y: if position <= 3 do 0 else if position <= 6 do 1 else if position <= 9 do 2 else do -1
     x: if position <= 3 do position - 1 else if position <= 6 do position - 4 else if position <= 9 do position - 7 else do -1
     if (y < 0 or x < 0) or position <= 0 do return "INVALID POSITION"
-    if game <= y <= x ! "-" do return "INVALID POSITION"
+    if game < y < x ! POSITION.EMPTY do return "INVALID POSITION"
 
-    gamey : game <= y
-
-    gamey - x
-    gamey.insert(x, char)
-
-    game - y
-    game.insert(y, gamey)
-
-    return game
+    (global game) < y < x: char
 end
 
 @ Showing the matrix
-show("\n")
 show_game()
 
 @ Main gameloop
-char: "x"
+char: POSITION.X
 while true do
     try do
-        move: get(("Enter position (" + char) + ") ").as_integer()
+        input: get("Enter position (" + char + ") ")
+
+        if input.length() ! 1 do throw_error(unexpected_type_error("Expected single-digit number!"))
+        
+        move_char: "" + input < 0
+        if move_char < 48 or move_char > 57 do throw_error(unexpected_type_error("Expected single-digit number!"))
+
+        move: move_char - 48
     catch do
         show("INVALID INPUT")
         skip
     end
 
     move: move_game(move, char)
-    if type_of(move) = "string" do
+    if type_name_of(move) = "string" do
         show(move)
         skip
-    else do
-        game: move
     end
 
     show("\n")
     show_game()
 
     result: check_result()
-    if result = "1" do
+    if result = "FULL" do
         show("Draw!")
         stop
-    else if result = "x" do
+    else if result = POSITION.X do
         show("X has won!")
         stop
-    else if result = "o" do
+    else if result = POSITION.O do
         show("O has won!")
         stop
     end
 
-    char: if char = "x" do "o" else do "x"
+    char: if char = POSITION.X do POSITION.O else do POSITION.X
 end

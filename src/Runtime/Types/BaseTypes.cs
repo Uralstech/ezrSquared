@@ -373,7 +373,7 @@ public abstract class EzrObject : IEzrObject
     /// Creates a new "nothing" constant.
     /// </summary>
     /// <returns>The constant.</returns>
-    protected internal Reference NewNothingConstant()
+    protected internal static Reference NewNothingConstant()
     {
         return ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant);
     }
@@ -383,7 +383,7 @@ public abstract class EzrObject : IEzrObject
     /// </summary>
     /// <param name="value">The raw boolean value.</param>
     /// <returns>The constant.</returns>
-    protected internal Reference NewBooleanConstant(bool value)
+    protected internal static Reference NewBooleanConstant(bool value)
     {
         return ReferencePool.Get(value
             ? EzrConstants.True

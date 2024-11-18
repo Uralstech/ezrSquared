@@ -115,7 +115,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
         if (arguments.Result.ShouldReturn)
             return;
 
-        arguments.Result.Success(ReferencePool.Get(hasKey ? EzrConstants.True : EzrConstants.False, AccessMod.PrivateConstant));
+        arguments.Result.Success(NewBooleanConstant(hasKey));
     }
 
     /// <inheritdoc/>
@@ -208,21 +208,21 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
                 if (result.ShouldReturn)
                     break;
 
-                result.Success(NewNothingConstant()); break;
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant)); break;
 
             case EzrDictionary otherDictionary:
                 Value.Merge(otherDictionary.Value, result);
                 if (result.ShouldReturn)
                     break;
 
-                result.Success(NewNothingConstant()); break;
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant)); break;
 
             case IEzrDictionary otherIDictionary:
                 Value.Merge(otherIDictionary, _executionContext, result);
                 if (result.ShouldReturn)
                     break;
 
-                result.Success(NewNothingConstant()); break;
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant)); break;
 
             default:
                 result.Failure(IllegalOperation(other)); break;
@@ -242,7 +242,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
         if (!success)
             result.Failure(new EzrKeyNotFoundError("The key not found in the dictionary and connot be removed!", _executionContext, other.StartPosition, other.EndPosition));
         else
-            result.Success(NewNothingConstant());
+            result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
     }
 
     /// <remarks>Here, "divide" means "decrease the number of pairs in the dictionary X times".</remarks>
@@ -258,7 +258,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
 
             case EzrFloat when Value.Count == 0:
             case EzrInteger when Value.Count == 0:
-                result.Success(NewNothingConstant()); return;
+                result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant)); return;
 
             case EzrInteger otherInteger when otherInteger.TryGetIntRepresentation(out int divisor):
                 newLength = Value.Count / divisor; break;
@@ -291,7 +291,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
             }
         }
 
-        result.Success(NewNothingConstant());
+        result.Success(ReferencePool.Get(this, AccessMod.PrivateConstant));
     }
 
     /// <inheritdoc/>

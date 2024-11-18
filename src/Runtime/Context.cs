@@ -252,6 +252,7 @@ public class Context : IEnumerable<KeyValuePair<string, Reference>>
         if (_symbols.TryGetValue(symbol, out Reference? reference))
         {
             if ((reference.AccessibilityModifiers & AccessMod.Private) == AccessMod.Private
+                && (accessibilityModifiers & AccessMod.Static) != AccessMod.Static
                 && callingContext.Id != Id && !callingContext.IsContextParent(this))
             {
                 objectReference = Reference.Empty;
@@ -276,8 +277,7 @@ public class Context : IEnumerable<KeyValuePair<string, Reference>>
         {
             for (int i = 0; i < LinkedContexts.Length; i++)
             {
-                Context linkedContext = LinkedContexts[i];
-                if (linkedContext is null)
+                if (LinkedContexts[i] is not Context linkedContext)
                     continue;
 
                 GetStatus status = linkedContext.Get(callingContext, symbol, out objectReference, AccessMod.LocalScope);
@@ -340,6 +340,7 @@ public class Context : IEnumerable<KeyValuePair<string, Reference>>
 
         if (oldReference.RegisteredContext is not null
             && ((oldReference.AccessibilityModifiers | accessibilityModifiers) & AccessMod.Private) == AccessMod.Private
+            && (accessibilityModifiers & AccessMod.Static) != AccessMod.Static
             && !isCallingContextRelatedToReceivingContext)
             return (SetStatus.PrivateSymbolAssignmentNotAllowed, Reference.Empty);
 
@@ -395,6 +396,7 @@ public class Context : IEnumerable<KeyValuePair<string, Reference>>
                 return SetStatus.ConstantAssignmentNotAllowed;
 
             if (((reference.AccessibilityModifiers & AccessMod.Private) == AccessMod.Private || objectReferenceIsPrivate)
+                && (accessibilityModifiers & AccessMod.Static) != AccessMod.Static
                 && !isCallingContextRelatedToReceivingContext)
                 return SetStatus.PrivateSymbolAssignmentNotAllowed;
 

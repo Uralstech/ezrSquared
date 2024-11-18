@@ -54,7 +54,8 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
         }
         else
         {
-            object? value = EzrObjectToCSharp(arguments[0].Object, SharpMember.PropertyType, result);
+            IEzrObject ezrObject = arguments[0].Object;
+            object? value = EzrObjectToCSharp(ezrObject, SharpMember.PropertyType, result);
             if (result.ShouldReturn)
                 return;
 
@@ -67,7 +68,7 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
             try
             {
                 SharpMember.SetValue(Instance, value);
-                result.Success(NewNothingConstant());
+                result.Success(ReferencePool.Get(ezrObject, AccessMod.PrivateConstant));
             }
             catch (Exception error)
             {

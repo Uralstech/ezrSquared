@@ -46,14 +46,15 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
                 break;
 
             case { Length: 1 }:
-                object? convertedArgument = EzrObjectToCSharp(arguments[0].Object, SharpMember.FieldType, result);
+                IEzrObject ezrObject = arguments[0].Object;
+                object? convertedArgument = EzrObjectToCSharp(ezrObject, SharpMember.FieldType, result);
                 if (result.ShouldReturn)
                     break;
 
                 try
                 {
                     SharpMember.SetValue(Instance, convertedArgument);
-                    result.Success(NewNothingConstant());
+                    result.Success(ReferencePool.Get(ezrObject, AccessMod.PrivateConstant));
                 }
                 catch (Exception error)
                 {

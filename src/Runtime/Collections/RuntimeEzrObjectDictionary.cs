@@ -20,7 +20,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <summary>
     /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
-    [SharpAutoWrapper("length", isReadOnly: true)]
+    [SharpAutoWrapper("length")]
     public int Count => _items.Count;
 
     /// <summary>
