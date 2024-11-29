@@ -79,7 +79,7 @@ ezr² RE still has a lot missing features, like the `include` expression and man
 It is also very unstable, and the API and syntax may change in updates. So, it is not recommended to use ezr² RE for scripting. If you want to try it
 out, you can download it from the [***releases page on GitHub***](https://github.com/Uralstech/ezrSquared/releases/), or, from here:
 
-# [Windows](#tab/REwindows)
+# [Windows Installers](#tab/REwindowsInstallers)
 
 * Download the appropriate installer.
 * Run the installer and go through the installation.
@@ -87,6 +87,29 @@ out, you can download it from the [***releases page on GitHub***](https://github
  
 [![ezr² RE v0.11.3 for Windows x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28Windows_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.Setup.Win64.exe)
 [![ezr² RE v0.11.3 for Windows x86](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28Windows_x86%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.Setup.Win32.exe)
+
+# [Windows Archives](#tab/REwindowsArchives)
+
+* Download and extract the appropriate archive.
+<br/>
+
+[![ezr² RE v0.11.3 for Windows Arm64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28Windows_arm64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.Windows-Arm64.tar.xz)
+
+# [Linux](#tab/RElinux)
+
+* Download and extract the appropriate archive.
+<br/>
+
+[![ezr² RE v0.11.3 for Linux x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28Linux_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.Linux-x64.tar.xz)
+[![ezr² RE v0.11.3 for Linux Arm64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28Linux_arm64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.Linux-Arm64.tar.xz)
+
+# [MacOS](#tab/REmacOS)
+
+* Download and extract the appropriate archive.
+<br/>
+
+[![ezr² RE v0.11.3 for MacOS x64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28MacOS_x64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.MacOS-x64.tar.xz)
+[![ezr² RE v0.11.3 for MacOS Arm64](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28MacOS_arm64%29-32CD32?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Uralstech/ezrSquared/releases/download/v0.11.3/ezrSquared.Shell.MacOS-Arm64.tar.xz)
 
 # [NuGet](#tab/REnuget)
 
