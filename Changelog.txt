@@ -3,6 +3,16 @@ CHANGELOG - What's new?
 See the GitHub releases for more detailed info:
 https://github.com/Uralstech/ezrSquared/releases
 
+* ezr² RE - v0.11.3 [29-11-24]
+	* [BREAKING CHANGE] `CsealAttribute` has been removed.
+	* [BREAKING CHANGE] `NewNothingConstant()` and `NewBooleanConstant(bool)` have been made static.
+	* Added new `get_raw` and `get_context` built-in functions.
+	* Object instances will now be able to access private static members.
+	* Mutable types now return references to themselves after mutation operations have been performed on them.
+	* Field and property wrappers now return the set value instead of "nothing".
+	* All `SharpAutoWrapper` wrapped `Count` properties are now named "length" in the wrapper. 
+	* `Context` now inherits from `IEnumerable<KeyValuePair<string, Reference>>`.
+
 * ezr² RE - v0.11.2 [09-11-24]
 	* Tasks are no longer awaited before being wrapped and are now wrapped like any other C# object.
 	* Wrapped constructors are now named "make" then "make_1" and so on for variations.
