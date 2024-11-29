@@ -21,16 +21,16 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
     
     - name: Setup Signing
       run: |
-        mkdir Secrets
-        echo "${{ secrets.LIB_SIGNING_KEY }}" > Secrets/sgKey.txt
-        openssl base64 -d -in Secrets/sgKey.txt -out Secrets/sgKey.snk
+        New-Item -ItemType "directory" -Path Secrets
+        Set-Content -Path Secrets\sgKey.txt -Value '${{ secrets.LIB_SIGNING_KEY }}'
+        certutil -decode Secrets\sgKey.txt Secrets\sgKey.snk
 
     - name: .NET Setup
       uses: actions/setup-dotnet@v4
