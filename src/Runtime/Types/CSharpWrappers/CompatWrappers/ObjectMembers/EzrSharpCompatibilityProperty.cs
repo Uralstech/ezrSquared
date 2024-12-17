@@ -49,8 +49,16 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
                 return;
             }
 
-            object? value = SharpMember.GetValue(Instance);
-            CSharpToEzrObject(value, result);
+            try
+            {
+                object? value = SharpMember.GetValue(Instance);
+                CSharpToEzrObject(value, SharpMember.PropertyType, result);
+            }
+            catch (Exception error)
+            {
+                result.Failure(new EzrWrapperExecutionError(error.Message, Context, StartPosition, EndPosition));
+                return;
+            }
         }
         else
         {

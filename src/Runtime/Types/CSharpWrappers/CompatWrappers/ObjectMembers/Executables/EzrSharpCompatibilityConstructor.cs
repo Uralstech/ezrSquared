@@ -59,28 +59,14 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        Dictionary<string, IEzrObject> formattedArguments = ArgumentsArrayToDictionary(arguments, result);
-        if (result.ShouldReturn)
-            return;
-
-        object?[] mappedArguments = CheckAndPopulateArguments(formattedArguments, result);
+        object?[] mappedArguments = CheckAndPopulateArguments(arguments, result);
         if (result.ShouldReturn)
             return;
 
         try
         {
             object? output = SharpMember.Invoke(mappedArguments);
-
-            if (output is null)
-                result.Success(NewNothingConstant());
-            else
-            {
-                IEzrObject wrapper = new EzrSharpCompatibilityObjectInstance(output, ConstructingType, _executionContext, StartPosition, EndPosition);
-                if (result.ShouldReturn)
-                    return;
-
-                result.Success(ReferencePool.Get(wrapper));
-            }
+            CSharpToEzrObject(output, ConstructingType, result);
         }
         catch (Exception error)
         {

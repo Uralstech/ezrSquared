@@ -1,6 +1,5 @@
 ﻿using EzrSquared;
 using EzrSquared.Executor;
-using EzrSquared.Runtime.Types.Collections;
 using System;
 using System.IO;
 using System.Text;
@@ -141,14 +140,12 @@ internal class Shell
             return false;
         }
 
-        string outputText = result.Result is EzrArray array && array.Value.Length == 1
-            ? array.Value[0].ToString(CodeExecutor.Interpreter.RuntimeResult)
-            : result.Result!.ToString(CodeExecutor.Interpreter.RuntimeResult);
-
+        string outputText = result.Result!.ToString(CodeExecutor.Interpreter.RuntimeResult);
         if (CodeExecutor.Interpreter.RuntimeResult.Error is not null)
             EzrShellConsoleHelper.ShowError(CodeExecutor.Interpreter.RuntimeResult.Error.ToPureString(CodeExecutor.Interpreter.RuntimeResult));
         else
             EzrShellConsoleHelper.ShowOutput(outputText);
+
         return true;
     }
 }

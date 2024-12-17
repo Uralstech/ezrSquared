@@ -22,25 +22,29 @@ public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? ins
     /// <inheritdoc/>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpFunction";
 
+    /// <summary>
+    /// Creates a new <see cref="EzrSharpCompatibilityFunction"/> from a delegate.
+    /// </summary>
+    /// <param name="sharpFunction">The method to wrap.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    /// <param name="skipValidation">Skip method signature validation?</param>
+    public EzrSharpCompatibilityFunction(Delegate sharpFunction, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false)
+        : this(sharpFunction.Method, sharpFunction.Target, parentContext, startPosition, endPosition, skipValidation)
+    { }
+
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        Dictionary<string, IEzrObject> formattedArguments = ArgumentsArrayToDictionary(arguments, result);
-        if (result.ShouldReturn)
-            return;
-
-        object?[] mappedArguments = CheckAndPopulateArguments(formattedArguments, result);
+        object?[] mappedArguments = CheckAndPopulateArguments(arguments, result);
         if (result.ShouldReturn)
             return;
 
         try
         {
             object? output = SharpMember.Invoke(Instance, mappedArguments);
-
-            if (output is null)
-                result.Success(NewNothingConstant());
-            else
-                CSharpToEzrObject(output, result);
+            CSharpToEzrObject(output, SharpMember.ReturnType, result);
         }
         catch (Exception error)
         {

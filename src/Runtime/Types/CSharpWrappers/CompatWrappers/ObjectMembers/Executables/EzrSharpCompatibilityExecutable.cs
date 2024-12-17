@@ -2,7 +2,6 @@
 using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
@@ -58,101 +57,82 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     }
 
     /// <summary>
-    /// Converts an array of arguments from ezr² code to an ordered dictionary.
-    /// </summary>
-    /// <param name="arguments">The arguments.</param>
-    /// <param name="result">Runtime result for carrying errors.</param>
-    /// <returns>The dictionary.</returns>
-    protected internal Dictionary<string, IEzrObject> ArgumentsArrayToDictionary(Reference[] arguments, RuntimeResult result)
-    {
-        Dictionary<string, IEzrObject> formattedArguments = new(arguments.Length);
-
-        int index = 0;
-        int requiredKeywordArguments = 0;
-        for (int i = 0; i < arguments.Length; i++)
-        {
-            Reference reference = arguments[i];
-            if (!string.IsNullOrEmpty(reference.Name) && !reference.IsRegistered)
-            {
-                if (formattedArguments.ContainsKey(reference.Name))
-                {
-                    result.Failure(new EzrIllegalOperationError($"Cannot override already defined argument \"{reference.Name}\"!", _executionContext, reference.Object.StartPosition, reference.Object.EndPosition));
-                    break;
-                }
-
-                formattedArguments[reference.Name] = reference.Object;
-                if (Array.IndexOf(ParameterNames, reference.Name) >= 0)
-                    requiredKeywordArguments++;
-            }
-            else
-            {
-            IndexCheck:
-                if (ParameterNames.Length <= index)
-                {
-                    result.Failure(new EzrUnexpectedArgumentError(
-                        requiredKeywordArguments > 0
-                            ? $"Only expected {ParameterNames.Length - requiredKeywordArguments} unnamed argument(s) as {requiredKeywordArguments} required argument(s) has/have been declared as (a) keyword argument(s)!"
-                            : $"Only expected {ParameterNames.Length} unnamed argument(s)!",
-                        _executionContext, StartPosition, EndPosition));
-                    break;
-                }
-
-                string argumentName = ParameterNames[index];
-                if (!formattedArguments.ContainsKey(argumentName))
-                {
-                    formattedArguments[argumentName] = reference.Object;
-                    index++;
-                }
-                else
-                {
-                    index++;
-                    goto IndexCheck;
-                }
-            }
-        }
-
-        return formattedArguments;
-    }
-
-    /// <summary>
-    /// Converts an ordered dictionary of named arguments into an array of primitive C# objects in the order the executable expects them in.
+    /// Converts an array of arguments from ezr² code to an array of primitive C# objects in the order the executable expects them in.
     /// </summary>
     /// <param name="arguments">The arguments.</param>
     /// <param name="result">Runtime result for carrying errors.</param>
     /// <returns>The array of objects.</returns>
-    protected internal object?[] CheckAndPopulateArguments(Dictionary<string, IEzrObject> arguments, RuntimeResult result)
+    protected internal object?[] CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
     {
-        object?[] formattedArguments = new object?[Parameters.Length];
+        int parametersLength = Parameters.Length;
+
+        object?[] formattedArguments = parametersLength == 0 ? [] : new object?[parametersLength];
         Array.Fill(formattedArguments, Type.Missing);
 
-        for (int i = 0; i < Parameters.Length; i++)
+        int nextUnnamedParamIndex = 0; // Track the index for unnamed params.
+        for (int argIndex = 0; argIndex < arguments.Length; argIndex++)
         {
-            ParameterInfo parameter = Parameters[i];
-            if (arguments.TryGetValue(ParameterNames[i], out IEzrObject? argument))
+            Reference argumentReference = arguments[argIndex];
+            string? argumentName = argumentReference.Name;
+            IEzrObject argumentObject = argumentReference.Object;
+
+            if (!string.IsNullOrEmpty(argumentName) && !argumentReference.IsRegistered)
             {
-                object? primitiveArgument = EzrObjectToCSharp(argument, parameter.ParameterType, result);
+                // Handle named parameter.
+                int parameterIndex = Array.IndexOf(ParameterNames, argumentName);
+                if (parameterIndex == -1)
+                {
+                    result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
+                    return [];
+                }
+                
+                if (!ReferenceEquals(formattedArguments[parameterIndex], Type.Missing))
+                {
+                    result.Failure(new EzrIllegalOperationError($"Cannot override already defined argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
+                    return [];
+                }
+
+                formattedArguments[parameterIndex] = EzrObjectToCSharp(argumentObject, Parameters[parameterIndex].ParameterType, result);
                 if (result.ShouldReturn)
                     return [];
 
-                formattedArguments[i] = primitiveArgument;
-                arguments.Remove(ParameterNames[i]);
+                ReferencePool.TryRelease(argumentReference);
+                continue;
             }
-            else if (parameter.HasDefaultValue)
-                formattedArguments[i] = parameter.DefaultValue;
-            else
+
+            // Handle unnamed parameter.
+
+            // Find the next unfilled parameter, skip already assigned ones.
+            for (; nextUnnamedParamIndex < parametersLength && !ReferenceEquals(formattedArguments[nextUnnamedParamIndex], Type.Missing); nextUnnamedParamIndex++)
+                continue;
+
+            if (nextUnnamedParamIndex >= parametersLength)
+            {
+                result.Failure(new EzrUnexpectedArgumentError("Did not expect any more unnamed arguments!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
+                return [];
+            }
+
+            formattedArguments[nextUnnamedParamIndex] = EzrObjectToCSharp(argumentObject, Parameters[nextUnnamedParamIndex].ParameterType, result);
+            if (result.ShouldReturn)
+                return [];
+            
+            nextUnnamedParamIndex++;
+            ReferencePool.TryRelease(argumentReference);
+        }
+
+        // Check for missing parameters, but skip parameters with default values.
+        for (int i = 0; i < parametersLength; i++)
+        {
+            if (!ReferenceEquals(formattedArguments[i], Type.Missing))
+                continue;
+
+            if (!Parameters[i].HasDefaultValue)
             {
                 result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{ParameterNames[i]}\"!", _executionContext, StartPosition, EndPosition));
                 return [];
             }
-        }
 
-        if (arguments.Count > 0)
-        {
-            using Dictionary<string, IEzrObject>.Enumerator argumentsEnumerator = arguments.GetEnumerator();
-            argumentsEnumerator.MoveNext();
-
-            KeyValuePair<string, IEzrObject> first = argumentsEnumerator.Current;
-            result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{first.Key}\"!", _executionContext, first.Value.StartPosition, first.Value.EndPosition));
+            formattedArguments[i] = Parameters[i].DefaultValue;
         }
 
         return formattedArguments;

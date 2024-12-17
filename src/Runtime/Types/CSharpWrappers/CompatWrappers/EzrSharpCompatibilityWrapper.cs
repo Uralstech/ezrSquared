@@ -325,9 +325,10 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// Converts a C# object to an ezr² object.
     /// </summary>
     /// <param name="value">The C# object to convert.</param>
+    /// <param name="valueType">The type of <paramref name="value"/>.</param>
     /// <param name="result">Runtime result for carrying the result and any errors.</param>
     /// <returns>The converted <see cref="IEzrObject"/>.</returns>
-    protected internal void CSharpToEzrObject(object? value, RuntimeResult result)
+    protected internal void CSharpToEzrObject(object? value, Type valueType, RuntimeResult result)
     {
         if (value is null)
         {
@@ -335,7 +336,9 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             return;
         }
 
-        Type valueType = value.GetType();
+        if (valueType == typeof(object))
+            valueType = value.GetType();
+
         switch (Type.GetTypeCode(valueType))
         {
             case TypeCode.Int16:
@@ -411,7 +414,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
 
         for (int i = 0; i < value.Length; i++)
         {
-            CSharpToEzrObject(value.GetValue(i), result);
+            CSharpToEzrObject(value.GetValue(i), arrayElementType, result);
             if (result.ShouldReturn)
                 return;
 

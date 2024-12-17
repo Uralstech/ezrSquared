@@ -71,7 +71,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
                 }
 
                 object? value = SharpMember.GetValue(Instance);
-                CSharpToEzrObject(value, result);
+                CSharpToEzrObject(value, SharpMember.FieldType, result);
                 break;
         }
     }

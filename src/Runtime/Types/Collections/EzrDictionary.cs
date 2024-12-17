@@ -45,7 +45,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
         Value = value;
 
         Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Count))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
-        Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(GetMemberInfo<MethodInfo, RuntimeEzrObjectDictionary>(nameof(Value.RemoveHash))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(Value.RemoveHash, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpSourceFunctionWrapper(DictionaryExists, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
