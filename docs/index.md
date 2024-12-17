@@ -126,9 +126,10 @@ For other OSes you can clone the [***branch***](https://github.com/Uralstech/ezr
 
 The offline documentation is included as an optional component in the installers. You can also download them from here:
 
-[![ezr² RE v0.11.3 documentation](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28documentation%29-32CD32?style=for-the-badge&logo=jekyll&logoColor=white)](https://uralstech.github.io/ezrSquared/docsrc/QuickStartDocumentation.pdf)
-[![ezr² RE v0.11.3 API reference manual](https://img.shields.io/badge/ezr%C2%B2_RE_v0.11.3_%28API_reference_manual%29-32CD32?style=for-the-badge&logo=jekyll&logoColor=white)](https://uralstech.github.io/ezrSquared/api/APIReferenceManual.pdf)
+This is documentation for the latest, bleeding-edge version of ezr² RE, so some things may not match up with the latest release:
 
+[![ezr² RE documentation](https://img.shields.io/badge/ezr%C2%B2_RE_documentation-32CD32?style=for-the-badge&logo=jekyll&logoColor=white)](https://uralstech.github.io/ezrSquared/docsrc/QuickStartDocumentation.pdf)
+[![ezr² RE API reference manual](https://img.shields.io/badge/ezr%C2%B2_RE_API_reference_manual-32CD32?style=for-the-badge&logo=jekyll&logoColor=white)](https://uralstech.github.io/ezrSquared/api/APIReferenceManual.pdf)
 
 ## Contributing
 

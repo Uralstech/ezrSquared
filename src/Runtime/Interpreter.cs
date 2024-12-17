@@ -57,6 +57,9 @@ public class Interpreter
             case ValueNode node:
                 VisitValueNode(node, executionContext);
                 break;
+            case StatementsNode node:
+                VisitStatementsNode(node, executionContext, callingContext, accessibilityModifiers);
+                break;
             case ArrayLikeNode node when node.CreateList:
                 VisitArrayLikeNodeList(node, executionContext, callingContext, accessibilityModifiers);
                 break;
@@ -200,6 +203,25 @@ public class Interpreter
             default:
                 throw new NotImplementedException($"Invalid TokenType \"{node.Value.Type}\" for {nameof(VisitValueNode)}!");
         }
+    }
+
+    /// <summary>
+    /// Interprets multiple statements.
+    /// </summary>
+    /// <param name="node">The <see cref="StatementsNode"/> to execute.</param>
+    /// <param name="executionContext">The <see cref="Context"/> under which the statements will be executed.</param>
+    /// <param name="callingContext">The <see cref="Context"/> calling on the execution of the statements.</param>
+    /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from executing the statements.</param>
+    private void VisitStatementsNode(StatementsNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
+    {
+        foreach (Node statement in node.Statements)
+        {
+            VisitNode(statement, executionContext, callingContext, accessibilityModifiers);
+            if (RuntimeResult.ShouldReturn)
+                return;
+        }
+
+        RuntimeResult.Success(node.Statements.Count > 0 ? RuntimeResult.Reference : ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant));
     }
 
     #region VisitArrayLikeNode

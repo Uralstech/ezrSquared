@@ -227,7 +227,7 @@ public class Parser
             statements.Add(_result.Node);
         }
 
-        _result.Success(new ArrayLikeNode(statements, false, startPosition, statements[^1].EndPosition));
+        _result.Success(new StatementsNode(statements, startPosition, statements[^1].EndPosition));
     }
 
     /// <summary>
