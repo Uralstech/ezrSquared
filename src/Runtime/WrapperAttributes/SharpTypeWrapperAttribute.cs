@@ -40,7 +40,7 @@ public class SharpTypeWrapperAttribute(string name) : Attribute
             SharpMethodWrapperAttribute? attribute = constructorInfo.GetCustomAttribute<SharpMethodWrapperAttribute>(false);
             if (constructor is not null && attribute is not null)
                 return new AmbiguousMatchException($"Found multiple constructors for type \"{typeInfo.Name}\" with attribute {nameof(SharpMethodWrapperAttribute)}");
-            
+
             if (attribute is not null)
             {
                 constructor = (constructorInfo, attribute);

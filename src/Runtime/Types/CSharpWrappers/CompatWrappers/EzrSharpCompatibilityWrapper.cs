@@ -262,7 +262,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             case TypeCode.Object when targetType == typeof(Task):
                 if (value is EzrSharpCompatibilityObjectInstance taskWrapper && targetType.IsAssignableFrom(taskWrapper.SharpMember))
                     return (Task)taskWrapper.Instance!;
-                
+
                 return s_taskFromResultMethod.MakeGenericMethod(value.GetType()).Invoke(null, [value]);
 
             case TypeCode.Object when typeof(Task).IsAssignableFrom(targetType) && !targetType.IsGenericTypeDefinition:

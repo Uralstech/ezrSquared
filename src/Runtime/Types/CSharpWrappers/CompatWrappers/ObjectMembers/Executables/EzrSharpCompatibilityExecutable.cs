@@ -85,7 +85,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
                     result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
                     return [];
                 }
-                
+
                 if (!ReferenceEquals(formattedArguments[parameterIndex], Type.Missing))
                 {
                     result.Failure(new EzrIllegalOperationError($"Cannot override already defined argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
@@ -115,7 +115,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
             formattedArguments[nextUnnamedParamIndex] = EzrObjectToCSharp(argumentObject, Parameters[nextUnnamedParamIndex].ParameterType, result);
             if (result.ShouldReturn)
                 return [];
-            
+
             nextUnnamedParamIndex++;
             ReferencePool.TryRelease(argumentReference);
         }
