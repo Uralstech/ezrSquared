@@ -6,6 +6,7 @@ using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -16,8 +17,14 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// Parent class for all automatic wrappers which wrap existing C# objects and members so that they can be used in ezr².
 /// </summary>
 /// <typeparam name="TMemberInfo">The <see cref="MemberInfo"/> type for the C# member being wrapped.</typeparam>
+
+#if NET7_0_OR_GREATER
+public abstract partial class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
+    where TMemberInfo : MemberInfo
+#else
 public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     where TMemberInfo : MemberInfo
+#endif
 {
     /// <summary>
     /// Reflection info for <see cref="Task.FromResult{TResult}(TResult)"/>/
@@ -66,8 +73,6 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
         Instance = instance;
     }
 
-
-#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
     /// <summary>
     /// Regex for converting PascalCase/camelCase to snake_case.
     /// </summary>
@@ -77,13 +82,12 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// 2. (?&lt;=[a-z0-9])(?=[A-Z]) - Add underscore when transitioning from lowercase or number to uppercase.<br/>
     /// 3. (?&lt;=[A-Z])(?=[A-Z][a-z]) - Add underscore between uppercase sequences followed by lowercase (e.g., "TCProtocol").
     /// </remarks>
-    private static readonly Regex s_caseConverterRegex = new(@"(?<!^)(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex s_caseConverterRegex = GetCaseConverterRegex();
 
     /// <summary>
     /// Regex for matching non-alphanumeric + underscore characters.
     /// </summary>
-    private static readonly Regex s_alphaNumericUnderscoreOnlyFilterRegex = new(@"[^a-zA-Z0-9_]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
+    private static readonly Regex s_alphaNumericUnderscoreOnlyFilterRegex = GetAlphaNumericUnderscoreOnlyFilterRegex();
 
     /// <summary>
     /// Converts a string from PascalCase to snake_case.
@@ -143,6 +147,17 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                     return (long)outputLong;
 
                 result.Failure(new EzrValueOutOfRangeError($"Expected value to be between {long.MinValue} - {long.MaxValue} (inclusive)!", Context, value.StartPosition, value.EndPosition));
+                break;
+
+            case TypeCode.Object when typeof(BigInteger).IsAssignableFrom(targetType):
+                if (value is EzrInteger or EzrFloat)
+                {
+                    return value is EzrInteger ezrInteger
+                        ? ezrInteger.Value
+                        : new BigInteger(((EzrFloat)value).Value);
+                }
+
+                result.Failure(new EzrUnexpectedTypeError($"Expected integer or float, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
 
             case TypeCode.UInt16:
@@ -245,7 +260,10 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 return HandleEzrArrayLikeToCSharp(value, targetType, result);
 
             case TypeCode.Object when targetType == typeof(Task):
-                return Task.CompletedTask;
+                if (value is EzrSharpCompatibilityObjectInstance taskWrapper && targetType.IsAssignableFrom(taskWrapper.SharpMember))
+                    return (Task)taskWrapper.Instance!;
+                
+                return s_taskFromResultMethod.MakeGenericMethod(value.GetType()).Invoke(null, [value]);
 
             case TypeCode.Object when typeof(Task).IsAssignableFrom(targetType) && !targetType.IsGenericTypeDefinition:
                 Type taskTargetType = targetType.GetGenericArguments()[0];
@@ -362,6 +380,9 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             case TypeCode.String:
                 result.Success(NewStringConstant((string)value));
                 break;
+            case TypeCode.Object when typeof(BigInteger).IsAssignableFrom(valueType):
+                result.Success(NewIntegerConstant((BigInteger)value));
+                break;
             case TypeCode.Object when valueType.IsArray && valueType.HasElementType:
                 HandleCSharpArrayToEzrObject((Array)value, valueType, result);
                 break;
@@ -442,4 +463,23 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
             ? HashCode.Combine(HashTag, SharpMember, Instance)
             : HashCode.Combine(HashTag, SharpMember);
     }
+
+
+#if NET7_0_OR_GREATER
+    [GeneratedRegex(@"(?<!^)(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex GetCaseConverterRegex();
+
+    [GeneratedRegex(@"[^a-zA-Z0-9_]", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    private static partial Regex GetAlphaNumericUnderscoreOnlyFilterRegex();
+#else
+    private static Regex GetCaseConverterRegex()
+    {
+        return new Regex(@"(?<!^)(?=[A-Z][a-z])|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    }
+
+    private static Regex GetAlphaNumericUnderscoreOnlyFilterRegex()
+    {
+        return new Regex(@"[^a-zA-Z0-9_]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    }
+#endif
 }

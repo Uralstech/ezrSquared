@@ -64,6 +64,10 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
     {
         SharpType = type;
 
+        // Check if type inherits from IEzrObject.
+        if (!typeof(IEzrObject).IsAssignableFrom(SharpType))
+            throw new ArgumentException($"A source wrapper cannot be used to wrap \"{type.Name}\", as it does not inherit {nameof(IEzrObject)}!", nameof(type));
+
         // Check if generic or abstract.
         if (type.IsAbstract || type.IsGenericTypeDefinition)
             throw new ArgumentException($"Cannot wrap generic/abstract C# type \"{type.Name}\"!", nameof(type));
@@ -82,12 +86,8 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
         if (typeAttributeException is not null)
             throw typeAttributeException;
 
-        Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(constructor!.Value.Info);
-        if (parameterException is not null)
-            throw parameterException;
-
         // Get constructor parameters.
-        int requiredParameters = constructor.Value.Attribute.RequiredParameters.Length;
+        int requiredParameters = constructor!.Value.Attribute.RequiredParameters.Length;
         Parameters = new (string Name, bool IsRequired)[constructor.Value.Attribute.RequiredParameters.Length + constructor.Value.Attribute.OptionalParameters.Length];
 
         // Required parameters.
@@ -115,7 +115,7 @@ public class EzrSharpSourceTypeWrapper : EzrSharpSourceExecutableWrapper
             // Check if method can be wrapped.
             if (method.GetCustomAttribute<SharpMethodWrapperAttribute>(false) is not null)
             {
-                EzrSharpSourceFunctionWrapper sourceMethod = new(method, Context, StartPosition, EndPosition);
+                EzrSharpSourceFunctionWrapper sourceMethod = new(method, null, Context, StartPosition, EndPosition);
                 (wrappedMethod, methodName) = (sourceMethod, sourceMethod.SharpFunctionName);
             }
             else if (method.GetCustomAttribute<SharpAutoWrapperAttribute>() is not null)

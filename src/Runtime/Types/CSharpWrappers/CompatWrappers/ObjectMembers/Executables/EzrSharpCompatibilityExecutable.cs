@@ -134,12 +134,6 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
                 if (result.ShouldReturn)
                     return [];
 
-                if (primitiveArgument?.GetType() != parameter.ParameterType)
-                {
-                    result.Failure(new EzrUnexpectedTypeError($"CSharp argument \"{ParameterNames[i]}\" expected value of CSharp type \"{parameter.ParameterType.Name}\", but got object of type \"{argument.TypeName}\"!", Context, argument.StartPosition, argument.EndPosition));
-                    return [];
-                }
-
                 formattedArguments[i] = primitiveArgument;
                 arguments.Remove(ParameterNames[i]);
             }

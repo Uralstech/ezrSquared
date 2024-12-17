@@ -41,7 +41,7 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
                 result.Failure(new EzrUnexpectedArgumentError($"Only expected 0 (for getting the value) or 1 (for setting the value) argument(s) for CSharp field wrapper \"{SharpMemberName}\"!", Context, StartPosition, EndPosition));
                 break;
 
-            case { Length: 1 } when AutoWrapperAttribute?.IsReadOnly == true:
+            case { Length: 1 } when AutoWrapperAttribute?.IsReadOnly == true || SharpMember.IsInitOnly:
                 result.Failure(new EzrIllegalOperationError($"Cannot set value to CSharp field wrapper \"{SharpMemberName}\" as it is read-only!", Context, StartPosition, EndPosition));
                 break;
 

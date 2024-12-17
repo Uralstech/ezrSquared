@@ -30,16 +30,17 @@ public partial class EzrSharpSourceFunctionWrapper : EzrSharpSourceExecutableWra
     /// Creates a new <see cref="EzrSharpSourceFunctionWrapper"/> from a function's <see cref="MethodInfo"/>.
     /// </summary>
     /// <param name="function">The method to wrap.</param>
+    /// <param name="instance">The object which contains the method, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpSourceFunctionWrapper(MethodInfo function, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    public EzrSharpSourceFunctionWrapper(MethodInfo function, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         Exception? parameterException = SharpMethodWrapperAttribute.ValidateMethodParameters(function);
         if (parameterException is not null)
             throw parameterException;
 
-        SharpFunction = (EzrSharpSourceWrappableMethod)function.CreateDelegate(typeof(EzrSharpSourceWrappableMethod));
+        SharpFunction = (EzrSharpSourceWrappableMethod)function.CreateDelegate(typeof(EzrSharpSourceWrappableMethod), instance);
         (SharpFunctionName, SharpMethodWrapperAttribute attribute) = GetFunctionInfo(function);
 
         AddParameters(attribute);

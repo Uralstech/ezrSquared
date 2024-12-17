@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Platforms>AnyCPU</Platforms>
 		<TargetFramework>net9.0</TargetFramework>
 		<LangVersion>13</LangVersion>
@@ -15,6 +14,10 @@
 		
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
+		<PublishAot>False</PublishAot>
+
+		<PublishTrimmed>True</PublishTrimmed>
+		<TrimMode>Partial</TrimMode>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -37,10 +40,6 @@
 		<RepositoryUrl>https://github.com/uralstech/ezrSquared</RepositoryUrl>
 	</PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Platform)' == 'x64' Or '$(Platform)' == 'arm64' ">
-		<PublishAot>True</PublishAot>
-	</PropertyGroup>
-	
 	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
 	  <Reference Include="ezrSquared-lib">
 	    <HintPath>..\..\Binaries\ezrSquared\Release\net9.0\ezrSquared-lib.dll</HintPath>

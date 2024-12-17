@@ -6,7 +6,7 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
@@ -26,7 +26,7 @@ internal class EzrRuntimeInvalidObject : EzrObject
     /// <summary>
     /// Creates a new <see cref="EzrRuntimeInvalidObject"/>.
     /// </summary>
-    EzrRuntimeInvalidObject() : base(Context.Empty, Context.Empty, Position.None, Position.None) { }
+    private EzrRuntimeInvalidObject() : base(Context.Empty, Context.Empty, Position.None, Position.None) { }
 }
 
 /// <summary>
@@ -37,7 +37,7 @@ public abstract class EzrObject : IEzrObject
     /// <summary>
     /// Cache of reflection data for all <see cref="EzrObject"/> types.
     /// </summary>
-    internal static readonly Lazy<Dictionary<(Type ParentType, string MemberName), MemberInfo>> s_memberMap = new();
+    internal static readonly ConcurrentDictionary<(Type ParentType, string MemberName), MemberInfo> s_reflectionCache = [];
 
     /// <summary>
     /// Gets cached reflection data about a member of <typeparamref name="TParentType"/>.
@@ -54,14 +54,14 @@ public abstract class EzrObject : IEzrObject
         Type parentType = typeof(TParentType);
         (Type, string) key = (parentType, name);
 
-        if (s_memberMap.Value.TryGetValue(key, out MemberInfo? cachedMemberInfo))
+        if (s_reflectionCache.TryGetValue(key, out MemberInfo? cachedMemberInfo))
             return (TMemberInfo)cachedMemberInfo;
 
         MemberInfo[] members = parentType.GetMember(name);
         if (members.Length == 0 || members[0] is not TMemberInfo memberInfo)
-            return default;
+            return null;
 
-        s_memberMap.Value[key] = memberInfo;
+        s_reflectionCache[key] = memberInfo;
         return memberInfo;
     }
 

@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputTypes>Library</OutputTypes>
-		<RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 		<Platforms>AnyCPU</Platforms>
 		<TargetFrameworks>net9.0;netstandard2.1</TargetFrameworks>
 		<LangVersion>13</LangVersion>
@@ -17,6 +16,7 @@
 		<SelfContained>True</SelfContained>
 		<IsPublishable>True</IsPublishable>
 
+		<IsTrimmable>False</IsTrimmable>
 		<IsAotCompatible>False</IsAotCompatible>
 	</PropertyGroup>
 

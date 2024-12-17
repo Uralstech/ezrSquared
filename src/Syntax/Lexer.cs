@@ -88,7 +88,6 @@ public class Lexer
     /// <returns>Any <see cref="EzrSyntaxError"/> that occurred in the lexing; <see langword="null"/> if none occurred.</returns>
     public EzrSyntaxError? Tokenize(out List<Token> tokens)
     {
-        EzrSyntaxError? error;
         tokens = [];
         while (!_reachedEnd)
         {
@@ -109,7 +108,7 @@ public class Lexer
                 case '"':
                 case '`':
                 case '\'':
-                    tokens.Add(CompileStringLike(out error));
+                    tokens.Add(CompileStringLike(out EzrSyntaxError? error));
                     if (error is not null)
                         return error;
                     break;
@@ -238,9 +237,13 @@ public class Lexer
                     tokens.Add(new Token(TokenType.Tilde, TokenTypeGroup.Symbol, string.Empty, _position.Copy()));
                     Advance();
                     break;
+                case '#':
                 case '_':
                 case char current when char.IsLetter(current):
-                    tokens.Add(CompileIdentifier());
+                    tokens.Add(CompileIdentifier(out error));
+                    if (error is not null)
+                        return error;
+
                     break;
                 case char current when char.IsDigit(current):
                     tokens.Add(CompileNumber());
@@ -583,12 +586,25 @@ public class Lexer
     /// <summary>
     /// Creates <see cref="TokenType.Identifier"/>, keyword type (<see cref="TokenType.KeywordItem"/>, <see cref="TokenType.KeywordFunction"/>, etc) and qeyword type (<see cref="TokenType.QeywordC"/>, <see cref="TokenType.QeywordFd"/>, etc) <see cref="Token"/> objects.
     /// </summary>
+    /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
     /// <returns>The created <see cref="Token"/>.</returns>
-    private Token CompileIdentifier()
+    private Token CompileIdentifier(out EzrSyntaxError? error)
     {
         Position startPosition = _position.Copy();
-        StringBuilder idValue = new();
+        error = null;
 
+        bool isEscapedIdentifier = _currentChar == '#';
+        if (isEscapedIdentifier)
+        {
+            Advance();
+            if (!char.IsLetterOrDigit(_currentChar) && _currentChar != '_')
+            {
+                error = new EzrSyntaxError(EzrSyntaxError.UnexpectedCharacter, "The hash symbol should only be used before identifiers to escape keyword detection.", startPosition, _position);
+                return Token.Empty;
+            }
+        }
+
+        StringBuilder idValue = new();
         while (!_reachedEnd && (char.IsLetterOrDigit(_currentChar) || _currentChar == '_'))
         {
             idValue.Append(_currentChar);
@@ -596,8 +612,10 @@ public class Lexer
         }
 
         string original = idValue.ToString();
-        return original.ToLower() switch
-        {
+        return isEscapedIdentifier
+            ? new Token(TokenType.Identifier, TokenTypeGroup.Special, original, startPosition, _position.Copy())
+            : original.ToLower() switch
+            {
             "private"   => new Token(TokenType.KeywordPrivate, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "constant"  => new Token(TokenType.KeywordConstant, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
             "readonly"  => new Token(TokenType.KeywordReadonly, TokenTypeGroup.Keyword, string.Empty, startPosition, _position.Copy()),
@@ -658,6 +676,6 @@ public class Lexer
             "g"         => new Token(TokenType.QeywordG, TokenTypeGroup.Qeyword, original, startPosition, _position.Copy()),
             "v"         => new Token(TokenType.QeywordV, TokenTypeGroup.Qeyword, original, startPosition, _position.Copy()),
             _           => new Token(TokenType.Identifier, TokenTypeGroup.Special, original, startPosition, _position.Copy()),
-        };
+            };
     }
 }

@@ -402,7 +402,7 @@ public static class EzrBuiltinFunctions
     {
         RuntimeResult result = arguments.Result;
         IEzrObject objectToWrap = arguments.ArgumentReferences["to_wrap"].Object;
-        
+
         IEzrObject wrapped = new EzrSharpCompatibilityObjectInstance(objectToWrap, objectToWrap.GetType(), arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition);
         result.Success(ReferencePool.Get(wrapped, AccessMod.PrivateConstant));
     }

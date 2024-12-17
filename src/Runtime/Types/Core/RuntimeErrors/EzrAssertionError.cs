@@ -21,6 +21,6 @@ public class EzrAssertionError(Context context, Position startPosition, Position
     /// Wrapper constructor for creating the error object.
     /// </summary>
     /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper()]
+    [SharpMethodWrapper]
     public EzrAssertionError(SharpMethodParameters arguments) : this(arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition) { }
 }
