@@ -2,6 +2,7 @@
 using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
@@ -30,7 +31,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     public readonly RuntimeEzrObjectDictionary Value;
 
     /// <inheritdoc/>
-    [SharpAutoWrapper("length")]
+    [WrappedMember("length")]
     public int Count => Value.Count;
 
     /// <summary>

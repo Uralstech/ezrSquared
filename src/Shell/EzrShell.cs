@@ -97,7 +97,7 @@ internal class Shell
 
     private static void ExecuteFile()
     {
-        CodeExecutor.CreateRuntimeContext(s_filePath);
+        CodeExecutor.CreateRuntimeContext(Path.GetFileName(s_filePath));
         CodeExecutor.PopulateRuntimeContext();
 
         ExecuteCode(File.ReadAllText(s_filePath, Encoding.UTF8));

@@ -1,5 +1,6 @@
 ﻿using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
@@ -15,25 +16,25 @@ public static class EzrBuiltinsUtility
     /// <param name="context">The context to add to.</param>
     public static void AddBuiltinFunctions(Context context)
     {
-        EzrSharpSourceFunctionWrapper throwError = new(EzrBuiltinFunctions.ThrowError, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper assert = new(EzrBuiltinFunctions.Assert, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper hash = new(EzrBuiltinFunctions.Hash, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper typeOf = new(EzrBuiltinFunctions.TypeOf, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper typeNameOf = new(EzrBuiltinFunctions.TypeNameOf, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper typeHashOf = new(EzrBuiltinFunctions.TypeHashOf, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper copy = new(EzrBuiltinFunctions.Copy, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper getRaw = new(EzrBuiltinFunctions.GetRaw, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper getContext = new(EzrBuiltinFunctions.GetContext, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction throwError = new(EzrBuiltinFunctions.ThrowError, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction assert = new(EzrBuiltinFunctions.Assert, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction hash = new(EzrBuiltinFunctions.Hash, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction typeOf = new(EzrBuiltinFunctions.TypeOf, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction typeNameOf = new(EzrBuiltinFunctions.TypeNameOf, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction typeHashOf = new(EzrBuiltinFunctions.TypeHashOf, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction copy = new(EzrBuiltinFunctions.Copy, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction getRaw = new(EzrBuiltinFunctions.GetRaw, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction getContext = new(EzrBuiltinFunctions.GetContext, context, Position.None, Position.None);
 
-        context.Set(null, throwError.SharpFunctionName, ReferencePool.Get(throwError, AccessMod.Constant));
-        context.Set(null, assert.SharpFunctionName, ReferencePool.Get(assert, AccessMod.Constant));
-        context.Set(null, hash.SharpFunctionName, ReferencePool.Get(hash, AccessMod.Constant));
-        context.Set(null, typeOf.SharpFunctionName, ReferencePool.Get(typeOf, AccessMod.Constant));
-        context.Set(null, typeNameOf.SharpFunctionName, ReferencePool.Get(typeNameOf, AccessMod.Constant));
-        context.Set(null, typeHashOf.SharpFunctionName, ReferencePool.Get(typeHashOf, AccessMod.Constant));
-        context.Set(null, copy.SharpFunctionName, ReferencePool.Get(copy, AccessMod.Constant));
-        context.Set(null, getRaw.SharpFunctionName, ReferencePool.Get(getRaw, AccessMod.Constant));
-        context.Set(null, getContext.SharpFunctionName, ReferencePool.Get(getContext, AccessMod.Constant));
+        context.Set(null, throwError.SharpMemberName, ReferencePool.Get(throwError, AccessMod.Constant));
+        context.Set(null, assert.SharpMemberName, ReferencePool.Get(assert, AccessMod.Constant));
+        context.Set(null, hash.SharpMemberName, ReferencePool.Get(hash, AccessMod.Constant));
+        context.Set(null, typeOf.SharpMemberName, ReferencePool.Get(typeOf, AccessMod.Constant));
+        context.Set(null, typeNameOf.SharpMemberName, ReferencePool.Get(typeNameOf, AccessMod.Constant));
+        context.Set(null, typeHashOf.SharpMemberName, ReferencePool.Get(typeHashOf, AccessMod.Constant));
+        context.Set(null, copy.SharpMemberName, ReferencePool.Get(copy, AccessMod.Constant));
+        context.Set(null, getRaw.SharpMemberName, ReferencePool.Get(getRaw, AccessMod.Constant));
+        context.Set(null, getContext.SharpMemberName, ReferencePool.Get(getContext, AccessMod.Constant));
     }
 
     /// <summary>
@@ -42,13 +43,13 @@ public static class EzrBuiltinsUtility
     /// <param name="context">The context to add to.</param>
     public static void AddBuiltinIOFunctions(Context context)
     {
-        EzrSharpSourceFunctionWrapper show = new(EzrBuiltinFunctions.Show, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper get = new(EzrBuiltinFunctions.Get, context, Position.None, Position.None);
-        EzrSharpSourceFunctionWrapper clear = new(EzrBuiltinFunctions.Clear, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction show = new(EzrBuiltinFunctions.Show, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction get = new(EzrBuiltinFunctions.Get, context, Position.None, Position.None);
+        EzrSharpCompatibilityFunction clear = new(EzrBuiltinFunctions.Clear, context, Position.None, Position.None);
 
-        context.Set(null, show.SharpFunctionName, ReferencePool.Get(show, AccessMod.Constant));
-        context.Set(null, get.SharpFunctionName, ReferencePool.Get(get, AccessMod.Constant));
-        context.Set(null, clear.SharpFunctionName, ReferencePool.Get(clear, AccessMod.Constant));
+        context.Set(null, show.SharpMemberName, ReferencePool.Get(show, AccessMod.Constant));
+        context.Set(null, get.SharpMemberName, ReferencePool.Get(get, AccessMod.Constant));
+        context.Set(null, clear.SharpMemberName, ReferencePool.Get(clear, AccessMod.Constant));
     }
 
     /// <summary>

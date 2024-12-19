@@ -3,7 +3,7 @@ using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -38,9 +38,9 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpWrapper";
 
     /// <summary>
-    /// The <see cref="SharpAutoWrapperAttribute"/> of the wrapped object, if defined.
+    /// The <see cref="WrappedMemberAttribute"/> of the wrapped object, if defined.
     /// </summary>
-    public readonly SharpAutoWrapperAttribute? AutoWrapperAttribute;
+    public readonly WrappedMemberAttribute? AutoWrapperAttribute;
 
     /// <summary>
     /// The name of the wrapped member in snake_case.
@@ -68,7 +68,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     public EzrSharpCompatibilityWrapper(TMemberInfo wrappedMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpMember = wrappedMember;
-        AutoWrapperAttribute = wrappedMember.GetCustomAttribute<SharpAutoWrapperAttribute>();
+        AutoWrapperAttribute = wrappedMember.GetCustomAttribute<WrappedMemberAttribute>();
         SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name)!;
         Instance = instance;
     }

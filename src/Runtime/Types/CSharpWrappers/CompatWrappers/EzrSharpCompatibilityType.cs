@@ -1,7 +1,7 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
-using EzrSquared.Runtime.WrapperAttributes;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
@@ -56,11 +56,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticMethods.Length; i++)
         {
             MethodInfo method = allStaticMethods[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(method))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(method))
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            if (!WrappedMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -79,7 +79,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticProperties.Length; i++)
         {
             PropertyInfo property = allStaticProperties[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(property))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(property))
                 continue;
 
             EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition);
@@ -90,7 +90,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < allStaticFields.Length; i++)
         {
             FieldInfo field = allStaticFields[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(field))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(field))
                 continue;
 
             EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition);
@@ -102,11 +102,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(constructor))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(constructor))
                 continue;
 
             EzrSharpCompatibilityConstructor constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!SharpAutoWrapperAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
+            if (!WrappedMemberAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
             Context.Set(null, definedConstructors == 0 ? "make" : $"make_{definedConstructors}", ReferencePool.Get(constructorObject, AccessMod.Constant));

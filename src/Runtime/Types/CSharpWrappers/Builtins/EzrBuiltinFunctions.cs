@@ -5,6 +5,8 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
@@ -53,37 +55,29 @@ public static class EzrBuiltinFunctions
     /// </list>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("show", HasExtraPositionalArguments = true, OptionalParameters = ["line_end", "separator"])]
-    public static void Show(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static void Show(
+        [Expose(true)] string lineEnd,
+        [Expose(true)] string separator,
+        [Runtime(Feature.PositionalArguments)] ExtraPositionalArguments messages,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ResultRef)] RuntimeResult result,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
     {
-        RuntimeResult result = arguments.Result;
-        List<Reference> messageReferences = arguments.ExtraPositionalArgumentReferences!;
-
-        if (messageReferences.Count == 0)
+        if (messages.Count == 0)
         {
-            result.Failure(new EzrMissingRequiredArgumentError("At least one message must be provided!", arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition));
+
+            result.Failure(new EzrMissingRequiredArgumentError("At least one message must be provided!", executionContext, wrapper.StartPosition, wrapper.EndPosition));
             return;
         }
 
-        string separator = string.Empty;
-        if (arguments.ArgumentReferences.TryGetValue("separator", out Reference? separatorReference))
-        {
-            IEzrObject separatorObject = separatorReference.Object;
-            if (separatorObject is IEzrString separatorString)
-                separator = separatorString.StringValue;
-            else
-            {
-                result.Failure(new EzrUnexpectedTypeError($"Expected separator of type string, character or character list, but got object of type \"{separatorObject.TypeName}\"", arguments.ExecutionContext, separatorObject.StartPosition, separatorObject.EndPosition));
-                return;
-            }
-        }
-
+        separator ??= ", ";
         StringBuilder messageBuilder = new();
-        int messagesCount = messageReferences.Count;
+        int messagesCount = messages.Count;
 
         for (int i = 0; i < messagesCount; i++)
         {
-            string messagePart = messageReferences[i].Object.ToPureString(result);
+            string messagePart = messages[i].ToPureString(result);
             if (result.ShouldReturn)
                 return;
 
@@ -92,21 +86,7 @@ public static class EzrBuiltinFunctions
                 messageBuilder.Append(separator);
         }
 
-        string lineEnd = Environment.NewLine;
-        if (arguments.ArgumentReferences.TryGetValue("line_end", out Reference? lineEndReference))
-        {
-            IEzrObject lineEndObject = lineEndReference.Object;
-            if (lineEndObject is IEzrString lineEndString)
-                lineEnd = lineEndString.StringValue;
-            else
-            {
-                result.Failure(new EzrUnexpectedTypeError($"Expected line ending of type string, character or character list, but got object of type \"{lineEndObject.TypeName}\"", arguments.ExecutionContext, lineEndObject.StartPosition, lineEndObject.EndPosition));
-                return;
-            }
-        }
-
-        Console.Write(messageBuilder.Append(lineEnd).ToString());
-        result.Success(ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant));
+        Console.Write(messageBuilder.Append(lineEnd ?? Environment.NewLine).ToString());
     }
 
     /// <summary>
@@ -134,16 +114,10 @@ public static class EzrBuiltinFunctions
     /// </list>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("throw_error", RequiredParameters = ["error"])]
-    public static void ThrowError(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static void ThrowError(IEzrRuntimeError error, [Runtime(Feature.ResultRef)] RuntimeResult result)
     {
-        Reference reference = arguments.ArgumentReferences["error"];
-
-        IEzrObject referenceObject = reference.Object;
-        if (referenceObject is not IEzrRuntimeError error)
-            arguments.Result.Failure(new EzrUnexpectedTypeError($"Expected runtime error, but got object of type \"{referenceObject.TypeName}\"!", arguments.ExecutionContext, referenceObject.StartPosition, referenceObject.EndPosition));
-        else
-            arguments.Result.Failure(error);
+        result.Failure(error);
     }
 
     /// <summary>
@@ -162,20 +136,19 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrString"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("get", OptionalParameters = ["message"])]
-    public static void Get(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static string Get([Expose(true)] IEzrObject? message, [Runtime(Feature.ResultRef)] RuntimeResult result)
     {
-        RuntimeResult result = arguments.Result;
-        if (arguments.ArgumentReferences.TryGetValue("message", out Reference? messageReference))
+        if (message is not null)
         {
-            string message = messageReference.Object.ToPureString(result);
+            string messageStr = message.ToPureString(result);
             if (result.ShouldReturn)
-                return;
+                return string.Empty;
 
-            Console.Write(message);
+            Console.Write(messageStr);
         }
 
-        result.Success(ReferencePool.Get(new EzrString(Console.ReadLine() ?? string.Empty, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), AccessMod.PrivateConstant));
+        return Console.ReadLine() ?? string.Empty;
     }
 
     /// <summary>
@@ -186,11 +159,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrNothing"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("clear")]
-    public static void Clear(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static void Clear()
     {
         Console.Clear();
-        arguments.Result.Success(ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant));
     }
 
     /// <summary>
@@ -212,23 +184,15 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrAssertionError"/> if the condition is not met.
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("assert", RequiredParameters = ["condition"])]
-    public static void Assert(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static void Assert(IEzrObject condition,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ResultRef)] RuntimeResult result,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
     {
-        RuntimeResult result = arguments.Result;
-        IEzrObject condition = arguments.ArgumentReferences["condition"].Object;
-
         bool conditionResult = condition.EvaluateBoolean(result);
-        if (result.ShouldReturn)
-            return;
-
-        if (!conditionResult)
-        {
-            result.Failure(new EzrAssertionError(arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition));
-            return;
-        }
-
-        result.Success(ReferencePool.Get(EzrConstants.Nothing, AccessMod.PrivateConstant));
+        if (!result.ShouldReturn && !conditionResult)
+            result.Failure(new EzrAssertionError(executionContext, wrapper.StartPosition, wrapper.EndPosition));
     }
 
     /// <summary>
@@ -247,17 +211,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrInteger"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("hash", RequiredParameters = ["to_hash"])]
-    public static void Hash(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static int Hash(IEzrObject toHash, [Runtime(Feature.ResultRef)] RuntimeResult result)
     {
-        RuntimeResult result = arguments.Result;
-        Reference reference = arguments.ArgumentReferences["to_hash"];
-
-        int hash = reference.Object.ComputeHashCode(result);
-        if (result.ShouldReturn)
-            return;
-
-        result.Success(ReferencePool.Get(new EzrInteger(hash, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), AccessMod.PrivateConstant));
+        return toHash.ComputeHashCode(result);
     }
 
     /// <summary>
@@ -276,16 +233,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrString"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("type_of", RequiredParameters = ["to_check"])]
-    public static void TypeOf(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static string TypeOf(IEzrObject toCheck)
     {
-        arguments.Result.Success(ReferencePool.Get(
-            new EzrString(
-                arguments.ArgumentReferences["to_check"].Object.Tag,
-                arguments.ExecutionContext,
-                arguments.StartPosition,
-                arguments.EndPosition),
-            AccessMod.PrivateConstant));
+        return toCheck.Tag;
     }
 
     /// <summary>
@@ -304,16 +255,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrString"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("type_name_of", RequiredParameters = ["to_check"])]
-    public static void TypeNameOf(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static string TypeNameOf(IEzrObject toCheck)
     {
-        arguments.Result.Success(ReferencePool.Get(
-            new EzrString(
-                arguments.ArgumentReferences["to_check"].Object.TypeName,
-                arguments.ExecutionContext,
-                arguments.StartPosition,
-                arguments.EndPosition),
-            AccessMod.PrivateConstant));
+        return toCheck.TypeName;
     }
 
     /// <summary>
@@ -332,16 +277,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrString"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("type_hash_of", RequiredParameters = ["to_check"])]
-    public static void TypeHashOf(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static int TypeHashOf(IEzrObject toCheck)
     {
-        arguments.Result.Success(ReferencePool.Get(
-            new EzrInteger(
-                arguments.ArgumentReferences["to_check"].Object.HashTag,
-                arguments.ExecutionContext,
-                arguments.StartPosition,
-                arguments.EndPosition),
-            AccessMod.PrivateConstant));
+        return toCheck.HashTag;
     }
 
     /// <summary>
@@ -363,22 +302,10 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrUnexpectedTypeError"/> if "to_copy" is not of the expected type.
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("copy", RequiredParameters = ["to_copy"])]
-    public static void Copy(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static IEzrObject Copy(IEzrMutableObject toCopy, [Runtime(Feature.ResultRef)] RuntimeResult result)
     {
-        RuntimeResult result = arguments.Result;
-        IEzrObject objectToCopy = arguments.ArgumentReferences["to_copy"].Object;
-        if (objectToCopy is not IEzrMutableObject mutableObject)
-        {
-            result.Failure(new EzrUnexpectedTypeError($"Cannot create copy of immutable object of type \"{objectToCopy.TypeName}\"!", arguments.ExecutionContext, objectToCopy.StartPosition, objectToCopy.EndPosition));
-            return;
-        }
-
-        IEzrObject? copy = (IEzrObject?)mutableObject.DeepCopy(result);
-        if (result.ShouldReturn)
-            return;
-
-        result.Success(ReferencePool.Get(copy, AccessMod.PrivateConstant));
+        return (IEzrObject?)toCopy.DeepCopy(result) ?? EzrConstants.Nothing;
     }
 
     /// <summary>
@@ -397,14 +324,12 @@ public static class EzrBuiltinFunctions
     /// <see cref="IEzrObject"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("get_raw", RequiredParameters = ["to_wrap"])]
-    public static void GetRaw(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static EzrSharpCompatibilityObjectInstance GetRaw(IEzrObject toGet,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
     {
-        RuntimeResult result = arguments.Result;
-        IEzrObject objectToWrap = arguments.ArgumentReferences["to_wrap"].Object;
-
-        IEzrObject wrapped = new EzrSharpCompatibilityObjectInstance(objectToWrap, objectToWrap.GetType(), arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition);
-        result.Success(ReferencePool.Get(wrapped, AccessMod.PrivateConstant));
+        return new EzrSharpCompatibilityObjectInstance(toGet, toGet.GetType(), executionContext, wrapper.StartPosition, wrapper.EndPosition);
     }
 
     /// <summary>
@@ -423,24 +348,23 @@ public static class EzrBuiltinFunctions
     /// <see cref="EzrDictionary"/>
     /// </remarks>
     /// <param name="arguments">The method arguments.</param>
-    [SharpMethodWrapper("get_context", RequiredParameters = ["to_get"])]
-    public static void GetContext(SharpMethodParameters arguments)
+    [WrappedMember]
+    public static IEzrObject GetContext(IEzrObject toGet,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ResultRef)] RuntimeResult result,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
     {
-        RuntimeResult result = arguments.Result;
-        IEzrObject objectToWrap = arguments.ArgumentReferences["to_get"].Object;
-
         RuntimeEzrObjectDictionary context = new();
-        foreach (KeyValuePair<string, Reference> pair in objectToWrap.Context)
+        foreach (KeyValuePair<string, Reference> pair in toGet.Context)
         {
             if (pair.Value.AccessibilityModifiers.HasFlag(AccessMod.Private))
                 continue;
 
-            context.Update(new EzrString(pair.Key, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition), pair.Value.Object, result);
+            context.Update(new EzrString(pair.Key, executionContext, wrapper.StartPosition, wrapper.EndPosition), pair.Value.Object, result);
             if (result.ShouldReturn)
-                return;
+                return EzrConstants.Nothing;
         }
 
-        IEzrObject dictionary = new EzrDictionary(context, arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition);
-        result.Success(ReferencePool.Get(dictionary, AccessMod.PrivateConstant));
+        return new EzrDictionary(context, executionContext, wrapper.StartPosition, wrapper.EndPosition);
     }
 }

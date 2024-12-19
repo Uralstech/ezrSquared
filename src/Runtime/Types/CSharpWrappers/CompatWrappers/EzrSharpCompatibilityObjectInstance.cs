@@ -1,6 +1,6 @@
-﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
-using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -48,11 +48,11 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allMethods.Length; i++)
         {
             MethodInfo method = allMethods[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(method))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(method))
                 continue;
 
             EzrSharpCompatibilityFunction methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!SharpAutoWrapperAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            if (!WrappedMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -71,7 +71,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allProperties.Length; i++)
         {
             PropertyInfo property = allProperties[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(property))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(property))
                 continue;
 
             EzrSharpCompatibilityProperty propertyObject = new(property, Instance, Context, StartPosition, EndPosition);
@@ -82,7 +82,7 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allFields.Length; i++)
         {
             FieldInfo field = allFields[i];
-            if (!SharpAutoWrapperAttribute.ShouldBeWrapped(field))
+            if (!WrappedMemberAttribute.ShouldBeWrapped(field))
                 continue;
 
             EzrSharpCompatibilityField fieldObject = new(field, Instance, Context, StartPosition, EndPosition);

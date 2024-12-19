@@ -1,6 +1,7 @@
 ﻿using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
@@ -34,7 +35,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
     public string StringValue => Value.ToString();
 
     /// <inheritdoc/>
-    [SharpAutoWrapper("length")]
+    [WrappedMember("length")]
     public int Count => Value.Length;
 
     /// <summary>

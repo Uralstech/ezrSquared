@@ -1,7 +1,9 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using EzrSquared.Util;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
@@ -19,14 +21,29 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpRuntimeExecutable";
 
     /// <summary>
-    /// Reflection information about the parameters of the executable to wrap.
+    /// Reflection information about the exposed parameters of the executable to wrap.
     /// </summary>
-    public readonly ParameterInfo[] Parameters;
+    public readonly (ParameterInfo Info, bool Optional)[] Parameters;
 
     /// <summary>
-    /// The names of the parameters of the executable to wrap, in ezr² (snake_case) format.
+    /// The names of the exposed parameters of the executable to wrap, in ezr² (snake_case) format.
     /// </summary>
     public readonly string[] ParameterNames;
+
+    /// <summary>
+    /// The attributes of the executable's runtime-provided parameters.
+    /// </summary>
+    public readonly RuntimeAttribute[] RuntimeProvidedParameters;
+
+    /// <summary>
+    /// Does this executable accept extra keyword arguments?
+    /// </summary>
+    public readonly bool AcceptsExtraKeywordArguments;
+
+    /// <summary>
+    /// Does this executable accept extra positional arguments?
+    /// </summary>
+    public readonly bool AcceptsExtraPositionalArguments;
 
     /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityExecutable{TMethodBase}"/>.
@@ -40,34 +57,69 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     public EzrSharpCompatibilityExecutable(TMethodBase sharpMethodBase, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMethodBase, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
+        if (!skipValidation)
+            WrappedMemberAttribute.ValidateMethod(SharpMember, AutoWrapperAttribute is null);
 
-        Parameters = SharpMember.GetParameters();
-        ParameterNames = new string[Parameters.Length];
+        ParameterInfo[] allParameters = SharpMember.GetParameters();
+        List<(ParameterInfo, bool)> exposedParameters = new(allParameters.Length);
+        List<string> exposedParameterNames = new(allParameters.Length);
 
-        for (int i = 0; i < Parameters.Length; i++)
+        Lazy<List<RuntimeAttribute>> runtimeProvidedParameters = new();
+
+        for (int i = 0; i < allParameters.Length; i++)
         {
-            ParameterInfo parameter = Parameters[i];
-            string? definedName = parameter.GetCustomAttribute<SharpAutoWrapperAttribute>()?.Name;
+            ParameterInfo parameterInfo = allParameters[i];
 
-            ParameterNames[i] = string.IsNullOrEmpty(definedName) ? PascalToSnakeCase(parameter.Name) ?? $"param_{i}" : definedName;
+            ExposeAttribute? autoWrapperAttribute = parameterInfo.GetCustomAttribute<ExposeAttribute>();
+            RuntimeAttribute? runtimeParamAttribute = parameterInfo.GetCustomAttribute<RuntimeAttribute>();
+
+            if (autoWrapperAttribute is not null && runtimeParamAttribute is not null)
+                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a parameter with both {nameof(ExposeAttribute)} and {nameof(RuntimeAttribute)} attributes ({parameterInfo.Name})!", nameof(sharpMethodBase));
+            else if (runtimeParamAttribute is null && runtimeProvidedParameters.IsValueCreated)
+                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a normal parameter after {nameof(RuntimeAttribute)}-attributed parameters ({parameterInfo.Name})!", nameof(sharpMethodBase));
+
+            if (runtimeParamAttribute is null)
+            {
+                exposedParameters.Add((parameterInfo, autoWrapperAttribute?.Optional ?? false));
+                exposedParameterNames.Add(string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? PascalToSnakeCase(parameterInfo.Name) ?? $"param_{i}" : autoWrapperAttribute.Name);
+                continue;
+            }
+
+            runtimeParamAttribute.ValidateParameter(parameterInfo);
+            runtimeProvidedParameters.Value.Add(runtimeParamAttribute);
+
+            switch (runtimeParamAttribute.Type)
+            {
+                case Feature.KeywordArguments:
+                    AcceptsExtraKeywordArguments = true; break;
+
+                case Feature.PositionalArguments:
+                    AcceptsExtraPositionalArguments = true; break;
+            }
         }
 
-        if (!skipValidation)
-            SharpAutoWrapperAttribute.ValidateMethod(SharpMember, AutoWrapperAttribute is null);
+        Parameters = [.. exposedParameters];
+        ParameterNames = [.. exposedParameterNames];
+        RuntimeProvidedParameters = runtimeProvidedParameters.IsValueCreated ? [.. runtimeProvidedParameters.Value] : [];
     }
 
     /// <summary>
     /// Converts an array of arguments from ezr² code to an array of primitive C# objects in the order the executable expects them in.
     /// </summary>
     /// <param name="arguments">The arguments.</param>
+    /// <param name="interpreter">The interpreter to be used in execution.</param>
     /// <param name="result">Runtime result for carrying errors.</param>
     /// <returns>The array of objects.</returns>
-    protected internal object?[] CheckAndPopulateArguments(Reference[] arguments, RuntimeResult result)
+    protected internal object?[] CheckAndPopulateArguments(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        int parametersLength = Parameters.Length;
+        int exposedParametersLength = Parameters.Length;
+        int totalParametersLength = exposedParametersLength + RuntimeProvidedParameters.Length;
 
-        object?[] formattedArguments = parametersLength == 0 ? [] : new object?[parametersLength];
-        Array.Fill(formattedArguments, Type.Missing);
+        object?[] formattedArguments = totalParametersLength == 0 ? [] : new object?[totalParametersLength];
+        Array.Fill(formattedArguments, Type.Missing, 0, Parameters.Length);
+
+        Lazy<ExtraKeywordArguments> extraKeywordArguments = new();
+        Lazy<ExtraPositionalArguments> extraPositionalArguments = new();
 
         int nextUnnamedParamIndex = 0; // Track the index for unnamed params.
         for (int argIndex = 0; argIndex < arguments.Length; argIndex++)
@@ -80,19 +132,29 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
             {
                 // Handle named parameter.
                 int parameterIndex = Array.IndexOf(ParameterNames, argumentName);
-                if (parameterIndex == -1)
+                bool isExtraArgument = parameterIndex == -1;
+
+                if (isExtraArgument && !AcceptsExtraKeywordArguments)
                 {
                     result.Failure(new EzrUnexpectedArgumentError($"Did not expect argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
                     return [];
                 }
 
-                if (!ReferenceEquals(formattedArguments[parameterIndex], Type.Missing))
+                if ((isExtraArgument && extraKeywordArguments.Value.ContainsKey(argumentName))
+                    || (!isExtraArgument && !ReferenceEquals(formattedArguments[parameterIndex], Type.Missing)))
                 {
                     result.Failure(new EzrIllegalOperationError($"Cannot override already defined argument \"{argumentName}\"!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
                     return [];
                 }
 
-                formattedArguments[parameterIndex] = EzrObjectToCSharp(argumentObject, Parameters[parameterIndex].ParameterType, result);
+                if (isExtraArgument)
+                {
+                    extraKeywordArguments.Value.Add(argumentName, argumentObject);
+                    ReferencePool.TryRelease(argumentReference);
+                    continue;
+                }
+
+                formattedArguments[parameterIndex] = EzrObjectToCSharp(argumentObject, Parameters[parameterIndex].Info.ParameterType, result);
                 if (result.ShouldReturn)
                     return [];
 
@@ -103,16 +165,24 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
             // Handle unnamed parameter.
 
             // Find the next unfilled parameter, skip already assigned ones.
-            for (; nextUnnamedParamIndex < parametersLength && !ReferenceEquals(formattedArguments[nextUnnamedParamIndex], Type.Missing); nextUnnamedParamIndex++)
+            for (; nextUnnamedParamIndex < exposedParametersLength && !ReferenceEquals(formattedArguments[nextUnnamedParamIndex], Type.Missing); nextUnnamedParamIndex++)
                 continue;
 
-            if (nextUnnamedParamIndex >= parametersLength)
+            bool allPositionalArgumentsFilled = nextUnnamedParamIndex >= exposedParametersLength;
+            if ((allPositionalArgumentsFilled || Parameters[nextUnnamedParamIndex].Optional) && AcceptsExtraPositionalArguments)
+            {
+                extraPositionalArguments.Value.Add(argumentObject);
+                ReferencePool.TryRelease(argumentReference);
+                continue;
+            }
+            
+            if (allPositionalArgumentsFilled)
             {
                 result.Failure(new EzrUnexpectedArgumentError("Did not expect any more unnamed arguments!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));
                 return [];
             }
 
-            formattedArguments[nextUnnamedParamIndex] = EzrObjectToCSharp(argumentObject, Parameters[nextUnnamedParamIndex].ParameterType, result);
+            formattedArguments[nextUnnamedParamIndex] = EzrObjectToCSharp(argumentObject, Parameters[nextUnnamedParamIndex].Info.ParameterType, result);
             if (result.ShouldReturn)
                 return [];
 
@@ -121,18 +191,37 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
         }
 
         // Check for missing parameters, but skip parameters with default values.
-        for (int i = 0; i < parametersLength; i++)
+        for (int i = 0; i < exposedParametersLength; i++)
         {
             if (!ReferenceEquals(formattedArguments[i], Type.Missing))
                 continue;
 
-            if (!Parameters[i].HasDefaultValue)
+            (ParameterInfo parameterInfo, bool isOptional) = Parameters[i];
+            if (!parameterInfo.HasDefaultValue && !isOptional)
             {
                 result.Failure(new EzrMissingRequiredArgumentError($"Expected required argument \"{ParameterNames[i]}\"!", _executionContext, StartPosition, EndPosition));
                 return [];
             }
 
-            formattedArguments[i] = Parameters[i].DefaultValue;
+            formattedArguments[i] = parameterInfo.HasDefaultValue ? parameterInfo.DefaultValue : null;
+        }
+
+        // Supply runtime-provided parameters.
+        for (int i = 0; i < RuntimeProvidedParameters.Length; i++)
+        {
+            Feature paramtype = RuntimeProvidedParameters[i].Type;
+            formattedArguments[exposedParametersLength + i] = paramtype switch
+            {
+                Feature.KeywordArguments => extraKeywordArguments.Value,
+                Feature.PositionalArguments => extraPositionalArguments.Value,
+
+                Feature.CallerRef => this,
+                Feature.ExecutionRef => _executionContext,
+                Feature.InterpreterRef => interpreter,
+                Feature.ResultRef => result,
+
+                _ => throw new NotImplementedException($"Case for handling runtime-provided parameter type \"{paramtype}\" has not been implemented!")
+            };
         }
 
         return formattedArguments;

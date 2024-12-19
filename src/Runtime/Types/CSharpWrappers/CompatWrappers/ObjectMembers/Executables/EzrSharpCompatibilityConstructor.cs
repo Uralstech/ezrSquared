@@ -1,8 +1,9 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 
 namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
 
@@ -51,20 +52,23 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     {
         ConstructingType = constructingType;
 
-        SharpAutoWrapperAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<SharpAutoWrapperAttribute>();
+        WrappedMemberAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<WrappedMemberAttribute>();
         ConstructingTypeName = !string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? autoWrapperAttribute.Name : PascalToSnakeCase(constructingType.Name)!;
     }
 
     /// <inheritdoc/>
     public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
     {
-        object?[] mappedArguments = CheckAndPopulateArguments(arguments, result);
+        object?[] mappedArguments = CheckAndPopulateArguments(arguments, interpreter, result);
         if (result.ShouldReturn)
             return;
 
         try
         {
             object? output = SharpMember.Invoke(mappedArguments);
+            if (result.ShouldReturn)
+                return;
+
             CSharpToEzrObject(output, ConstructingType, result);
         }
         catch (Exception error)
@@ -76,8 +80,24 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        return ParameterNames.Length > 0
-            ? $"<{TypeName} for type \"{ConstructingTypeName}\", with \"{string.Join("\", \"", ParameterNames)}\">"
-            : $"<{TypeName} for \"{ConstructingTypeName}\">";
+        bool hasParameters = ParameterNames.Length > 0;
+        StringBuilder builder = new($"<{TypeName} for \"{ConstructingTypeName}\"");
+
+        if (hasParameters)
+            builder.Append($", with \"{string.Join("\", \"", ParameterNames)}\"");
+
+        if (AcceptsExtraKeywordArguments)
+        {
+            builder.Append(hasParameters && AcceptsExtraPositionalArguments ? ", " : AcceptsExtraPositionalArguments || !hasParameters ? ", with " : " and ");
+            builder.Append("extra keyword arguments");
+        }
+
+        if (AcceptsExtraPositionalArguments)
+        {
+            builder.Append(hasParameters || AcceptsExtraKeywordArguments ? " and " : ", with ");
+            builder.Append("extra positional arguments");
+        }
+
+        return builder.Append('>').ToString();
     }
 }

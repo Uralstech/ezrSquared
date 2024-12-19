@@ -1,5 +1,6 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.WrapperAttributes;
 using System;
@@ -27,7 +28,7 @@ public class EzrArray : EzrObject, IEzrIndexedCollection
     public readonly IEzrObject[] Value;
 
     /// <inheritdoc/>
-    [SharpAutoWrapper("length")]
+    [WrappedMember("length")]
     public int Count { get; }
 
     /// <summary>

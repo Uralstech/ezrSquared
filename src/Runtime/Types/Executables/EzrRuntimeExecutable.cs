@@ -7,6 +7,7 @@ using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Util;
 using System;
+using System.Text;
 
 namespace EzrSquared.Runtime.Types.Executables;
 
@@ -83,8 +84,8 @@ public abstract class EzrRuntimeExecutable : EzrObject
     protected internal void CheckAndPopulateArguments(Reference[] arguments, Context context, Interpreter interpreter, RuntimeResult result, bool ignoreExtraArguments)
     {
         // Create dictionary or list to store extra arguments, if allowed.
-        RuntimeEzrObjectDictionary? extraKeywordArguments = ExtraKeywordArguments.HasValue ? new() : null;
-        RuntimeEzrObjectList? extraPositionalArguments = ExtraPositionalArguments.HasValue ? new() : null;
+        Lazy<RuntimeEzrObjectDictionary> extraKeywordArguments = new();
+        Lazy<RuntimeEzrObjectList> extraPositionalArguments = new();
 
         int currentIndexThroughParameters = 0;
         for (int i = 0; i < arguments.Length; i++)
@@ -113,7 +114,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
                 else if (extraKeywordArguments is not null) // Otherwise, if extra keyword arguments (EKAs) are allowed:
                 {
                     // Add it to the EKA dictionary.
-                    extraKeywordArguments.Update(new EzrString(keywordArgumentName, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
+                    extraKeywordArguments.Value.Update(new EzrString(keywordArgumentName, context, argumentObject.StartPosition, argumentObject.EndPosition), argumentObject, result);
 
                     // Continue onto the next argument.
                     ReferencePool.TryRelease(argument);
@@ -139,7 +140,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
             if (!isKeywordArgument && currentIndexThroughParameters >= Parameters.Length && extraPositionalArguments is not null)
             {
                 // And a reference to it to the EPA list.
-                extraPositionalArguments.Add(ReferencePool.Get(argumentObject));
+                extraPositionalArguments.Value.Add(ReferencePool.Get(argumentObject));
                 ReferencePool.TryRelease(argument);
 
                 continue;
@@ -203,11 +204,11 @@ public abstract class EzrRuntimeExecutable : EzrObject
 
         // If the extra keyword arguments dictionary should be set:
         if (ExtraKeywordArguments.HasValue)
-            context.Set(null, ExtraKeywordArguments.Value.Name, ReferencePool.Get(new EzrDictionary(extraKeywordArguments!, context, ExtraKeywordArguments.Value.StartPosition, ExtraKeywordArguments.Value.EndPosition), AccessMod.Private)); // Set it.
+            context.Set(null, ExtraKeywordArguments.Value.Name, ReferencePool.Get(new EzrDictionary(extraKeywordArguments!.Value, context, ExtraKeywordArguments.Value.StartPosition, ExtraKeywordArguments.Value.EndPosition), AccessMod.Private)); // Set it.
 
         // If the extra positional arguments list should be set:
         if (ExtraPositionalArguments.HasValue)
-            context.Set(null, ExtraPositionalArguments.Value.Name, ReferencePool.Get(new EzrList(extraPositionalArguments!, context, ExtraPositionalArguments.Value.StartPosition, ExtraPositionalArguments.Value.EndPosition), AccessMod.Private)); // Set it.
+            context.Set(null, ExtraPositionalArguments.Value.Name, ReferencePool.Get(new EzrList(extraPositionalArguments!.Value, context, ExtraPositionalArguments.Value.StartPosition, ExtraPositionalArguments.Value.EndPosition), AccessMod.Private)); // Set it.
     }
 
     /// <inheritdoc/>
@@ -251,19 +252,28 @@ public abstract class EzrRuntimeExecutable : EzrObject
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        static string ToEnabledOrDisabled(bool enabled)
+        bool hasParameters = Parameters.Length > 0;
+
+        StringBuilder builder = new($"<{TypeName} ");
+        builder.Append(IsAnonymous ? ExecutableName : $"\"{ExecutableName}\"");
+
+        if (hasParameters)
+            builder.Append($", with \"{string.Join("\", \"", Array.ConvertAll(Parameters, param => param.Name))}\"");
+
+        bool hasExtraKeywordArguments = ExtraKeywordArguments.HasValue;
+        bool hasExtraPositionalArguments = ExtraPositionalArguments.HasValue;
+        if (hasExtraKeywordArguments)
         {
-            return enabled ? "enabled" : "disabled";
+            builder.Append(hasParameters && hasExtraPositionalArguments ? ", " : hasExtraPositionalArguments || !hasParameters ? ", with " : " and ");
+            builder.Append("extra keyword arguments");
         }
 
-        string[] parameterNames = Array.ConvertAll(Parameters, parameter => parameter.Name);
-        return (Parameters.Length > 0, IsAnonymous) switch
+        if (hasExtraPositionalArguments)
         {
-            (true, true) => $"<{TypeName} {ExecutableName}, with \"{string.Join("\", \"", parameterNames)}\", extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
-            (true, false) => $"<{TypeName} \"{ExecutableName}\", with \"{string.Join("\", \"", parameterNames)}\", extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
+            builder.Append(hasParameters || hasExtraKeywordArguments ? " and " : ", with ");
+            builder.Append("extra positional arguments");
+        }
 
-            (false, true) => $"<{TypeName} {ExecutableName} with extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
-            (false, false) => $"<{TypeName} \"{ExecutableName}\" with extra keyword arguments {ToEnabledOrDisabled(ExtraKeywordArguments.HasValue)} and extra positional arguments {ToEnabledOrDisabled(ExtraPositionalArguments.HasValue)}>",
-        };
+        return builder.Append('>').ToString();
     }
 }

@@ -36,7 +36,7 @@ public static class CodeExecutor
     public static void CreateRuntimeContext(string filePath)
     {
         RuntimeContext?.Release();
-        RuntimeContext = new Context($"<\"{filePath}\" context>", true, new Position(0, 0, filePath, string.Empty));
+        RuntimeContext = new Context(filePath, true, new Position(0, 0, filePath, string.Empty));
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public static class CodeExecutor
     /// Thrown if the runtime context is <see langword="null"/>.
     /// Use <see cref="CreateRuntimeContext(string)"/> to initialize the runtime context.
     /// </exception>
-    /// <param name="excludeIO">Exclude built-in I/O functions like <see cref="EzrBuiltinFunctions.Show(Runtime.WrapperAttributes.SharpMethodParameters)"/>?</param>
+    /// <param name="excludeIO">Exclude built-in I/O functions like <see cref="EzrBuiltinFunctions.Show(string, string, List{Runtime.Types.IEzrObject}, Runtime.Types.IEzrObject, RuntimeResult, Context)"/>?</param>
     public static void PopulateRuntimeContext(bool excludeIO = false)
     {
         if (RuntimeContext is null)
