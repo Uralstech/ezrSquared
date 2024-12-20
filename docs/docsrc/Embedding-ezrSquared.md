@@ -54,7 +54,7 @@ private async void ShowOnCanvas(string text)
 ### Interpreting Code
 
 Just call `CodeExecutor.Execute` with the code you want to interpret! It returns a
-[*ExecutionResult*](~/api/EzrSquared.Executor.ExecutionResult.yml) object, which contains info
+[`ExecutionResult`](~/api/EzrSquared.Executor.ExecutionResult.yml) object, which contains info
 about the execution, like the AST, parse errors, runtime errors, and the actual result.
 
 So, for example, you can run a script asynchronously in Unity like so:

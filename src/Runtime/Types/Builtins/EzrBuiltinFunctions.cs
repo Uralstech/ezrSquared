@@ -2,7 +2,6 @@
 using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
 using EzrSquared.Runtime.Types.Wrappers;
 using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
@@ -21,37 +20,15 @@ public static class EzrBuiltinFunctions
     /// Basic console print function. Implements <see cref="Console.WriteLine()"/>.
     /// </summary>
     /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>Extra Positional Arguments</term>
-    ///         <description>(<see cref="List{T}"/> of <see cref="Reference"/>s) The message(s) to display on the console.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>line_end</term>
-    ///         <description>(Optional, <see cref="IEzrString"/>) Line end character(s) to use instead of \n.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>separator</term>
-    ///         <description>(Optional, <see cref="IEzrString"/>) separator to separate each message to be printed.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrNothing"/>
-    /// <br/>
     /// ezr² errors:
-    /// <list type="table">
-    ///     <item>
-    ///         <term><see cref="EzrMissingRequiredArgumentError"/></term>
-    ///         <description>Thrown if no messages are provided.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term><see cref="EzrUnexpectedTypeError"/></term>
-    ///         <description>Thrown if "line_end" or "separator" are not of the specified types.</description>
-    ///     </item>
-    /// </list>
+    /// <see cref="EzrMissingRequiredArgumentError"/> if no messages are provided.
     /// </remarks>
+    /// <param name="lineEnd">Optional line end character(s) to use instead of <see cref="Environment.NewLine"/>.</param>
+    /// <param name="separator">Optional separator to separate each message to be printed.</param>
+    /// <param name="messages">The message(s) to display on the console.</param>
+    /// <param name="wrapper">Reference to the caller.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <param name="executionContext">Reference to the current execution context.</param>
     [WrapMember]
     public static void Show(
         [Parameter(true)] string lineEnd,
@@ -89,27 +66,8 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Basic error throwing function. Implements <see cref="RuntimeResult.Failure(IEzrRuntimeError)"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>error</term>
-    ///         <description>(<see cref="IEzrRuntimeError"/>) The error to throw.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² errors:
-    /// <list type="table">
-    ///     <item>
-    ///         <term><see cref="EzrUnexpectedTypeError"/></term>
-    ///         <description>if "error" is not of the specified type.</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>error</term>
-    ///         <description>the given error.</description>
-    ///     </item>
-    /// </list>
-    /// </remarks>
+    /// <param name="error">The error to throw.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
     [WrapMember]
     public static void ThrowError(IEzrRuntimeError error, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
@@ -119,18 +77,9 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Basic console input function. Implements <see cref="Console.ReadLine()"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>message</term>
-    ///         <description>(<see cref="IEzrObject"/>) The message to display on the console before waiting for user input.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrString"/>
-    /// </remarks>
+    /// <param name="message">The message to display on the console before waiting for user input.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <returns>The user's input.</returns>
     [WrapMember]
     public static string Get([Parameter(true)] IEzrObject? message, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
@@ -149,10 +98,6 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Basic console clear function. Implements <see cref="Console.Clear()"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² return type:
-    /// <see cref="EzrNothing"/>
-    /// </remarks>
     [WrapMember]
     public static void Clear()
     {
@@ -163,20 +108,13 @@ public static class EzrBuiltinFunctions
     /// Assertion function to assert conditions.
     /// </summary>
     /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>condition</term>
-    ///         <description>(<see cref="IEzrObject"/>) The condition to assert.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrNothing"/>
-    /// <br/>
     /// ezr² errors:
     /// <see cref="EzrAssertionError"/> if the condition is not met.
     /// </remarks>
+    /// <param name="condition">The condition to assert.</param>
+    /// <param name="wrapper">Reference to the caller.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <param name="executionContext">Reference to the current execution context.</param>
     [WrapMember]
     public static void Assert(IEzrObject condition,
         [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
@@ -191,18 +129,9 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Basic hash function. Implements <see cref="IEzrObject.ComputeHashCode(RuntimeResult)"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_hash</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to hash.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrInteger"/>
-    /// </remarks>
+    /// <param name="toHash">The object to hash.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <returns>The hash of the object.</returns>
     [WrapMember]
     public static int Hash(IEzrObject toHash, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
@@ -212,18 +141,8 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Basic <see langword="typeof"/>-like function. Uses <see cref="IEzrObject.Tag"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_check</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to check the type of.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrString"/>
-    /// </remarks>
+    /// <param name="toCheck">The object to check the type of.</param>
+    /// <returns>The tag of the object.</returns>
     [WrapMember]
     public static string TypeOf(IEzrObject toCheck)
     {
@@ -233,18 +152,8 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Gets the plain text name of the type of an object. Uses <see cref="IEzrObject.TypeName"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_check</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to check the type-name of.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrString"/>
-    /// </remarks>
+    /// <param name="toCheck">The object to check the type-name of.</param>
+    /// <returns>The type name of the object.</returns>
     [WrapMember]
     public static string TypeNameOf(IEzrObject toCheck)
     {
@@ -254,18 +163,8 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Gets the hash ID of the type of an object. Uses <see cref="IEzrObject.HashTag"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_check</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to check the type hash of.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrString"/>
-    /// </remarks>
+    /// <param name="toCheck">The object to check the type hash of.</param>
+    /// <returns>The hashed tag of the object.</returns>
     [WrapMember]
     public static int TypeHashOf(IEzrObject toCheck)
     {
@@ -276,20 +175,12 @@ public static class EzrBuiltinFunctions
     /// Creates a copy of an <see cref="IEzrMutableObject"/>. Uses <see cref="IMutable{T}.DeepCopy(RuntimeResult)"/>.
     /// </summary>
     /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_copy</term>
-    ///         <description>(<see cref="IEzrMutableObject"/>) The object to copy.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="IEzrMutableObject"/>
-    /// 
     /// ezr² errors:
     /// <see cref="EzrUnexpectedTypeError"/> if "to_copy" is not of the expected type.
     /// </remarks>
+    /// <param name="toCopy">The object to copy.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <returns>The copy of the object.</returns>
     [WrapMember]
     public static IEzrObject Copy(IEzrMutableObject toCopy, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
@@ -299,18 +190,10 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Wraps the given ezr² object so that the runtime has access to its raw C# object.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_wrap</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to wrap.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="IEzrObject"/>
-    /// </remarks>
+    /// <param name="toGet">The object to wrap.</param>
+    /// <param name="wrapper">Reference to the caller.</param>
+    /// <param name="executionContext">Reference to the current execution context.</param>
+    /// <returns>The wrapped object.</returns>
     [WrapMember]
     public static EzrObjectWrapper GetRaw(IEzrObject toGet,
         [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
@@ -322,18 +205,11 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Returns an <see cref="EzrDictionary"/> of the references (as &lt;name, object&gt;) contained in the <see cref="Context"/> of the given object.
     /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>to_get</term>
-    ///         <description>(<see cref="IEzrObject"/>) The object to get the context of.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrDictionary"/>
-    /// </remarks>
+    /// <param name="toGet">The object to get the context of.</param>
+    /// <param name="wrapper">Reference to the caller.</param>
+    /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
+    /// <param name="executionContext">Reference to the current execution context.</param>
+    /// <returns>The content of the object's context.</returns>
     [WrapMember]
     public static IEzrObject GetContext(IEzrObject toGet,
         [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
