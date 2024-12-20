@@ -1,5 +1,6 @@
 ﻿using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using System;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <summary>
 /// Implementation of <see cref="IEzrRuntimeError"/> with some utility methods.
 /// </summary>
-[SharpTypeWrapper("runtime_error")]
+[WrappedMember("runtime_error")]
 public class EzrRuntimeError : EzrObject, IEzrRuntimeError
 {
     /// <inheritdoc/>
@@ -52,20 +53,23 @@ public class EzrRuntimeError : EzrObject, IEzrRuntimeError
         Context.Set(null, "details", ReferencePool.Get(new EzrString(Details, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
-
     /// <summary>
     /// Wrapper constructor for creating the error object.
     /// </summary>
-    /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper(RequiredParameters = ["title", "details"])]
-    public EzrRuntimeError(SharpMethodParameters arguments) : this(
-        GetStringArgument("title", arguments.ArgumentReferences["title"].Object, arguments.ExecutionContext, arguments.Result),
-        GetStringArgument("details", arguments.ArgumentReferences["details"].Object, arguments.ExecutionContext, arguments.Result),
-        arguments.ExecutionContext,
-        arguments.StartPosition,
-        arguments.EndPosition
-    )
-    { }
+    /// <param name="title">The title of the error.</param>
+    /// <param name="details">Details on why the error happened.</param>
+    /// <param name="wrapper">The caller.</param>
+    /// <param name="executionContext">The execution context.</param>
+    [WrappedMember, PrimaryConstructor]
+    public EzrRuntimeError(string title, string details,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        : this(
+            title,
+            details,
+            executionContext,
+            wrapper.StartPosition,
+            wrapper.EndPosition) { }
 
     /// <summary>
     /// Converts the given argument to a string.

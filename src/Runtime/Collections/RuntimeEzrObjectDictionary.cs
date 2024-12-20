@@ -2,7 +2,7 @@
 using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.WrapperAttributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -192,7 +192,8 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <param name="key">The key to be checked.</param>
     /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
     /// <returns><see langword="true"/> if the key was found, <see langword="false"/> if any error occured or the key was not found.</returns>
-    public bool HasKey(IEzrObject key, RuntimeResult result)
+    [WrappedMember]
+    public bool HasKey(IEzrObject key, [Runtime(Feature.ResultRef)] RuntimeResult result)
     {
         int hash = key.ComputeHashCode(result);
         return !result.ShouldReturn && _items.ContainsKey(hash);

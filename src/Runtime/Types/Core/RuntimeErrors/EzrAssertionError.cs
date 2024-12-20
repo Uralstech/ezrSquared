@@ -1,4 +1,5 @@
-﻿using EzrSquared.Runtime.WrapperAttributes;
+﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 
 namespace EzrSquared.Runtime.Types.Core.Errors;
 
@@ -8,7 +9,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <param name="context">The context in which the error occurred.</param>
 /// <param name="startPosition">The starting position of the error.</param>
 /// <param name="endPosition">The ending position of the error.</param>
-[SharpTypeWrapper("assertion_error")]
+[WrappedMember("assertion_error")]
 public class EzrAssertionError(Context context, Position startPosition, Position endPosition) : EzrRuntimeError("Assertion failed", "The assertion conditions were not met!", context, startPosition, endPosition)
 {
     /// <inheritdoc/>
@@ -20,7 +21,11 @@ public class EzrAssertionError(Context context, Position startPosition, Position
     /// <summary>
     /// Wrapper constructor for creating the error object.
     /// </summary>
-    /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper]
-    public EzrAssertionError(SharpMethodParameters arguments) : this(arguments.ExecutionContext, arguments.StartPosition, arguments.EndPosition) { }
+    /// <param name="wrapper">The caller.</param>
+    /// <param name="executionContext">The execution context.</param>
+    [WrappedMember, PrimaryConstructor]
+    public EzrAssertionError(
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        : this(executionContext, wrapper.StartPosition, wrapper.EndPosition) { }
 }

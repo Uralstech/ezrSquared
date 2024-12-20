@@ -6,7 +6,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 /// <summary>
 /// Attribute for C# types and members to be automatically wrapped from C# types into ezr² types.
 /// </summary>
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
 public class WrappedMemberAttribute : Attribute
 {
     /// <summary>
@@ -48,6 +48,21 @@ public class WrappedMemberAttribute : Attribute
     public WrappedMemberAttribute(string name, bool isReadOnly = false, bool isWriteOnly = false) : this(isReadOnly, isWriteOnly)
     {
         Name = name;
+    }
+
+    /// <summary>
+    /// Checks if the given type has the supported signature for wrapping.
+    /// </summary>
+    /// <param name="type">The type.</param>
+    /// <param name="dontThrow">Disable exception throwing.</param>
+    /// <returns><see langword="true"/> if valid, an exception or <see langword="false"/> otherwise.</returns>
+    /// <exception cref="ArgumentException">Thrown if the type is generic or has generic parameters.</exception>
+    public static bool ValidateType(Type type, bool dontThrow = false)
+    {
+        if (type.IsAbstract || type.IsGenericTypeDefinition)
+            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(WrappedMemberAttribute)}\" attribute does not support abstract/generic type \"{type.Name}\".", nameof(type));
+
+        return true;
     }
 
     /// <summary>

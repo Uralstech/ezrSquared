@@ -2,6 +2,7 @@
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// <summary>
 /// Class to automatically wrap C# types so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
+public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEzrObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp type";
@@ -22,10 +23,14 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpType";
 
     /// <summary>
+    /// The primary wrapped constructor for the type. May be <see langword="null"/>.
+    /// </summary>
+    public readonly EzrSharpCompatibilityConstructor? PrimaryConstructor;
+
+    /// <summary>
     /// Creates a new <see cref="EzrSharpCompatibilityType"/>.
     /// </summary>
     /// <param name="sharpType">The type to wrap.</param>
-    /// <param name="result">Runtime result for carrying any errors.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
@@ -41,15 +46,10 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
             | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
         Type sharpType,
 
-        RuntimeResult result, Context parentContext, Position startPosition, Position endPosition) : base(sharpType, null, parentContext, startPosition, endPosition)
+        Context parentContext, Position startPosition, Position endPosition) : base(sharpType, null, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
-
-        if (sharpType.IsAbstract || sharpType.IsGenericTypeDefinition)
-        {
-            result.Failure(new EzrUnsupportedWrappingError($"Cannot wrap generic/abstract C# type \"{SharpMember.Name}\"!", Context, StartPosition, EndPosition));
-            return;
-        }
+        WrappedMemberAttribute.ValidateType(SharpMember, AutoWrapperAttribute is null);
 
         MethodInfo[] allStaticMethods = sharpType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         Dictionary<string, int> duplicateNames = new(allStaticMethods.Length);
@@ -109,9 +109,47 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>
             if (!WrappedMemberAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
-            Context.Set(null, definedConstructors == 0 ? "make" : $"make_{definedConstructors}", ReferencePool.Get(constructorObject, AccessMod.Constant));
-            definedConstructors++;
+            if (constructor.GetCustomAttribute<PrimaryConstructorAttribute>() is not null)
+            {
+                if (PrimaryConstructor is not null)
+                    throw new ArgumentException($"Type \"{SharpMember.Name}\" cannot have multiple primary constructors!", nameof(sharpType));
+
+                PrimaryConstructor = constructorObject;
+                continue;
+            }
+
+            string name = definedConstructors == 0 ? "make" : $"make_{definedConstructors}";
+            if (constructorObject.AutoWrapperAttribute is not WrappedMemberAttribute attr || string.IsNullOrEmpty(attr.Name))
+                definedConstructors++;
+            else
+            {
+                if (Context.IsDefined(attr.Name))
+                    throw new ArgumentException($"Wrapped member with name \"{attr.Name}\" is already defined for type \"{SharpMember.Name}\".", nameof(sharpType));
+
+                name = attr.Name;
+            }
+
+            Context.Set(null, name, ReferencePool.Get(constructorObject, AccessMod.Constant));
         }
+    }
+
+    /// <inheritdoc/>
+    public new void Update(Context context, Position startPosition, Position endPosition)
+    {
+        base.Update(context, startPosition, endPosition);
+        PrimaryConstructor?.Update(Context, startPosition, endPosition);
+    }
+
+    /// <inheritdoc/>
+    public override void Execute(Reference[] arguments, Interpreter interpreter, RuntimeResult result)
+    {
+        if (PrimaryConstructor is null)
+        {
+            base.Execute(arguments, interpreter, result);
+            return;
+        }
+
+        PrimaryConstructor.Execute(arguments, interpreter, result);
     }
 
     /// <inheritdoc/>

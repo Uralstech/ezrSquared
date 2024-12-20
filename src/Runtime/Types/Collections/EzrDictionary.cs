@@ -1,12 +1,9 @@
 ﻿using EzrSquared.Runtime.Collections;
-using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
 using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
-using EzrSquared.Runtime.Types.CSharpWrappers.SourceWrappers;
-using EzrSquared.Runtime.WrapperAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,7 +44,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
 
         Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Count))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
         Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(Value.RemoveHash, Context, StartPosition, EndPosition), AccessMod.Constant));
-        Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpSourceFunctionWrapper(DictionaryExists, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpCompatibilityFunction(Value.HasKey, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
     /// <inheritdoc/>
@@ -89,34 +86,6 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    /// <summary>
-    /// Basic key checking function. Implements <see cref="RuntimeEzrObjectDictionary.HasKey(IEzrObject, RuntimeResult)"/>.
-    /// </summary>
-    /// <remarks>
-    /// ezr² parameters:
-    /// <list type="table">
-    ///     <item>
-    ///         <term>key</term>
-    ///         <description>(<see cref="IEzrObject"/>) The key to check for.</description>
-    ///     </item>
-    /// </list>
-    /// 
-    /// ezr² return type:
-    /// <see cref="EzrBoolean"/>
-    /// </remarks>
-    /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper("has_key", RequiredParameters = ["key"])]
-    private void DictionaryExists(SharpMethodParameters arguments)
-    {
-        Reference reference = arguments.ArgumentReferences["key"];
-
-        bool hasKey = Value.HasKey(reference.Object, arguments.Result);
-        if (arguments.Result.ShouldReturn)
-            return;
-
-        arguments.Result.Success(NewBooleanConstant(hasKey));
     }
 
     /// <inheritdoc/>

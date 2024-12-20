@@ -1,4 +1,5 @@
-﻿using EzrSquared.Runtime.WrapperAttributes;
+﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 
 namespace EzrSquared.Runtime.Types.Core.Errors;
 
@@ -9,7 +10,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <param name="context">The context in which the error occurred.</param>
 /// <param name="startPosition">The starting position of the error.</param>
 /// <param name="endPosition">The ending position of the error.</param>
-[SharpTypeWrapper("key_not_found_error")]
+[WrappedMember("key_not_found_error")]
 public class EzrKeyNotFoundError(string details, Context context, Position startPosition, Position endPosition) : EzrRuntimeError("Key not found", details, context, startPosition, endPosition)
 {
     /// <inheritdoc/>
@@ -21,13 +22,16 @@ public class EzrKeyNotFoundError(string details, Context context, Position start
     /// <summary>
     /// Wrapper constructor for creating the error object.
     /// </summary>
-    /// <param name="arguments">The constructor arguments.</param>
-    [SharpMethodWrapper(RequiredParameters = ["details"])]
-    public EzrKeyNotFoundError(SharpMethodParameters arguments) : this(
-        GetStringArgument("details", arguments.ArgumentReferences["details"].Object, arguments.ExecutionContext, arguments.Result),
-        arguments.ExecutionContext,
-        arguments.StartPosition,
-        arguments.EndPosition
-    )
-    { }
+    /// <param name="details">Details on why the error happened.</param>
+    /// <param name="wrapper">The caller.</param>
+    /// <param name="executionContext">The execution context.</param>
+    [WrappedMember, PrimaryConstructor]
+    public EzrKeyNotFoundError(string details,
+        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
+        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        : this(
+            details,
+            executionContext,
+            wrapper.StartPosition,
+            wrapper.EndPosition) { }
 }
