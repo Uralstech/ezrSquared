@@ -32,11 +32,11 @@ public static class CodeExecutor
     /// <summary>
     /// Creates the runtime context.
     /// </summary>
-    /// <param name="filePath">The file path to the code file this context will be used to execute.</param>
-    public static void CreateRuntimeContext(string filePath)
+    /// <param name="name">The name of the context.</param>
+    public static void CreateRuntimeContext(string name)
     {
         RuntimeContext?.Release();
-        RuntimeContext = new Context(filePath, true, new Position(0, 0, filePath, string.Empty));
+        RuntimeContext = new Context(name, true, new Position(0, 0, name, string.Empty));
     }
 
     /// <summary>
