@@ -1,8 +1,8 @@
 ﻿using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +34,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
     public string StringValue => Value.ToString();
 
     /// <inheritdoc/>
-    [WrappedMember("length")]
+    [WrapMember("length")]
     public int Count => Value.Length;
 
     /// <summary>
@@ -48,7 +48,7 @@ public class EzrCharacterList : EzrObject, IEzrMutableObject, IEzrString, IEzrIn
     {
         Value = new(value);
 
-        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrCharacterList>(nameof(Count))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "length", ReferencePool.Get(new EzrPropertyWrapper(GetMemberInfo<PropertyInfo, EzrCharacterList>(nameof(Count))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
     /// <summary>

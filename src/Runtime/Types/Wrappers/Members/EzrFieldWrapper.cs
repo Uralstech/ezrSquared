@@ -3,12 +3,12 @@ using EzrSquared.Util;
 using System;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+namespace EzrSquared.Runtime.Types.Wrappers.Members;
 
 /// <summary>
 /// Class to automatically wrap C# fields so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo>
+public class EzrFieldWrapper : EzrWrapper<FieldInfo>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp field";
@@ -17,14 +17,14 @@ public class EzrSharpCompatibilityField : EzrSharpCompatibilityWrapper<FieldInfo
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpField";
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityField"/>.
+    /// Creates a new <see cref="EzrFieldWrapper"/>.
     /// </summary>
     /// <param name="sharpField">The field to wrap.</param>
     /// <param name="instance">The object which contains the field, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityField(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpField, instance, parentContext, startPosition, endPosition)
+    public EzrFieldWrapper(FieldInfo sharpField, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpField, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
     }

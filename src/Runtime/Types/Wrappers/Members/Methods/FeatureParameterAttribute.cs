@@ -3,7 +3,7 @@ global using ExtraPositionalArguments = System.Collections.Generic.List<EzrSquar
 using System;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
 /// Attribute for wrapped C# methods that need to enable features or request data from the ezr² runtime.
@@ -15,7 +15,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <see cref="Interpreter"/> type.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
-public class RuntimeAttribute(Feature type) : Attribute
+public class FeatureParameterAttribute(Feature type) : Attribute
 {
     /// <summary>
     /// The type of the parameter.
@@ -31,22 +31,22 @@ public class RuntimeAttribute(Feature type) : Attribute
         switch (Type)
         {
             case Feature.KeywordArguments when !parameter.ParameterType.IsAssignableFrom(typeof(ExtraKeywordArguments)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(ExtraKeywordArguments)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(ExtraKeywordArguments)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
 
             case Feature.PositionalArguments when !parameter.ParameterType.IsAssignableFrom(typeof(ExtraPositionalArguments)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(ExtraPositionalArguments)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(ExtraPositionalArguments)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
 
             case Feature.CallerRef when !parameter.ParameterType.IsAssignableFrom(typeof(IEzrObject)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(IEzrObject)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(IEzrObject)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
 
             case Feature.ExecutionRef when !parameter.ParameterType.IsAssignableFrom(typeof(Context)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(Context)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(Context)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
 
             case Feature.InterpreterRef when !parameter.ParameterType.IsAssignableFrom(typeof(Interpreter)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(Interpreter)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(Interpreter)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
 
             case Feature.ResultRef when !parameter.ParameterType.IsAssignableFrom(typeof(RuntimeResult)):
-                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(RuntimeResult)} as it has the {nameof(RuntimeAttribute)} attribute, with type {Type}.", nameof(parameter));
+                throw new ArgumentException($"Parameter \"{parameter.Name}\" must be assignable from type {nameof(RuntimeResult)} as it has the {nameof(FeatureParameterAttribute)} attribute, with type {Type}.", nameof(parameter));
         }
     }
 }

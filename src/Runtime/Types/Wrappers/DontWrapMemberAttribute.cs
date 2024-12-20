@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+namespace EzrSquared.Runtime.Types.Wrappers;
 
 /// <summary>
 /// Attribute for C# types and members which should NOT be automatically wrapped from C# types into ezr² types by the interpreter.

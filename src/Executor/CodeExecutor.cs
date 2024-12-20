@@ -1,6 +1,6 @@
 ﻿using EzrSquared.Runtime;
-using EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+using EzrSquared.Runtime.Types.Builtins;
+using EzrSquared.Runtime.Types.Wrappers;
 using EzrSquared.Syntax;
 using EzrSquared.Syntax.Errors;
 using System;
@@ -86,8 +86,8 @@ public static class CodeExecutor
     /// </exception>
     /// <param name="wrapper">The wrapped object to add.</param>
     /// <param name="accessibilityModifiers">The accessibility modifiers for the reference. Defaults to <see cref="AccessMod.Constant"/>.</param>
-    /// <typeparam name="TMemberInfo">See <see cref="EzrSharpCompatibilityWrapper{TMemberInfo}"/>.</typeparam>
-    public static void AddToContext<TMemberInfo>(EzrSharpCompatibilityWrapper<TMemberInfo> wrapper, AccessMod accessibilityModifiers = AccessMod.Constant)
+    /// <typeparam name="TMemberInfo">See <see cref="EzrWrapper{TMemberInfo}"/>.</typeparam>
+    public static void AddToContext<TMemberInfo>(EzrWrapper<TMemberInfo> wrapper, AccessMod accessibilityModifiers = AccessMod.Constant)
         where TMemberInfo : MemberInfo
     {
         if (RuntimeContext is null)

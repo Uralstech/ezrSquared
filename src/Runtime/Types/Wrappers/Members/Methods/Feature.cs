@@ -1,7 +1,7 @@
-﻿namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+﻿namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
-/// The metadata for <see cref="RuntimeAttribute"/>.
+/// The metadata for <see cref="FeatureParameterAttribute"/>.
 /// </summary>
 public enum Feature
 {

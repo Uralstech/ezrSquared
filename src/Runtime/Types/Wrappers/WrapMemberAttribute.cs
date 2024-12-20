@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
+namespace EzrSquared.Runtime.Types.Wrappers;
 
 /// <summary>
 /// Attribute for C# types and members to be automatically wrapped from C# types into ezr² types.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
-public class WrappedMemberAttribute : Attribute
+public class WrapMemberAttribute : Attribute
 {
     /// <summary>
     /// The ezr² name for the member.
@@ -25,12 +25,12 @@ public class WrappedMemberAttribute : Attribute
     public readonly bool IsWriteOnly;
 
     /// <summary>
-    /// Creates a new <see cref="WrappedMemberAttribute"/>.
+    /// Creates a new <see cref="WrapMemberAttribute"/>.
     /// </summary>
     /// <param name="isReadOnly">Is the member read-only? Only for properties and fields.</param>
     /// <param name="isWriteOnly">Is the member write-only? Only for properties and fields.</param>
     /// <exception cref="ArgumentException">Thrown if both <see cref="IsReadOnly"/> and <see cref="IsWriteOnly"/> are set to <see langword="true"/>.</exception>
-    public WrappedMemberAttribute(bool isReadOnly = false, bool isWriteOnly = false)
+    public WrapMemberAttribute(bool isReadOnly = false, bool isWriteOnly = false)
     {
         IsReadOnly = isReadOnly;
         IsWriteOnly = isWriteOnly;
@@ -40,12 +40,12 @@ public class WrappedMemberAttribute : Attribute
     }
 
     /// <summary>
-    /// Creates a new <see cref="WrappedMemberAttribute"/>.
+    /// Creates a new <see cref="WrapMemberAttribute"/>.
     /// </summary>
     /// <param name="name">The ezr² name for the member.</param>
     /// <param name="isReadOnly">Is the member read-only? Only for properties and fields.</param>
     /// <param name="isWriteOnly">Is the member write-only? Only for properties and fields.</param>
-    public WrappedMemberAttribute(string name, bool isReadOnly = false, bool isWriteOnly = false) : this(isReadOnly, isWriteOnly)
+    public WrapMemberAttribute(string name, bool isReadOnly = false, bool isWriteOnly = false) : this(isReadOnly, isWriteOnly)
     {
         Name = name;
     }
@@ -60,7 +60,7 @@ public class WrappedMemberAttribute : Attribute
     public static bool ValidateType(Type type, bool dontThrow = false)
     {
         if (type.IsAbstract || type.IsGenericTypeDefinition)
-            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(WrappedMemberAttribute)}\" attribute does not support abstract/generic type \"{type.Name}\".", nameof(type));
+            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(WrapMemberAttribute)}\" attribute does not support abstract/generic type \"{type.Name}\".", nameof(type));
 
         return true;
     }
@@ -75,7 +75,7 @@ public class WrappedMemberAttribute : Attribute
     public static bool ValidateMethod(MethodBase methodBase, bool dontThrow = false)
     {
         if (methodBase.IsGenericMethodDefinition || methodBase.ContainsGenericParameters)
-            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(WrappedMemberAttribute)}\" attribute does not support generic method/constructor \"{methodBase.Name}\".", nameof(methodBase));
+            return dontThrow ? false : throw new ArgumentException($"The \"{nameof(WrapMemberAttribute)}\" attribute does not support generic method/constructor \"{methodBase.Name}\".", nameof(methodBase));
 
         return true;
     }
@@ -87,7 +87,7 @@ public class WrappedMemberAttribute : Attribute
     /// <returns><see langword="true"/> if yes, <see langword="false"/> otherwise.</returns>
     public static bool ShouldBeWrapped(MemberInfo member)
     {
-        return member.GetCustomAttribute<DontWrapMemberAttribute>() is null && (GetIsPublic(member) || member.GetCustomAttribute<WrappedMemberAttribute>() is not null);
+        return member.GetCustomAttribute<DontWrapMemberAttribute>() is null && (GetIsPublic(member) || member.GetCustomAttribute<WrapMemberAttribute>() is not null);
     }
 
     /// <summary>

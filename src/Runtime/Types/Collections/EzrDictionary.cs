@@ -1,9 +1,9 @@
 ﻿using EzrSquared.Runtime.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     public readonly RuntimeEzrObjectDictionary Value;
 
     /// <inheritdoc/>
-    [WrappedMember("length")]
+    [WrapMember("length")]
     public int Count => Value.Count;
 
     /// <summary>
@@ -42,9 +42,9 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     {
         Value = value;
 
-        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Count))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
-        Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrSharpCompatibilityFunction(Value.RemoveHash, Context, StartPosition, EndPosition), AccessMod.Constant));
-        Context.Set(null, "has_key", ReferencePool.Get(new EzrSharpCompatibilityFunction(Value.HasKey, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "length", ReferencePool.Get(new EzrPropertyWrapper(GetMemberInfo<PropertyInfo, RuntimeEzrObjectDictionary>(nameof(Value.Count))!, Value, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "remove_by_hash", ReferencePool.Get(new EzrMethodWrapper(Value.RemoveHash, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "has_key", ReferencePool.Get(new EzrMethodWrapper(Value.HasKey, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
     /// <inheritdoc/>

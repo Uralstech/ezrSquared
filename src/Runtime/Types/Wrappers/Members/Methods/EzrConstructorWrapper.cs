@@ -1,16 +1,15 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
 /// Class to automatically wrap C# constructors so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<ConstructorInfo>
+public class EzrConstructorWrapper : EzrMethodBaseWrapper<ConstructorInfo>
 {
     /// <summary>
     /// This C# constructor's class.
@@ -30,7 +29,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     public readonly string ConstructingTypeName;
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityConstructor"/>.
+    /// Creates a new <see cref="EzrConstructorWrapper"/>.
     /// </summary>
     /// <param name="constructingType">This C# constructor's class.</param>
     /// <param name="sharpConstructor">The constructor to wrap.</param>
@@ -38,7 +37,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip method signature validation?</param>
-    public EzrSharpCompatibilityConstructor(
+    public EzrConstructorWrapper(
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicMethods
             | DynamicallyAccessedMemberTypes.NonPublicMethods
@@ -52,7 +51,7 @@ public class EzrSharpCompatibilityConstructor : EzrSharpCompatibilityExecutable<
     {
         ConstructingType = constructingType;
 
-        WrappedMemberAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<WrappedMemberAttribute>();
+        WrapMemberAttribute? autoWrapperAttribute = constructingType.GetCustomAttribute<WrapMemberAttribute>();
         ConstructingTypeName = !string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? autoWrapperAttribute.Name : PascalToSnakeCase(constructingType.Name)!;
     }
 

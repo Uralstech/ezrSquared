@@ -1,17 +1,15 @@
 ﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
 /// Base class for all automatic wrappers which wrap C# executables so that they can be used in ezr².
 /// </summary>
-public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCompatibilityWrapper<TMethodBase>
+public abstract class EzrMethodBaseWrapper<TMethodBase> : EzrWrapper<TMethodBase>
     where TMethodBase : MethodBase
 {
     /// <inheritdoc/>
@@ -33,7 +31,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     /// <summary>
     /// The attributes of the executable's runtime-provided parameters.
     /// </summary>
-    public readonly RuntimeAttribute[] RuntimeProvidedParameters;
+    public readonly FeatureParameterAttribute[] RuntimeProvidedParameters;
 
     /// <summary>
     /// Does this executable accept extra keyword arguments?
@@ -46,7 +44,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     public readonly bool AcceptsExtraPositionalArguments;
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityExecutable{TMethodBase}"/>.
+    /// Creates a new <see cref="EzrMethodBaseWrapper{TMethodBase}"/>.
     /// </summary>
     /// <param name="sharpMethodBase">The executable to wrap.</param>
     /// <param name="instance">The object which contains the executable, <see langword="null"/> if static.</param>
@@ -54,29 +52,29 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip method signature validation?</param>
-    public EzrSharpCompatibilityExecutable(TMethodBase sharpMethodBase, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMethodBase, instance, parentContext, startPosition, endPosition)
+    public EzrMethodBaseWrapper(TMethodBase sharpMethodBase, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation) : base(sharpMethodBase, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
         if (!skipValidation)
-            WrappedMemberAttribute.ValidateMethod(SharpMember, AutoWrapperAttribute is null);
+            WrapMemberAttribute.ValidateMethod(SharpMember, AutoWrapperAttribute is null);
 
         ParameterInfo[] allParameters = SharpMember.GetParameters();
         List<(ParameterInfo, bool)> exposedParameters = new(allParameters.Length);
         List<string> exposedParameterNames = new(allParameters.Length);
 
-        Lazy<List<RuntimeAttribute>> runtimeProvidedParameters = new();
+        Lazy<List<FeatureParameterAttribute>> runtimeProvidedParameters = new();
 
         for (int i = 0; i < allParameters.Length; i++)
         {
             ParameterInfo parameterInfo = allParameters[i];
 
-            ExposeAttribute? autoWrapperAttribute = parameterInfo.GetCustomAttribute<ExposeAttribute>();
-            RuntimeAttribute? runtimeParamAttribute = parameterInfo.GetCustomAttribute<RuntimeAttribute>();
+            ParameterAttribute? autoWrapperAttribute = parameterInfo.GetCustomAttribute<ParameterAttribute>();
+            FeatureParameterAttribute? runtimeParamAttribute = parameterInfo.GetCustomAttribute<FeatureParameterAttribute>();
 
             if (autoWrapperAttribute is not null && runtimeParamAttribute is not null)
-                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a parameter with both {nameof(ExposeAttribute)} and {nameof(RuntimeAttribute)} attributes ({parameterInfo.Name})!", nameof(sharpMethodBase));
+                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a parameter with both {nameof(ParameterAttribute)} and {nameof(FeatureParameterAttribute)} attributes ({parameterInfo.Name})!", nameof(sharpMethodBase));
             else if (runtimeParamAttribute is null && runtimeProvidedParameters.IsValueCreated)
-                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a normal parameter after {nameof(RuntimeAttribute)}-attributed parameters ({parameterInfo.Name})!", nameof(sharpMethodBase));
+                throw new ArgumentException($"Method \"{SharpMember.Name}\" cannot have a normal parameter after {nameof(FeatureParameterAttribute)}-attributed parameters ({parameterInfo.Name})!", nameof(sharpMethodBase));
 
             if (runtimeParamAttribute is null)
             {
@@ -175,7 +173,7 @@ public abstract class EzrSharpCompatibilityExecutable<TMethodBase> : EzrSharpCom
                 ReferencePool.TryRelease(argumentReference);
                 continue;
             }
-            
+
             if (allPositionalArgumentsFilled)
             {
                 result.Failure(new EzrUnexpectedArgumentError("Did not expect any more unnamed arguments!", _executionContext, argumentObject.StartPosition, argumentObject.EndPosition));

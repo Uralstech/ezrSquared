@@ -1,5 +1,5 @@
-﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+﻿using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 namespace EzrSquared.Runtime.Types.Core.Errors;
 
@@ -10,7 +10,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <param name="context">The context in which the error occurred.</param>
 /// <param name="startPosition">The starting position of the error.</param>
 /// <param name="endPosition">The ending position of the error.</param>
-[WrappedMember("undefined_value_error")]
+[WrapMember("undefined_value_error")]
 public class EzrUndefinedValueError(string details, Context context, Position startPosition, Position endPosition) : EzrRuntimeError("Undefined value", details, context, startPosition, endPosition)
 {
     /// <inheritdoc/>
@@ -25,10 +25,10 @@ public class EzrUndefinedValueError(string details, Context context, Position st
     /// <param name="details">Details on why the error happened.</param>
     /// <param name="wrapper">The caller.</param>
     /// <param name="executionContext">The execution context.</param>
-    [WrappedMember, PrimaryConstructor]
+    [WrapMember, PrimaryConstructor]
     public EzrUndefinedValueError(string details,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
         : this(
             details,
             executionContext,

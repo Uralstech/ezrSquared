@@ -1,8 +1,8 @@
 ﻿using EzrSquared.Runtime.Types;
 using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,7 +21,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <summary>
     /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
-    [WrappedMember("length")]
+    [WrapMember("length")]
     public int Count => _items.Count;
 
     /// <summary>
@@ -117,7 +117,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// </remarks>
     /// <param name="key">The key (hash) to be removed.</param>
     /// <returns><see langword="true"/> if the operation was successful, <see langword="false"/> if not.</returns>
-    [WrappedMember("remove_by_hash")]
+    [WrapMember("remove_by_hash")]
     public bool RemoveHash(int key)
     {
         if (_items.TryGetValue(key, out KeyValuePair<IEzrObject, Reference> pair))
@@ -192,8 +192,8 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <param name="key">The key to be checked.</param>
     /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
     /// <returns><see langword="true"/> if the key was found, <see langword="false"/> if any error occured or the key was not found.</returns>
-    [WrappedMember]
-    public bool HasKey(IEzrObject key, [Runtime(Feature.ResultRef)] RuntimeResult result)
+    [WrapMember]
+    public bool HasKey(IEzrObject key, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         int hash = key.ComputeHashCode(result);
         return !result.ShouldReturn && _items.ContainsKey(hash);

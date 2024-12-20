@@ -3,12 +3,12 @@ using EzrSquared.Util;
 using System;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+namespace EzrSquared.Runtime.Types.Wrappers.Members;
 
 /// <summary>
 /// Class to automatically wrap C# properties so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<PropertyInfo>
+public class EzrPropertyWrapper : EzrWrapper<PropertyInfo>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp property";
@@ -17,14 +17,14 @@ public class EzrSharpCompatibilityProperty : EzrSharpCompatibilityWrapper<Proper
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpProperty";
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityProperty"/>.
+    /// Creates a new <see cref="EzrPropertyWrapper"/>.
     /// </summary>
     /// <param name="sharpProperty">The property to wrap.</param>
     /// <param name="instance">The object which contains the property, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityProperty(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpProperty, instance, parentContext, startPosition, endPosition)
+    public EzrPropertyWrapper(PropertyInfo sharpProperty, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(sharpProperty, instance, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
     }

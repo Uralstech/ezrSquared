@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
 /// Attribute that declares a primary constructor.

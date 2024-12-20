@@ -6,8 +6,8 @@ using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 using EzrSquared.Runtime.Types.Executables;
+using EzrSquared.Runtime.Types.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -1174,7 +1174,7 @@ public class Interpreter
                 return;
 
             IEzrObject targetObject = RuntimeResult.Reference.Object;
-            if (targetObject is not EzrSharpCompatibilityType target || !typeof(IEzrRuntimeError).IsAssignableFrom(target.SharpMember))
+            if (targetObject is not EzrTypeWrapper target || !typeof(IEzrRuntimeError).IsAssignableFrom(target.SharpMember))
             {
                 RuntimeResult.Failure(new EzrUnexpectedTypeError($"Expected error type, but got object of type \"{targetObject.TypeName}\"!", executionContext, errorType.StartPosition, errorType.EndPosition));
                 return;

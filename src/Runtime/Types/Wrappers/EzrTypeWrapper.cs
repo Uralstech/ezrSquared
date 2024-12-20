@@ -1,20 +1,17 @@
-﻿using EzrSquared.Runtime.Types.Core.Errors;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+﻿using EzrSquared.Runtime.Types.Wrappers.Members;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using EzrSquared.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+namespace EzrSquared.Runtime.Types.Wrappers;
 
 /// <summary>
 /// Class to automatically wrap C# types so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEzrObject
+public class EzrTypeWrapper : EzrWrapper<Type>, IEzrObject
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp type";
@@ -25,16 +22,16 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
     /// <summary>
     /// The primary wrapped constructor for the type. May be <see langword="null"/>.
     /// </summary>
-    public readonly EzrSharpCompatibilityConstructor? PrimaryConstructor;
+    public readonly EzrConstructorWrapper? PrimaryConstructor;
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityType"/>.
+    /// Creates a new <see cref="EzrTypeWrapper"/>.
     /// </summary>
     /// <param name="sharpType">The type to wrap.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityType(
+    public EzrTypeWrapper(
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicFields
             | DynamicallyAccessedMemberTypes.NonPublicFields
@@ -49,18 +46,18 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
         Context parentContext, Position startPosition, Position endPosition) : base(sharpType, null, parentContext, startPosition, endPosition)
     {
         Tag = $"{Tag}.{SharpMemberName}.{UIDProvider.Get()}";
-        WrappedMemberAttribute.ValidateType(SharpMember, AutoWrapperAttribute is null);
+        WrapMemberAttribute.ValidateType(SharpMember, AutoWrapperAttribute is null);
 
         MethodInfo[] allStaticMethods = sharpType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         Dictionary<string, int> duplicateNames = new(allStaticMethods.Length);
         for (int i = 0; i < allStaticMethods.Length; i++)
         {
             MethodInfo method = allStaticMethods[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(method))
+            if (!WrapMemberAttribute.ShouldBeWrapped(method))
                 continue;
 
-            EzrSharpCompatibilityFunction methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!WrappedMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            EzrMethodWrapper methodObject = new(method, null, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!WrapMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -79,10 +76,10 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
         for (int i = 0; i < allStaticProperties.Length; i++)
         {
             PropertyInfo property = allStaticProperties[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(property))
+            if (!WrapMemberAttribute.ShouldBeWrapped(property))
                 continue;
 
-            EzrSharpCompatibilityProperty propertyObject = new(property, null, Context, StartPosition, EndPosition);
+            EzrPropertyWrapper propertyObject = new(property, null, Context, StartPosition, EndPosition);
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
 
@@ -90,10 +87,10 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
         for (int i = 0; i < allStaticFields.Length; i++)
         {
             FieldInfo field = allStaticFields[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(field))
+            if (!WrapMemberAttribute.ShouldBeWrapped(field))
                 continue;
 
-            EzrSharpCompatibilityField fieldObject = new(field, null, Context, StartPosition, EndPosition);
+            EzrFieldWrapper fieldObject = new(field, null, Context, StartPosition, EndPosition);
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
 
@@ -102,11 +99,11 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
         for (int i = 0; i < publicConstructors.Length; i++)
         {
             ConstructorInfo constructor = publicConstructors[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(constructor))
+            if (!WrapMemberAttribute.ShouldBeWrapped(constructor))
                 continue;
 
-            EzrSharpCompatibilityConstructor constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!WrappedMemberAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
+            EzrConstructorWrapper constructorObject = new(sharpType, constructor, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!WrapMemberAttribute.ValidateMethod(constructor, constructorObject.AutoWrapperAttribute is null))
                 continue;
 
             if (constructor.GetCustomAttribute<PrimaryConstructorAttribute>() is not null)
@@ -119,7 +116,7 @@ public class EzrSharpCompatibilityType : EzrSharpCompatibilityWrapper<Type>, IEz
             }
 
             string name = definedConstructors == 0 ? "make" : $"make_{definedConstructors}";
-            if (constructorObject.AutoWrapperAttribute is not WrappedMemberAttribute attr || string.IsNullOrEmpty(attr.Name))
+            if (constructorObject.AutoWrapperAttribute is not WrapMemberAttribute attr || string.IsNullOrEmpty(attr.Name))
                 definedConstructors++;
             else
             {

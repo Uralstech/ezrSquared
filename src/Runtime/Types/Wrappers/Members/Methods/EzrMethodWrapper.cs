@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using System.Text;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+namespace EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 
 /// <summary>
 /// Class to automatically wrap C# methods so that they can be used in ezr².
@@ -14,7 +14,7 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.E
 /// <param name="startPosition">The starting position of the object.</param>
 /// <param name="endPosition">The ending position of the object.</param>
 /// <param name="skipValidation">Skip method signature validation?</param>
-public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrSharpCompatibilityExecutable<MethodInfo>(sharpFunction, instance, parentContext, startPosition, endPosition, skipValidation)
+public class EzrMethodWrapper(MethodInfo sharpFunction, object? instance, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false) : EzrMethodBaseWrapper<MethodInfo>(sharpFunction, instance, parentContext, startPosition, endPosition, skipValidation)
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp function";
@@ -23,14 +23,14 @@ public class EzrSharpCompatibilityFunction(MethodInfo sharpFunction, object? ins
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpFunction";
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityFunction"/> from a delegate.
+    /// Creates a new <see cref="EzrMethodWrapper"/> from a delegate.
     /// </summary>
     /// <param name="sharpFunction">The method to wrap.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
     /// <param name="skipValidation">Skip method signature validation?</param>
-    public EzrSharpCompatibilityFunction(Delegate sharpFunction, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false)
+    public EzrMethodWrapper(Delegate sharpFunction, Context parentContext, Position startPosition, Position endPosition, bool skipValidation = false)
         : this(sharpFunction.Method, sharpFunction.Target, parentContext, startPosition, endPosition, skipValidation)
     { }
 

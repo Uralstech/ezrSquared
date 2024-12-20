@@ -1,8 +1,8 @@
 ﻿using EzrSquared.Runtime.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
     public readonly RuntimeEzrObjectList Value;
 
     /// <inheritdoc/>
-    [WrappedMember("length")]
+    [WrapMember("length")]
     public int Count => Value.Count;
 
     /// <param name="elements">The base value.</param>
@@ -39,7 +39,7 @@ public class EzrList : EzrObject, IEzrMutableObject, IEzrIndexedCollection
     {
         Value = elements;
 
-        Context.Set(null, "length", ReferencePool.Get(new EzrSharpCompatibilityProperty(GetMemberInfo<PropertyInfo, EzrList>(nameof(Count))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
+        Context.Set(null, "length", ReferencePool.Get(new EzrPropertyWrapper(GetMemberInfo<PropertyInfo, EzrList>(nameof(Count))!, this, Context, StartPosition, EndPosition), AccessMod.Constant));
     }
 
     /// <summary>

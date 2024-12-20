@@ -1,17 +1,16 @@
-﻿using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables;
+﻿using EzrSquared.Runtime.Types.Wrappers.Members;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+namespace EzrSquared.Runtime.Types.Wrappers;
 
 /// <summary>
 /// Class to automatically wrap <i>instances</i> of C# types so that they can be used in ezr².
 /// </summary>
-public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<Type>
+public class EzrObjectWrapper : EzrWrapper<Type>
 {
     /// <inheritdoc/>
     public override string TypeName { get; protected internal set; } = "csharp object instance";
@@ -20,14 +19,14 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpObjectInstance";
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityObjectInstance"/>.
+    /// Creates a new <see cref="EzrObjectWrapper"/>.
     /// </summary>
     /// <param name="instance">The object to wrap.</param>
     /// <param name="instanceType">The C# object's type.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityObjectInstance(
+    public EzrObjectWrapper(
         object instance,
 
         [DynamicallyAccessedMembers(
@@ -48,11 +47,11 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allMethods.Length; i++)
         {
             MethodInfo method = allMethods[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(method))
+            if (!WrapMemberAttribute.ShouldBeWrapped(method))
                 continue;
 
-            EzrSharpCompatibilityFunction methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
-            if (!WrappedMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+            EzrMethodWrapper methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!WrapMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
                 continue;
 
             string methodObjectName = methodObject.SharpMemberName;
@@ -71,10 +70,10 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allProperties.Length; i++)
         {
             PropertyInfo property = allProperties[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(property))
+            if (!WrapMemberAttribute.ShouldBeWrapped(property))
                 continue;
 
-            EzrSharpCompatibilityProperty propertyObject = new(property, Instance, Context, StartPosition, EndPosition);
+            EzrPropertyWrapper propertyObject = new(property, Instance, Context, StartPosition, EndPosition);
             Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
         }
 
@@ -82,10 +81,10 @@ public class EzrSharpCompatibilityObjectInstance : EzrSharpCompatibilityWrapper<
         for (int i = 0; i < allFields.Length; i++)
         {
             FieldInfo field = allFields[i];
-            if (!WrappedMemberAttribute.ShouldBeWrapped(field))
+            if (!WrapMemberAttribute.ShouldBeWrapped(field))
                 continue;
 
-            EzrSharpCompatibilityField fieldObject = new(field, Instance, Context, StartPosition, EndPosition);
+            EzrFieldWrapper fieldObject = new(field, Instance, Context, StartPosition, EndPosition);
             Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
         }
     }

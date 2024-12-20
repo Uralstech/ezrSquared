@@ -1,6 +1,6 @@
 ﻿using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using System;
 using System.Text;
 
@@ -9,7 +9,7 @@ namespace EzrSquared.Runtime.Types.Core.Errors;
 /// <summary>
 /// Implementation of <see cref="IEzrRuntimeError"/> with some utility methods.
 /// </summary>
-[WrappedMember("runtime_error")]
+[WrapMember("runtime_error")]
 public class EzrRuntimeError : EzrObject, IEzrRuntimeError
 {
     /// <inheritdoc/>
@@ -60,16 +60,17 @@ public class EzrRuntimeError : EzrObject, IEzrRuntimeError
     /// <param name="details">Details on why the error happened.</param>
     /// <param name="wrapper">The caller.</param>
     /// <param name="executionContext">The execution context.</param>
-    [WrappedMember, PrimaryConstructor]
+    [WrapMember, PrimaryConstructor]
     public EzrRuntimeError(string title, string details,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
         : this(
             title,
             details,
             executionContext,
             wrapper.StartPosition,
-            wrapper.EndPosition) { }
+            wrapper.EndPosition)
+    { }
 
     /// <summary>
     /// Converts the given argument to a string.

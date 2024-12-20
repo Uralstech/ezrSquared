@@ -4,14 +4,13 @@ using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.ObjectMembers.Executables.Attributes;
+using EzrSquared.Runtime.Types.Wrappers;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.Builtins;
+namespace EzrSquared.Runtime.Types.Builtins;
 
 /// <summary>
 /// All built-in functions in ezr².
@@ -53,15 +52,14 @@ public static class EzrBuiltinFunctions
     ///     </item>
     /// </list>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static void Show(
-        [Expose(true)] string lineEnd,
-        [Expose(true)] string separator,
-        [Runtime(Feature.PositionalArguments)] ExtraPositionalArguments messages,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ResultRef)] RuntimeResult result,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        [Parameter(true)] string lineEnd,
+        [Parameter(true)] string separator,
+        [FeatureParameter(Feature.PositionalArguments)] ExtraPositionalArguments messages,
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ResultRef)] RuntimeResult result,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
     {
         if (messages.Count == 0)
         {
@@ -112,9 +110,8 @@ public static class EzrBuiltinFunctions
     ///     </item>
     /// </list>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
-    public static void ThrowError(IEzrRuntimeError error, [Runtime(Feature.ResultRef)] RuntimeResult result)
+    [WrapMember]
+    public static void ThrowError(IEzrRuntimeError error, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         result.Failure(error);
     }
@@ -134,9 +131,8 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
-    public static string Get([Expose(true)] IEzrObject? message, [Runtime(Feature.ResultRef)] RuntimeResult result)
+    [WrapMember]
+    public static string Get([Parameter(true)] IEzrObject? message, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         if (message is not null)
         {
@@ -157,8 +153,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrNothing"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static void Clear()
     {
         Console.Clear();
@@ -182,12 +177,11 @@ public static class EzrBuiltinFunctions
     /// ezr² errors:
     /// <see cref="EzrAssertionError"/> if the condition is not met.
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static void Assert(IEzrObject condition,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ResultRef)] RuntimeResult result,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ResultRef)] RuntimeResult result,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
     {
         bool conditionResult = condition.EvaluateBoolean(result);
         if (!result.ShouldReturn && !conditionResult)
@@ -209,9 +203,8 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrInteger"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
-    public static int Hash(IEzrObject toHash, [Runtime(Feature.ResultRef)] RuntimeResult result)
+    [WrapMember]
+    public static int Hash(IEzrObject toHash, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         return toHash.ComputeHashCode(result);
     }
@@ -231,8 +224,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static string TypeOf(IEzrObject toCheck)
     {
         return toCheck.Tag;
@@ -253,8 +245,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static string TypeNameOf(IEzrObject toCheck)
     {
         return toCheck.TypeName;
@@ -275,8 +266,7 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrString"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static int TypeHashOf(IEzrObject toCheck)
     {
         return toCheck.HashTag;
@@ -300,9 +290,8 @@ public static class EzrBuiltinFunctions
     /// ezr² errors:
     /// <see cref="EzrUnexpectedTypeError"/> if "to_copy" is not of the expected type.
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
-    public static IEzrObject Copy(IEzrMutableObject toCopy, [Runtime(Feature.ResultRef)] RuntimeResult result)
+    [WrapMember]
+    public static IEzrObject Copy(IEzrMutableObject toCopy, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         return (IEzrObject?)toCopy.DeepCopy(result) ?? EzrConstants.Nothing;
     }
@@ -322,13 +311,12 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="IEzrObject"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
-    public static EzrSharpCompatibilityObjectInstance GetRaw(IEzrObject toGet,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+    [WrapMember]
+    public static EzrObjectWrapper GetRaw(IEzrObject toGet,
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
     {
-        return new EzrSharpCompatibilityObjectInstance(toGet, toGet.GetType(), executionContext, wrapper.StartPosition, wrapper.EndPosition);
+        return new EzrObjectWrapper(toGet, toGet.GetType(), executionContext, wrapper.StartPosition, wrapper.EndPosition);
     }
 
     /// <summary>
@@ -346,12 +334,11 @@ public static class EzrBuiltinFunctions
     /// ezr² return type:
     /// <see cref="EzrDictionary"/>
     /// </remarks>
-    /// <param name="arguments">The method arguments.</param>
-    [WrappedMember]
+    [WrapMember]
     public static IEzrObject GetContext(IEzrObject toGet,
-        [Runtime(Feature.CallerRef)] IEzrObject wrapper,
-        [Runtime(Feature.ResultRef)] RuntimeResult result,
-        [Runtime(Feature.ExecutionRef)] Context executionContext)
+        [FeatureParameter(Feature.CallerRef)] IEzrObject wrapper,
+        [FeatureParameter(Feature.ResultRef)] RuntimeResult result,
+        [FeatureParameter(Feature.ExecutionRef)] Context executionContext)
     {
         RuntimeEzrObjectDictionary context = new();
         foreach (KeyValuePair<string, Reference> pair in toGet.Context)

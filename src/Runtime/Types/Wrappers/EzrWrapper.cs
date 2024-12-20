@@ -3,7 +3,6 @@ using EzrSquared.Runtime.Types.Core;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Core.Numerics;
 using EzrSquared.Runtime.Types.Core.Text;
-using EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -11,7 +10,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
+namespace EzrSquared.Runtime.Types.Wrappers;
 
 /// <summary>
 /// Parent class for all automatic wrappers which wrap existing C# objects and members so that they can be used in ezr².
@@ -19,10 +18,10 @@ namespace EzrSquared.Runtime.Types.CSharpWrappers.CompatWrappers;
 /// <typeparam name="TMemberInfo">The <see cref="MemberInfo"/> type for the C# member being wrapped.</typeparam>
 
 #if NET7_0_OR_GREATER
-public abstract partial class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
+public abstract partial class EzrWrapper<TMemberInfo> : EzrObject
     where TMemberInfo : MemberInfo
 #else
-public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
+public abstract class EzrWrapper<TMemberInfo> : EzrObject
     where TMemberInfo : MemberInfo
 #endif
 {
@@ -38,9 +37,9 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     public override string Tag { get; protected internal set; } = "ezrSquared.CSharpWrapper";
 
     /// <summary>
-    /// The <see cref="WrappedMemberAttribute"/> of the wrapped object, if defined.
+    /// The <see cref="WrapMemberAttribute"/> of the wrapped object, if defined.
     /// </summary>
-    public readonly WrappedMemberAttribute? AutoWrapperAttribute;
+    public readonly WrapMemberAttribute? AutoWrapperAttribute;
 
     /// <summary>
     /// The name of the wrapped member in snake_case.
@@ -58,17 +57,17 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     public readonly object? Instance;
 
     /// <summary>
-    /// Creates a new <see cref="EzrSharpCompatibilityWrapper{TMemberInfo}"/>.
+    /// Creates a new <see cref="EzrWrapper{TMemberInfo}"/>.
     /// </summary>
     /// <param name="wrappedMember">Reflection info on the wrapped C# member.</param>
     /// <param name="instance">The object which contains the wrapped member, <see langword="null"/> if static.</param>
     /// <param name="parentContext">The context in which this object was created.</param>
     /// <param name="startPosition">The starting position of the object.</param>
     /// <param name="endPosition">The ending position of the object.</param>
-    public EzrSharpCompatibilityWrapper(TMemberInfo wrappedMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
+    public EzrWrapper(TMemberInfo wrappedMember, object? instance, Context parentContext, Position startPosition, Position endPosition) : base(parentContext, startPosition, endPosition)
     {
         SharpMember = wrappedMember;
-        AutoWrapperAttribute = wrappedMember.GetCustomAttribute<WrappedMemberAttribute>();
+        AutoWrapperAttribute = wrappedMember.GetCustomAttribute<WrapMemberAttribute>();
         SharpMemberName = !string.IsNullOrEmpty(AutoWrapperAttribute?.Name) ? AutoWrapperAttribute.Name : PascalToSnakeCase(wrappedMember.Name)!;
         Instance = instance;
     }
@@ -260,7 +259,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 return HandleEzrArrayLikeToCSharp(value, targetType, result);
 
             case TypeCode.Object when targetType == typeof(Task):
-                if (value is EzrSharpCompatibilityObjectInstance taskWrapper && targetType.IsAssignableFrom(taskWrapper.SharpMember))
+                if (value is EzrObjectWrapper taskWrapper && targetType.IsAssignableFrom(taskWrapper.SharpMember))
                     return (Task)taskWrapper.Instance!;
 
                 return s_taskFromResultMethod.MakeGenericMethod(value.GetType()).Invoke(null, [value]);
@@ -281,7 +280,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 break;
 
             default:
-                if (value is EzrSharpCompatibilityObjectInstance wrapper && wrapper.SharpMember == targetType)
+                if (value is EzrObjectWrapper wrapper && wrapper.SharpMember == targetType)
                     return wrapper.Instance;
 
                 result.Failure(new EzrUnexpectedTypeError($"Expected wrapped object of C# type \"{targetType.Name}\", but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
@@ -396,7 +395,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
                 result.Success(NewNothingConstant());
                 break;
             default:
-                result.Success(ReferencePool.Get(new EzrSharpCompatibilityObjectInstance(value, valueType, _executionContext, StartPosition, EndPosition), AccessMod.PrivateConstant));
+                result.Success(ReferencePool.Get(new EzrObjectWrapper(value, valueType, _executionContext, StartPosition, EndPosition), AccessMod.PrivateConstant));
                 break;
         }
     }
@@ -453,7 +452,7 @@ public abstract class EzrSharpCompatibilityWrapper<TMemberInfo> : EzrObject
     /// <inheritdoc/>
     public override bool StrictEquals(IEzrObject other, RuntimeResult result)
     {
-        return other is EzrSharpCompatibilityWrapper<TMemberInfo> otherWrapper
+        return other is EzrWrapper<TMemberInfo> otherWrapper
             && otherWrapper.SharpMember == SharpMember
             && otherWrapper.Instance?.GetHashCode() == Instance?.GetHashCode()
             && other.HashTag == HashTag;
