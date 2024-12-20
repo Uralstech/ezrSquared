@@ -174,10 +174,6 @@ public static class EzrBuiltinFunctions
     /// <summary>
     /// Creates a copy of an <see cref="IEzrMutableObject"/>. Uses <see cref="IMutable{T}.DeepCopy(RuntimeResult)"/>.
     /// </summary>
-    /// <remarks>
-    /// ezr² errors:
-    /// <see cref="EzrUnexpectedTypeError"/> if "to_copy" is not of the expected type.
-    /// </remarks>
     /// <param name="toCopy">The object to copy.</param>
     /// <param name="result">Reference to the current <see cref="RuntimeResult"/>.</param>
     /// <returns>The copy of the object.</returns>

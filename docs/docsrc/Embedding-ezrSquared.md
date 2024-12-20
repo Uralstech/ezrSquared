@@ -1,14 +1,14 @@
 # Embedding ezr²
 
+This documentation only applies to the *bleeding-edge latest version* of ezr² RE, which you may
+have to compile from the `ezrSquared-re` branch of the repository.
+
 Currently, the only version recommended for embedding in your C# apps is
 the latest version of ezr² RE, available on [*NuGet*](https://www.nuget.org/packages/ezrSquared).
 
 The NuGet package is targeted for .NET 9 and .NET Standard 2.1 and is compatible with Unity.
 You may need to use third-party packages like [*NuGetForUnity*](https://github.com/GlitchEnzo/NuGetForUnity)
 to import it into Unity.
-
-Also, this documentation only applies to the *bleeding-edge latest version* of ezr² RE, which you may
-have to compile from the `ezrSquared-re` branch of the repository.
 
 ## CodeExecutor.cs
 
