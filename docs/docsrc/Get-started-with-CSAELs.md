@@ -94,7 +94,7 @@ a [PrimaryConstructorAttribute](~/api/EzrSquared.Runtime.Types.Wrappers.Members.
 
 ### ezr² Object -> C# Object
 
-The method responsible for converting `IEzrObject`s to C# objects is [`EzrWrapper.EzrObjectToCSharp`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml).
+The method responsible for converting `IEzrObject`s to C# objects is [`EzrWrapper.EzrObjectToCSharp`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml#EzrSquared_Runtime_Types_Wrappers_EzrWrapper_1_EzrObjectToCSharp_EzrSquared_Runtime_Types_IEzrObject_System_Type_EzrSquared_Runtime_RuntimeResult_).
 
 The following table shows which C# types can be converted from which ezr² objects.
 
@@ -136,7 +136,7 @@ is an `EzrNothing` or tries to convert the object to the underlying type of the 
 
 ### C# Object -> ezr² Object
 
-The method responsible for converting C# objects to `IEzrObject`s is [`EzrWrapper.CSharpToEzrObject`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml).
+The method responsible for converting C# objects to `IEzrObject`s is [`EzrWrapper.CSharpToEzrObject`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml#EzrSquared_Runtime_Types_Wrappers_EzrWrapper_1_CSharpToEzrObject_System_Object_System_Type_EzrSquared_Runtime_RuntimeResult_).
 
 The following table shows which C# types are natively supported:
 
