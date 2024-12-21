@@ -10,7 +10,7 @@ The NuGet package is targeted for .NET 9 and .NET Standard 2.1 and is compatible
 You may need to use third-party packages like [*NuGetForUnity*](https://github.com/GlitchEnzo/NuGetForUnity)
 to import it into Unity.
 
-## CodeExecutor.cs
+## CodeExecutor
 
 The high-level class to interact with the ezr² runtime is the [`CodeExecutor`](~/api/EzrSquared.Executor.CodeExecutor.yml) class.
 

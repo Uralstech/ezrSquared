@@ -90,6 +90,80 @@ of the `EzrTypeWrapper`. A single constructor, for each type, can be declared a 
 will be used when the `Execute` method is called on the type wrapper. The constructor must be declared with
 a [PrimaryConstructorAttribute](~/api/EzrSquared.Runtime.Types.Wrappers.Members.Methods.PrimaryConstructorAttribute.yml).
 
+## Type Support
+
+### ezr² Object -> C# Object
+
+The method responsible for converting `IEzrObject`s to C# objects is [`EzrWrapper.EzrObjectToCSharp`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml).
+
+The following table shows which C# types can be converted from which ezr² objects.
+
+| C# Type           | Converted From        |
+|-------------------|-----------------------|
+| byte              | EzrFloat, EzrInteger  |
+| sbyte             | EzrFloat, EzrInteger  |
+| short             | EzrFloat, EzrInteger  |
+| ushort            | EzrFloat, EzrInteger  |
+| int               | EzrFloat, EzrInteger  |
+| uint              | EzrFloat, EzrInteger  |
+| long              | EzrFloat, EzrInteger  |
+| ulong             | EzrFloat, EzrInteger  |
+| BigInteger        | EzrFloat, EzrInteger  |
+| float             | EzrFloat, EzrInteger  |
+| double            | EzrFloat, EzrInteger  |
+| decimal           | EzrFloat, EzrInteger  |
+| bool              | EzrBoolean            |
+| char              | EzrCharacter          |
+| string            | IEzrString            |
+| Null Reference    | EzrNothing            |
+
+If the C# type is assignable from the ezr² object's type, for example, if the C# type
+is `IEzrObject` and the ezr² object is `EzrInteger`, the method passes the ezr² object
+without any conversion.
+
+If the C# type is `Task`, then it returns `Task<T>.FromResult([the ezr² object])` where `T` is the type of
+the ezr² object. If the type is a variant of task, like `Task<EzrInteger>`, then it uses the enclosed type
+to run the method again with it as the target.
+
+Arrays are also supported, the method checks if the ezr² object is an `IEzrIndexedCollection` and tries to
+convert each element to the array's element type.
+
+For all other types, it checks if the ezr² object is an `EzrObjectWrapper` and checks if the target type
+is assignable from the wrapped type.
+
+The method also supports the `Nullable<T>` variants of all the above, where it checks if the ezr² object
+is an `EzrNothing` or tries to convert the object to the underlying type of the `Nullable`.
+
+### C# Object -> ezr² Object
+
+The method responsible for converting C# objects to `IEzrObject`s is [`EzrWrapper.CSharpToEzrObject`](~/api/EzrSquared.Runtime.Types.Wrappers.EzrWrapper-1.yml).
+
+The following table shows which C# types are natively supported:
+
+| C# Type           | Converted To          |
+|-------------------|-----------------------|
+| byte              | EzrInteger            |
+| sbyte             | EzrInteger            |
+| short             | EzrInteger            |
+| ushort            | EzrInteger            |
+| int               | EzrInteger            |
+| uint              | EzrInteger            |
+| long              | EzrInteger            |
+| ulong             | EzrInteger            |
+| BigInteger        | EzrInteger            |
+| float             | EzrFloat              |
+| double            | EzrFloat              |
+| decimal           | EzrFloat              |
+| bool              | EzrBoolean            |
+| char              | EzrCharacter          |
+| string            | EzrString             |
+| Null Reference    | EzrNothing            |
+| Array             | EzrArray              |
+
+Array elements are converted based on the array element type. If the C# object is itself
+an `IEzrObject`, it is returned as-is. All other types not listed here are wrapped into
+`EzrObjectWrapper`s.
+
 ## Example References
 
 All runtime error types in ezr² are wrapped! Although the objects themselves are `IEzrObject`s, the type is

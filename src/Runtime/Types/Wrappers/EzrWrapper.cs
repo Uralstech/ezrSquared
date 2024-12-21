@@ -248,6 +248,9 @@ public abstract class EzrWrapper<TMemberInfo> : EzrObject
                 result.Failure(new EzrUnexpectedTypeError($"Expected string, character or character list, but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));
                 break;
 
+            case TypeCode.Object when Nullable.GetUnderlyingType(targetType) is Type underlyingType:
+                return value is EzrNothing ? null : EzrObjectToCSharp(value, underlyingType, result);
+
             case TypeCode.Object when targetType.IsAssignableFrom(value.GetType()):
                 return value;
 
@@ -280,7 +283,7 @@ public abstract class EzrWrapper<TMemberInfo> : EzrObject
                 break;
 
             default:
-                if (value is EzrObjectWrapper wrapper && wrapper.SharpMember == targetType)
+                if (value is EzrObjectWrapper wrapper && targetType.IsAssignableFrom(wrapper.SharpMember))
                     return wrapper.Instance;
 
                 result.Failure(new EzrUnexpectedTypeError($"Expected wrapped object of C# type \"{targetType.Name}\", but got object of type \"{value.TypeName}\"!", Context, value.StartPosition, value.EndPosition));

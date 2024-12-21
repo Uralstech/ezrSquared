@@ -78,6 +78,11 @@ public abstract class EzrMethodBaseWrapper<TMethodBase> : EzrWrapper<TMethodBase
 
             if (runtimeParamAttribute is null)
             {
+                if (autoWrapperAttribute?.Optional == true
+                    && parameterInfo.ParameterType.IsValueType
+                    && Nullable.GetUnderlyingType(parameterInfo.ParameterType) is null)
+                    throw new ArgumentException($"Method \"{SharpMember.Name}\" contains a parameter declared optional through its {nameof(ParameterAttribute)} which is not nullable ({parameterInfo.Name})!", nameof(sharpMethodBase));
+
                 exposedParameters.Add((parameterInfo, autoWrapperAttribute?.Optional ?? false));
                 exposedParameterNames.Add(string.IsNullOrEmpty(autoWrapperAttribute?.Name) ? PascalToSnakeCase(parameterInfo.Name) ?? $"param_{i}" : autoWrapperAttribute.Name);
                 continue;
