@@ -470,8 +470,6 @@ public class Context : IEnumerable<KeyValuePair<string, Reference>>
         }
 
         _symbols.Clear();
-        _symbols.TrimExcess();
-
         for (int i = 0; i < LinkedContexts.Length; i++)
             LinkedContexts[i]?.Release();
     }

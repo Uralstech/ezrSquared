@@ -123,7 +123,6 @@ public class RuntimeEzrObjectList : List<Reference>, IMutable<RuntimeEzrObjectLi
         }
 
         Clear();
-        TrimExcess();
     }
 
     /// <summary>Destructor.</summary>

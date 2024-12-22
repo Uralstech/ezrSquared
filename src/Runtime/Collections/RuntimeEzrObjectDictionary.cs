@@ -1,4 +1,5 @@
-﻿using EzrSquared.Runtime.Types;
+﻿global using KeyValueRef = (EzrSquared.Runtime.Types.IEzrObject Key, EzrSquared.Runtime.Reference ValueRef);
+using EzrSquared.Runtime.Types;
 using EzrSquared.Runtime.Types.Collections;
 using EzrSquared.Runtime.Types.Core.Errors;
 using EzrSquared.Runtime.Types.Wrappers;
@@ -11,34 +12,24 @@ namespace EzrSquared.Runtime.Collections;
 /// <summary>
 /// A Dictionary for <see cref="IEzrObject"/>s.
 /// </summary>
-public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, IEnumerable<KeyValuePair<int, KeyValuePair<IEzrObject, Reference>>>
+public class RuntimeEzrObjectDictionary : Dictionary<int, KeyValueRef>, IMutable<RuntimeEzrObjectDictionary>, IEnumerable
 {
-    /// <summary>
-    /// The collection of <see cref="IEzrObject"/>s stored in the <see cref="RuntimeEzrObjectDictionary"/>, in the format Dictionary&lt;hashOfKey, KeyValuePair&lt;key, valueReference&gt;&gt;.
-    /// </summary>
-    private readonly IDictionary<int, KeyValuePair<IEzrObject, Reference>> _items;
-
     /// <summary>
     /// The number of <see cref="IEzrObject"/>s in the <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
     [WrapMember("length")]
-    public int Count => _items.Count;
+    public new int Count => base.Count;
 
     /// <summary>
     /// Creates a new <see cref="RuntimeEzrObjectDictionary"/>.
     /// </summary>
-    public RuntimeEzrObjectDictionary()
-    {
-        _items = new Dictionary<int, KeyValuePair<IEzrObject, Reference>>();
-    }
+    public RuntimeEzrObjectDictionary() : base() { }
 
-    /// <summary>
-    /// Creates a new <see cref="RuntimeEzrObjectDictionary"/> from an existing <see cref="Dictionary{TKey, TValue}"/>.
-    /// </summary>
-    public RuntimeEzrObjectDictionary(IDictionary<int, KeyValuePair<IEzrObject, Reference>> items)
-    {
-        _items = items;
-    }
+    /// <param name="capacity">The capacity of the dictionary.</param>
+    public RuntimeEzrObjectDictionary(int capacity) : base(capacity) { }
+
+    /// <param name="items">An existing <see cref="IDictionary{TKey, TValue}"/> to create it from.</param>
+    public RuntimeEzrObjectDictionary(IDictionary<int, KeyValueRef> items) : base(items) { }
 
     /// <summary>
     /// Tries to get a copy of the given object.
@@ -72,8 +63,8 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
         if (result.ShouldReturn)
             return;
 
-        if (_items.TryGetValue(hash, out KeyValuePair<IEzrObject, Reference> reference))
-            reference.Value.UpdateObject(value);
+        if (TryGetValue(hash, out KeyValueRef reference))
+            reference.ValueRef.UpdateObject(value);
         else
         {
             if (TryCopyObject(key, result) is not IEzrObject keyCopy)
@@ -82,7 +73,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
             Reference valueReference = ReferencePool.Get(value);
             valueReference.UpdateRegister(true);
 
-            _items.Add(hash, new KeyValuePair<IEzrObject, Reference>(keyCopy, valueReference));
+            Add(hash, new KeyValueRef(keyCopy, valueReference));
         }
     }
 
@@ -98,12 +89,12 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
         if (result.ShouldReturn)
             return false;
 
-        if (_items.TryGetValue(hash, out KeyValuePair<IEzrObject, Reference> pair))
+        if (TryGetValue(hash, out KeyValueRef pair))
         {
-            pair.Value.UpdateRegister(false);
-            ReferencePool.TryRelease(pair.Value);
+            pair.ValueRef.UpdateRegister(false);
+            ReferencePool.TryRelease(pair.ValueRef);
 
-            return _items.Remove(hash);
+            return Remove(hash);
         }
 
         return false;
@@ -120,12 +111,12 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     [WrapMember("remove_by_hash")]
     public bool RemoveHash(int key)
     {
-        if (_items.TryGetValue(key, out KeyValuePair<IEzrObject, Reference> pair))
+        if (TryGetValue(key, out KeyValueRef pair))
         {
-            pair.Value.UpdateRegister(false);
-            ReferencePool.TryRelease(pair.Value);
+            pair.ValueRef.UpdateRegister(false);
+            ReferencePool.TryRelease(pair.ValueRef);
 
-            return _items.Remove(key);
+            return Remove(key);
         }
 
         return false;
@@ -138,15 +129,15 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <param name="result">The <see cref="RuntimeResult"/> object for returning errors.</param>
     public void Merge(RuntimeEzrObjectDictionary other, RuntimeResult result)
     {
-        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> pair in other._items)
+        foreach (KeyValuePair<int, KeyValueRef> pair in other)
         {
             if (TryCopyObject(pair.Value.Key, result) is not IEzrObject keyObject)
                 return;
 
-            Reference newReference = ReferencePool.Get(pair.Value.Value.Object);
+            Reference newReference = ReferencePool.Get(pair.Value.ValueRef.Object);
             newReference.UpdateRegister(true);
 
-            _items[pair.Key] = new KeyValuePair<IEzrObject, Reference>(keyObject, newReference);
+            this[pair.Key] = new KeyValueRef(keyObject, newReference);
         }
     }
 
@@ -183,7 +174,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     public Reference Get(IEzrObject key, RuntimeResult result)
     {
         int hash = key.ComputeHashCode(result);
-        return (!result.ShouldReturn && _items.TryGetValue(hash, out KeyValuePair<IEzrObject, Reference> pair)) ? pair.Value : Reference.Empty;
+        return (!result.ShouldReturn && TryGetValue(hash, out KeyValueRef pair)) ? pair.ValueRef : Reference.Empty;
     }
 
     /// <summary>
@@ -196,7 +187,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     public bool HasKey(IEzrObject key, [FeatureParameter(Feature.ResultRef)] RuntimeResult result)
     {
         int hash = key.ComputeHashCode(result);
-        return !result.ShouldReturn && _items.ContainsKey(hash);
+        return !result.ShouldReturn && ContainsKey(hash);
     }
 
     /// <summary>
@@ -207,19 +198,19 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <returns>The comparison result.</returns>
     public bool IsEqual(RuntimeEzrObjectDictionary other, RuntimeResult result)
     {
-        if (other._items.Count != _items.Count)
+        if (other.Count != Count)
             return false;
 
-        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> pair in _items)
+        foreach (KeyValuePair<int, KeyValueRef> pair in this)
         {
-            if (!other._items.TryGetValue(pair.Key, out KeyValuePair<IEzrObject, Reference> otherPair))
+            if (!other.TryGetValue(pair.Key, out KeyValueRef otherPair))
                 return false;
 
             bool keyEquals = pair.Value.Key.StrictEquals(otherPair.Key, result);
             if (result.ShouldReturn || !keyEquals)
                 return false;
 
-            bool valueEquals = pair.Value.Value.Object.StrictEquals(otherPair.Value.Object, result);
+            bool valueEquals = pair.Value.ValueRef.Object.StrictEquals(otherPair.ValueRef.Object, result);
             if (result.ShouldReturn || !valueEquals)
                 return false;
         }
@@ -236,7 +227,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <returns>The comparison result.</returns>
     public bool IsEqual(IEzrDictionary other, Context executionContext, RuntimeResult result)
     {
-        if (other.Count != _items.Count)
+        if (other.Count != Count)
             return false;
 
         foreach (IEzrObject ezrObject in other)
@@ -250,28 +241,19 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
             (IEzrObject keyObject, IEzrObject valueObject) = (pair.At(0), pair.At(1));
 
             int keyHashCode = keyObject.ComputeHashCode(result);
-            if (result.ShouldReturn || !_items.TryGetValue(keyHashCode, out KeyValuePair<IEzrObject, Reference> thisPair))
+            if (result.ShouldReturn || !TryGetValue(keyHashCode, out KeyValueRef thisPair))
                 return false;
 
             bool keyEquals = keyObject.StrictEquals(thisPair.Key, result);
             if (result.ShouldReturn || !keyEquals)
                 return false;
 
-            bool valueEquals = valueObject.StrictEquals(thisPair.Value.Object, result);
+            bool valueEquals = valueObject.StrictEquals(thisPair.ValueRef.Object, result);
             if (result.ShouldReturn || !valueEquals)
                 return false;
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Returns the <i>actual</i> integer (hash) keys from the <see cref="RuntimeEzrObjectDictionary"/>.
-    /// </summary>
-    /// <returns>The integer hashes.</returns>
-    public int[] GetRealKeys()
-    {
-        return [.. _items.Keys];
     }
 
     /// <summary>
@@ -281,8 +263,8 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <returns>The keys or <see langword="null"/> if something went wrong.</returns>
     public IEzrObject[]? GetKeys(RuntimeResult result)
     {
-        IEzrObject[] keys = new IEzrObject[_items.Count];
-        using IEnumerator<KeyValuePair<IEzrObject, Reference>> pairs = _items.Values.GetEnumerator();
+        IEzrObject[] keys = new IEzrObject[Count];
+        using ValueCollection.Enumerator pairs = Values.GetEnumerator();
 
         for (int i = 0; i < keys.Length; i++)
         {
@@ -303,13 +285,13 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <returns>The values.</returns>
     public IEzrObject[] GetValues()
     {
-        IEzrObject[] values = new IEzrObject[_items.Count];
-        using IEnumerator<KeyValuePair<IEzrObject, Reference>> pairs = _items.Values.GetEnumerator();
+        IEzrObject[] values = new IEzrObject[Count];
+        using ValueCollection.Enumerator pairs = Values.GetEnumerator();
 
         for (int i = 0; i < values.Length; i++)
         {
             pairs.MoveNext();
-            values[i] = pairs.Current.Value.Object;
+            values[i] = pairs.Current.ValueRef.Object;
         }
 
         return values;
@@ -322,8 +304,8 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <returns>The keys and values as an array of <see cref="KeyValuePair"/>s or <see langword="null"/> if something went wrong.</returns>
     public KeyValuePair<IEzrObject, IEzrObject>[]? GetPairs(RuntimeResult result)
     {
-        KeyValuePair<IEzrObject, IEzrObject>[] pairsArray = new KeyValuePair<IEzrObject, IEzrObject>[_items.Count];
-        using IEnumerator<KeyValuePair<IEzrObject, Reference>> pairs = _items.Values.GetEnumerator();
+        KeyValuePair<IEzrObject, IEzrObject>[] pairsArray = new KeyValuePair<IEzrObject, IEzrObject>[Count];
+        using ValueCollection.Enumerator pairs = Values.GetEnumerator();
 
         for (int i = 0; i < pairsArray.Length; i++)
         {
@@ -332,7 +314,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
             if (TryCopyObject(pairs.Current.Key, result) is not IEzrObject keyObject)
                 return null;
 
-            pairsArray[i] = new KeyValuePair<IEzrObject, IEzrObject>(keyObject, pairs.Current.Value.Object);
+            pairsArray[i] = new KeyValuePair<IEzrObject, IEzrObject>(keyObject, pairs.Current.ValueRef.Object);
         }
 
         return pairsArray;
@@ -341,14 +323,13 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// <inheritdoc/>
     public IMutable<RuntimeEzrObjectDictionary>? DeepCopy(RuntimeResult result)
     {
-        Dictionary<int, KeyValuePair<IEzrObject, Reference>> copiedItems = new(_items.Count);
-
-        foreach (KeyValuePair<IEzrObject, Reference> pair in _items.Values)
+        RuntimeEzrObjectDictionary copiedItems = new(Count);
+        foreach (KeyValueRef pair in Values)
         {
             if (TryCopyObject(pair.Key, result) is not IEzrObject keyObject)
                 return null;
 
-            if (TryCopyObject(pair.Value.Object, result) is not IEzrObject valueObject)
+            if (TryCopyObject(pair.ValueRef.Object, result) is not IEzrObject valueObject)
                 return null;
 
             Reference valueCopy = ReferencePool.Get(valueObject);
@@ -358,10 +339,10 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
             if (result.ShouldReturn)
                 return null;
 
-            copiedItems.Add(hash, new KeyValuePair<IEzrObject, Reference>(keyObject, valueCopy));
+            copiedItems.Add(hash, new KeyValueRef(keyObject, valueCopy));
         }
 
-        return new RuntimeEzrObjectDictionary(copiedItems);
+        return copiedItems;
     }
 
     /// <summary>
@@ -369,13 +350,13 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// </summary>
     public void Release()
     {
-        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> item in _items)
+        foreach (KeyValuePair<int, KeyValueRef> item in this)
         {
-            item.Value.Value.UpdateRegister(false);
-            ReferencePool.TryRelease(item.Value.Value);
+            item.Value.ValueRef.UpdateRegister(false);
+            ReferencePool.TryRelease(item.Value.ValueRef);
         }
 
-        _items.Clear();
+        Clear();
     }
 
     /// <inheritdoc/>
@@ -384,9 +365,9 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// method does NOT copy the keys. So it's best not to expose the key values from this to the
     /// ezr² runtime as mutable key objects can be changed.
     /// </remarks>
-    public IEnumerator<KeyValuePair<int, KeyValuePair<IEzrObject, Reference>>> GetEnumerator()
+    public new Enumerator GetEnumerator()
     {
-        return _items.GetEnumerator();
+        return base.GetEnumerator();
     }
 
     /// <inheritdoc/>
@@ -397,7 +378,7 @@ public class RuntimeEzrObjectDictionary : IMutable<RuntimeEzrObjectDictionary>, 
     /// </remarks>
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return GetEnumerator();
+        return base.GetEnumerator();
     }
 
     /// <summary>Destructor.</summary>

@@ -78,8 +78,8 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     /// <inheritdoc/>
     public IEnumerator<IEzrObject> GetEnumerator()
     {
-        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> keyValuePair in Value)
-            yield return new EzrArray([keyValuePair.Value.Key, keyValuePair.Value.Value.Object], _executionContext, StartPosition, EndPosition);
+        foreach (KeyValuePair<int, KeyValueRef> keyValuePair in Value)
+            yield return new EzrArray([keyValuePair.Value.Key, keyValuePair.Value.ValueRef.Object], _executionContext, StartPosition, EndPosition);
     }
 
     /// <inheritdoc/>
@@ -251,7 +251,7 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
                 result.Failure(IllegalOperation(other)); return;
         }
 
-        int[] keys = Value.GetRealKeys();
+        int[] keys = [.. Value.Keys];
         for (int i = Value.Count - 1; i >= newLength; i--)
         {
             if (!Value.RemoveHash(keys[i]))
@@ -294,11 +294,11 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     public override int ComputeHashCode(RuntimeResult result)
     {
         int hash = HashTag;
-        foreach (KeyValuePair<int, KeyValuePair<IEzrObject, Reference>> keyValuePair in Value)
+        foreach (KeyValuePair<int, KeyValueRef> keyValuePair in Value)
         {
             int keyHash = keyValuePair.Key;
 
-            int valueHash = keyValuePair.Value.Value.Object.ComputeHashCode(result);
+            int valueHash = keyValuePair.Value.ValueRef.Object.ComputeHashCode(result);
             if (result.ShouldReturn)
                 return int.MinValue;
 
@@ -311,19 +311,19 @@ public class EzrDictionary : EzrObject, IEzrMutableObject, IEzrDictionary
     /// <inheritdoc/>
     public override string ToString(RuntimeResult result)
     {
-        using IEnumerator<KeyValuePair<int, KeyValuePair<IEzrObject, Reference>>> keyValuePairs = Value.GetEnumerator();
+        using RuntimeEzrObjectDictionary.Enumerator keyValuePairs = Value.GetEnumerator();
 
         string[] pairsAsString = new string[Value.Count];
         for (int i = 0; i < pairsAsString.Length; i++)
         {
             keyValuePairs.MoveNext();
-            KeyValuePair<IEzrObject, Reference> pair = keyValuePairs.Current.Value;
+            KeyValueRef pair = keyValuePairs.Current.Value;
 
             string key = pair.Key.ToString(result);
             if (result.ShouldReturn)
                 return string.Empty;
 
-            string value = pair.Value.Object.ToString(result);
+            string value = pair.ValueRef.Object.ToString(result);
             if (result.ShouldReturn)
                 return string.Empty;
 
