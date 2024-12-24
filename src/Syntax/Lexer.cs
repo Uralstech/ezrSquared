@@ -24,7 +24,7 @@ public class Lexer
     /// The <see cref="Position"/> of the current lexing iteration in the script.
     /// </summary>
     private Position _position;
-
+    
     /// <summary>
     /// The character in the <see cref="Position"/> of the current lexing iteration in the script.
     /// </summary>
@@ -92,21 +92,16 @@ public class Lexer
         {
             switch (_currentChar)
             {
-                case '\r':
-                case '\t':
-                case ' ':
+                case '\r' or '\t' or ' ':
                     Advance();
                     break;
-                case ';':
-                case '\n':
+                case ';' or '\n':
                     tokens.Add(CompileNewLines());
                     break;
                 case '@':
                     SkipComment();
                     break;
-                case '"':
-                case '`':
-                case '\'':
+                case '"' or '`' or '\'':
                     tokens.Add(CompileStringLike(out EzrSyntaxError? error));
                     if (error is not null)
                         return error;
@@ -236,8 +231,7 @@ public class Lexer
                     tokens.Add(new Token(TokenType.Tilde, TokenTypeGroup.Symbol, string.Empty, _position));
                     Advance();
                     break;
-                case '#':
-                case '_':
+                case '#' or '_':
                 case char current when char.IsLetter(current):
                     tokens.Add(CompileIdentifier(out error));
                     if (error is not null)
@@ -275,7 +269,7 @@ public class Lexer
     private Token CompileNumber()
     {
         Position startPosition = _position;
-        bool hasPeriod = false;
+        bool isFloat = false;
 
         while (!_reachedEnd && (char.IsDigit(_currentChar) || _currentChar == '.'))
         {
@@ -284,17 +278,17 @@ public class Lexer
                 int peekIndex = _position.Index + 1;
                 char next = peekIndex < _script.Length ? _script[peekIndex] : '\0';
 
-                if (hasPeriod || !char.IsDigit(next))
+                if (isFloat || !char.IsDigit(next))
                     break;
 
-                hasPeriod = true;
+                isFloat = true;
             }
 
             Advance();
         }
 
         return new Token(
-            hasPeriod ? TokenType.FloatingPoint : TokenType.Integer,
+            isFloat ? TokenType.FloatingPoint : TokenType.Integer,
             TokenTypeGroup.Value,
             _script[startPosition.Index.._position.Index],
             startPosition,
@@ -349,15 +343,15 @@ public class Lexer
         {
             if (_currentChar == '\\')
             {
-                ProcessEscapeSequence(toReturn, ref error);
+                ProcessEscapeSequence(toReturn, out error);
                 if (error is not null)
                     return Token.Empty;
+
+                continue;
             }
-            else
-            {
-                toReturn.Append(_currentChar);
-                Advance();
-            }
+
+            toReturn.Append(_currentChar);
+            Advance();
         }
 
         if (_currentChar != enclosingChar)
@@ -395,18 +389,19 @@ public class Lexer
     /// </summary>
     /// <param name="builder">The <see cref="StringBuilder"/> to append the special character to.</param>
     /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
-    private void ProcessEscapeSequence(StringBuilder builder, ref EzrSyntaxError? error)
+    private void ProcessEscapeSequence(StringBuilder builder, out EzrSyntaxError? error)
     {
+        error = null;
         Position startPosition = _position;
         Advance();
 
         switch (_currentChar)
         {
             case 'u':
-                builder.Append(ProcessUtf16Sequence(ref error));
+                builder.Append(ProcessUtf16Sequence(out error));
                 break;
             case 'U':
-                builder.Append(ProcessUtf32Sequence(ref error));
+                builder.Append(ProcessUtf32Sequence(out error));
                 break;
             case 'n':
                 builder.Append('\n');
@@ -436,10 +431,7 @@ public class Lexer
                 builder.Append('\v');
                 Advance();
                 break;
-            case '"':
-            case '\'':
-            case '`':
-            case '\\':
+            case '"' or '\'' or '`' or '\\':
                 builder.Append(_currentChar);
                 Advance();
                 break;
@@ -454,12 +446,15 @@ public class Lexer
     /// </summary>
     /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
     /// <returns>The UTF-16 character.</returns>
-    private char[] ProcessUtf16Sequence(ref EzrSyntaxError? error)
+    private char[] ProcessUtf16Sequence(out EzrSyntaxError? error)
     {
+        const int Utf16SequenceLength = 4;
+
+        error = null;
         Advance();
         
         Position startPosition = _position;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < Utf16SequenceLength; i++)
         {
             if (_currentChar is (not >= 'a' or not <= 'f') and (not >= 'A' or not <= 'F') and (not >= '0' or not <= '9'))
             {
@@ -470,7 +465,10 @@ public class Lexer
             Advance();
         }
 
-        return Encoding.Unicode.GetChars([Convert.ToByte(_script[(startPosition.Index + 2).._position.Index], 16), Convert.ToByte(_script[startPosition.Index..(_position.Index - 2)], 16)]);
+        string upper = _script[(startPosition.Index + 2).._position.Index];
+        string lower = _script[startPosition.Index..(_position.Index - 2)];
+
+        return Encoding.Unicode.GetChars([Convert.ToByte(upper, 16), Convert.ToByte(lower, 16)]);
     }
 
     /// <summary>
@@ -478,12 +476,15 @@ public class Lexer
     /// </summary>
     /// <param name="error">Any <see cref="EzrSyntaxError"/> that occurred in the process; <see langword="null"/> if none occurred.</param>
     /// <returns>The UTF-32 character.</returns>
-    private string ProcessUtf32Sequence(ref EzrSyntaxError? error)
+    private string ProcessUtf32Sequence(out EzrSyntaxError? error)
     {
+        const int Utf32SequenceLength = 4;
+
+        error = null;
         Advance();
 
         Position startPosition = _position;
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < Utf32SequenceLength; i++)
         {
             if (_currentChar is (not >= 'a' or not <= 'f') and (not >= 'A' or not <= 'F') and (not >= '0' or not <= '9'))
             {
@@ -569,7 +570,7 @@ public class Lexer
             Advance();
             if (!char.IsLetterOrDigit(_currentChar) && _currentChar != '_')
             {
-                error = new EzrSyntaxError(EzrSyntaxError.UnexpectedCharacter, "The hash symbol should only be used before identifiers to escape keyword detection.", startPosition, _position);
+                error = new EzrSyntaxError(EzrSyntaxError.UnexpectedCharacter, "The hash (#) symbol should only be used before identifiers to escape keyword detection.", startPosition, _position);
                 return Token.Empty;
             }
         }
