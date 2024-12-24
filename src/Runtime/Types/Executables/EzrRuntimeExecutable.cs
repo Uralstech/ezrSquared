@@ -180,7 +180,7 @@ public abstract class EzrRuntimeExecutable : EzrObject
             if (parameterCode is VariableAccessNode vaNode)
             {
                 operationAccessibilityModifiers = (vaNode.AccessibilityModifiers & AccessMod.Global) != AccessMod.Global
-                                                    ? vaNode.AccessibilityModifiers |= AccessMod.LocalScope
+                                                    ? vaNode.AccessibilityModifiers | AccessMod.LocalScope
                                                     : vaNode.AccessibilityModifiers;
             }
 

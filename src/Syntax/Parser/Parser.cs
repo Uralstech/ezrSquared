@@ -405,10 +405,7 @@ public class Parser
             {
                 if ((accessibilityModifiers & AccessMod.Global) == AccessMod.Global)
                 {
-                    Position errorStartPosition = startPosition.Copy();
-                    errorStartPosition.Advance();
-
-                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", errorStartPosition, _currentToken.EndPosition));
+                    _result.Failure(10, new EzrSyntaxError(EzrSyntaxError.InvalidGrammar, "A variable, function or class cannot be declared 'global' and 'private' at the same time! It must be either 'global' , which means it is accessible to any code, or 'private' , which means it is only accessible to the current context.", startPosition.Advance(), _currentToken.EndPosition));
                     return;
                 }
 

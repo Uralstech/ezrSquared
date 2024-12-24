@@ -282,7 +282,7 @@ public class Interpreter
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
     private void VisitDictionaryNode(DictionaryNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
-        RuntimeEzrObjectDictionary dictionary = new();
+        RuntimeEzrObjectDictionary dictionary = [];
         List<(Node Key, Node Value)> pairs = node.KeyValuePairs;
 
         for (int i = 0; i < pairs.Count; i++)

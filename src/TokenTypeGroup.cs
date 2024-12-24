@@ -6,7 +6,7 @@
 /// <remarks>
 /// If you want to see which group a token type is in, check the documentation for that type.
 /// </remarks>
-public enum TokenTypeGroup : ushort
+public enum TokenTypeGroup : byte
 {
     /// <summary>
     /// Groups primitive-type tokens, like integers or strings.

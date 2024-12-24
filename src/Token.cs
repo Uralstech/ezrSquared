@@ -3,7 +3,7 @@
 /// <summary>
 /// The smallest component in the script identified by the <see cref="TokenType"/>, grouped together into <see cref="Runtime.Nodes.Node"/> objects to from source code constructs.
 /// </summary>
-public class Token
+public record Token
 {
     /// <summary>
     /// The identifying <see cref="TokenType"/> of the <see cref="Token"/>.
@@ -50,13 +50,7 @@ public class Token
         Value = value;
 
         StartPosition = startPosition;
-        if (endPosition is not null)
-            EndPosition = endPosition;
-        else
-        {
-            EndPosition = startPosition.Copy();
-            EndPosition.Advance();
-        }
+        EndPosition = endPosition is not null ? endPosition.Value : startPosition.Advance();
     }
 
     /// <summary>

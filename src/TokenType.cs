@@ -5,7 +5,7 @@ namespace EzrSquared;
 /// <summary>
 /// The identifying type of a <see cref="Token"/>.
 /// </summary>
-public enum TokenType : ushort
+public enum TokenType : byte
 {
     /// <summary>
     /// An integer, part of the <see cref="TokenTypeGroup.Value"/> type-group.
