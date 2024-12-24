@@ -274,8 +274,7 @@ public class Lexer
     /// <returns>The <see cref="Token"/> object.</returns>
     private Token CompileNumber()
     {
-        StringBuilder numberValue = new();
-        Position numberTokenStartPosition = _position;
+        Position startPosition = _position;
         bool hasPeriod = false;
 
         while (!_reachedEnd && (char.IsDigit(_currentChar) || _currentChar == '.'))
@@ -291,15 +290,14 @@ public class Lexer
                 hasPeriod = true;
             }
 
-            numberValue.Append(_currentChar);
             Advance();
         }
 
         return new Token(
             hasPeriod ? TokenType.FloatingPoint : TokenType.Integer,
             TokenTypeGroup.Value,
-            numberValue.ToString(),
-            numberTokenStartPosition,
+            _script[startPosition.Index.._position.Index],
+            startPosition,
             _position
         );
     }
@@ -314,17 +312,15 @@ public class Lexer
         while (!_reachedEnd && (char.IsWhiteSpace(_currentChar) || _currentChar == ';'))
         {
             Advance();
-            if (_currentChar is '\n' or ';' or '@')
+            if (_currentChar == '@')
             {
-                if (_currentChar == '@')
-                {
-                    SkipComment();
-                    if (_reachedEnd)
-                        break;
-                }
-
-                lastNewLineIndex = _position.Index;
+                SkipComment();
+                if (_reachedEnd)
+                    break;
             }
+
+            if (_currentChar is '\n' or ';')
+                lastNewLineIndex = _position.Index;
         }
 
         ReverseTo(lastNewLineIndex);
@@ -371,10 +367,10 @@ public class Lexer
         }
 
         Advance();
-        if (enclosingChar == '`' && ((toReturn.Length > 1 is bool tooLong && tooLong) || toReturn.Length == 0))
+        if (enclosingChar == '`' && (toReturn.Length > 1 || toReturn.Length == 0))
         {
             error = new EzrSyntaxError(EzrSyntaxError.InvalidGrammar,
-                tooLong
+                toReturn.Length > 1
                 ? "Value too long to be a character!"
                 : "A character cannot be empty!", startPosition, _position);
 
@@ -462,25 +458,19 @@ public class Lexer
     {
         Advance();
         
-        int characterCount = 0;
-        string hexValue = string.Empty;
         Position startPosition = _position;
-        while (characterCount < 4)
+        for (int i = 0; i < 4; i++)
         {
-            if (_currentChar is (>= 'a' and <= 'f') or (>= 'A' and <= 'F') or (>= '0' and <= '9'))
-            {
-                characterCount++;
-                hexValue += _currentChar;
-                Advance();
-            }
-            else
+            if (_currentChar is (not >= 'a' or not <= 'f') and (not >= 'A' or not <= 'F') and (not >= '0' or not <= '9'))
             {
                 error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-16 hexadecimal values must be 4 characters long and only contain digits and the letters A to F!", startPosition, _position.Advance());
                 return [];
             }
+
+            Advance();
         }
 
-        return Encoding.Unicode.GetChars([Convert.ToByte(hexValue[2..4], 16), Convert.ToByte(hexValue[0..2], 16)]);
+        return Encoding.Unicode.GetChars([Convert.ToByte(_script[(startPosition.Index + 2).._position.Index], 16), Convert.ToByte(_script[startPosition.Index..(_position.Index - 2)], 16)]);
     }
 
     /// <summary>
@@ -492,25 +482,19 @@ public class Lexer
     {
         Advance();
 
-        int characterCount = 0;
-        string hexValue = string.Empty;
         Position startPosition = _position;
-        while (characterCount < 6)
+        for (int i = 0; i < 6; i++)
         {
-            if (_currentChar is (>= 'a' and <= 'f') or (>= 'A' and <= 'F') or (>= '0' and <= '9'))
-            {
-                characterCount++;
-                hexValue += _currentChar;
-                Advance();
-            }
-            else
+            if (_currentChar is (not >= 'a' or not <= 'f') and (not >= 'A' or not <= 'F') and (not >= '0' or not <= '9'))
             {
                 error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be 6 characters long and only contain digits and the letters A to F!", startPosition, _position.Advance());
                 return string.Empty;
             }
+
+            Advance();
         }
 
-        int unicodePoint = Convert.ToInt32(hexValue, 16);
+        int unicodePoint = Convert.ToInt32(_script[startPosition.Index.._position.Index], 16);
         if (unicodePoint > 0x10FFFF)
         {
             error = new EzrSyntaxError(EzrSyntaxError.InvalidHexValue, "UTF-32 hexadecimal values must be in range 000000 - 10FFFF!", startPosition, _position);
@@ -590,14 +574,11 @@ public class Lexer
             }
         }
 
-        StringBuilder idValue = new();
+        Position actualStartPosition = _position;
         while (!_reachedEnd && (char.IsLetterOrDigit(_currentChar) || _currentChar == '_'))
-        {
-            idValue.Append(_currentChar);
             Advance();
-        }
 
-        string original = idValue.ToString();
+        string original = _script[actualStartPosition.Index.._position.Index];
         return isEscapedIdentifier
             ? new Token(TokenType.Identifier, TokenTypeGroup.Special, original, startPosition, _position)
             : original.ToLower() switch
