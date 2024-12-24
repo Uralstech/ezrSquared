@@ -1,0 +1,90 @@
+string: get("Enter string:")
+length: string.length() + 2
+tape: ["B"]
+tape * length
+tapehead: 1
+
+i: 1
+for each j in string do
+    tape < i : j
+    i:+ 1
+end
+
+state: 0
+a: "a"
+b: "b"
+X: "X"
+Z: "Z"
+U: "U"
+V: "V"
+R: "R"
+L: "L"
+B: "B" 
+old_tapehead: -1
+accept: false
+
+function action with input_char, replace_with, move, new_state do
+    if tapehead >= tape.length() do return false
+    
+    if tape < tapehead = input_char do
+        global tape < tapehead : replace_with
+        global state: new_state
+
+        if move = "L" do
+            global tapehead:- 1
+        else do
+            global tapehead:+ 1
+        end
+
+        return true
+    end
+
+    return false
+end
+
+accept: false
+while old_tapehead ! tapehead do
+    old_tapehead: tapehead
+    
+    show(tape, " with tapehead at index ", tapehead, " on state ", state)
+
+    if state = 0 do
+        action(a, X, R, 1) or action(B, B, R, 10) or action(Z, Z, R, 7) or action(b, U, R, 4) 
+    else if state = 1 do
+        action(a, a, R, 1) or action(b, b, R, 2) or action(B, B, L, 11) 
+    else if state = 2 do
+        action(b, b, R, 2) or action(Z, Z, R, 2) or action(a, Z, L, 3) 
+    else if state = 3 do
+        action(b, b, L, 3) or action(Z, Z, L, 3) or action(a, a, L, 3) or action(X, X, R, 0) 
+    else if state = 4 do
+        action(b, b, R, 4) or action(Z, Z, R, 5) or action(B, B, L, 15) 
+    else if state = 5 do
+        action(Z, Z, R, 5) or action(V, V, R, 5) or action(b, V, L, 6) 
+    else if state = 6 do
+        action(Z, Z, L, 6) or action(V, V, L, 6) or action(b, b, L, 6) or action(U, U, R, 0) 
+    else if state = 7 do
+        action(Z, Z, R, 7) or action(V, V, R, 8) 
+    else if state = 8 do
+        action(V, V, R, 8) or action(B, B, R, 9) 
+    else if state = 11 do
+        action(a, a, L, 11) or action(X, X, R, 12) 
+    else if state = 12 do
+        action(a, Z, R, 13) 
+    else if state = 13 do
+        action(a, X, R, 12) or action(B, B, R, 14) 
+    else if state = 15 do
+        action(b, b, L, 15) or action(U, U, R, 16) 
+    else if state = 16 do
+        action(b, V, R, 17) 
+    else if state = 17 do
+        action(b, U, R, 16) or action(B, B, R, 18) 
+    else do
+        accept: true
+    end
+end
+
+if accept do
+    show("String accepted on state = ", state)
+else do
+    show("String not accepted on state = ", state)
+end

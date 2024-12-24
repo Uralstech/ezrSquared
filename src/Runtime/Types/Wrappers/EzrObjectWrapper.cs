@@ -1,0 +1,97 @@
+﻿using EzrSquared.Runtime.Types.Wrappers.Members;
+using EzrSquared.Runtime.Types.Wrappers.Members.Methods;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
+namespace EzrSquared.Runtime.Types.Wrappers;
+
+/// <summary>
+/// Class to automatically wrap <i>instances</i> of C# types so that they can be used in ezr².
+/// </summary>
+public class EzrObjectWrapper : EzrWrapper<Type>
+{
+    /// <inheritdoc/>
+    public override string TypeName { get; protected internal set; } = "csharp object instance";
+
+    /// <inheritdoc/>
+    public override string Tag { get; protected internal set; } = "ezrSquared.CSharpObjectInstance";
+
+    /// <summary>
+    /// Creates a new <see cref="EzrObjectWrapper"/>.
+    /// </summary>
+    /// <param name="instance">The object to wrap.</param>
+    /// <param name="instanceType">The C# object's type.</param>
+    /// <param name="parentContext">The context in which this object was created.</param>
+    /// <param name="startPosition">The starting position of the object.</param>
+    /// <param name="endPosition">The ending position of the object.</param>
+    public EzrObjectWrapper(
+        object instance,
+
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.NonPublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.NonPublicProperties
+            | DynamicallyAccessedMemberTypes.PublicFields
+            | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type instanceType,
+
+        Context parentContext, Position startPosition, Position endPosition) : base(instanceType, instance, parentContext, startPosition, endPosition)
+    {
+        Tag = $"{Tag}.{SharpMemberName}.{SharpMember.GetHashCode()}";
+
+        MethodInfo[] allMethods = instanceType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        Dictionary<string, int> duplicateNames = new(allMethods.Length);
+        for (int i = 0; i < allMethods.Length; i++)
+        {
+            MethodInfo method = allMethods[i];
+            if (!WrapMemberAttribute.ShouldBeWrapped(method))
+                continue;
+
+            EzrMethodWrapper methodObject = new(method, Instance, Context, StartPosition, EndPosition, skipValidation: true);
+            if (!WrapMemberAttribute.ValidateMethod(method, methodObject.AutoWrapperAttribute is null))
+                continue;
+
+            string methodObjectName = methodObject.SharpMemberName;
+            if (duplicateNames.TryGetValue(method.Name, out int duplicates))
+            {
+                methodObjectName += $"_{duplicates}";
+                duplicateNames[method.Name] += 1;
+            }
+            else
+                duplicateNames.Add(method.Name, 1);
+
+            Context.Set(null, methodObjectName, ReferencePool.Get(methodObject, AccessMod.Constant));
+        }
+
+        PropertyInfo[] allProperties = instanceType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        for (int i = 0; i < allProperties.Length; i++)
+        {
+            PropertyInfo property = allProperties[i];
+            if (!WrapMemberAttribute.ShouldBeWrapped(property))
+                continue;
+
+            EzrPropertyWrapper propertyObject = new(property, Instance, Context, StartPosition, EndPosition);
+            Context.Set(null, propertyObject.SharpMemberName, ReferencePool.Get(propertyObject, AccessMod.Constant));
+        }
+
+        FieldInfo[] allFields = instanceType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        for (int i = 0; i < allFields.Length; i++)
+        {
+            FieldInfo field = allFields[i];
+            if (!WrapMemberAttribute.ShouldBeWrapped(field))
+                continue;
+
+            EzrFieldWrapper fieldObject = new(field, Instance, Context, StartPosition, EndPosition);
+            Context.Set(null, fieldObject.SharpMemberName, ReferencePool.Get(fieldObject, AccessMod.Constant));
+        }
+    }
+
+    /// <inheritdoc/>
+    public override string ToString(RuntimeResult result)
+    {
+        return $"<{TypeName} of type \"{SharpMemberName}\">";
+    }
+}

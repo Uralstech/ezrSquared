@@ -1,23 +1,146 @@
 CHANGELOG - What's new?
 
-* prerelease-1.5.1.3.0 - [03-05-23]
-    * Added new functions `get_window_size`, `set_window_size`, `get_window_position` and `set_window_position` -
-        to `Console` class in the IO library
-    * Function `set_buffer_size` in `Console` class in the IO library now uses the `SetBufferSize` C# function
+See the GitHub releases for more detailed info:
+https://github.com/Uralstech/ezrSquared/releases
 
-* prerelease-1.5.1.2.0 - [01-04-23]
-    * Added new functions `get_buffer_size` and `set_buffer_size` to `Console` class in the IO library
-    * Unsupported functions in `Console` class in the IO library will now show new error if called
+* ezr² RE - v0.11.3 [29-11-24]
+	* [BREAKING CHANGE] `CsealAttribute` has been removed.
+	* [BREAKING CHANGE] `NewNothingConstant()` and `NewBooleanConstant(bool)` have been made static.
+	* Added new `get_raw` and `get_context` built-in functions.
+	* Object instances will now be able to access private static members.
+	* Mutable types now return references to themselves after mutation operations have been performed on them.
+	* Field and property wrappers now return the set value instead of "nothing".
+	* All `SharpAutoWrapper` wrapped `Count` properties are now named "length" in the wrapper. 
+	* `Context` now inherits from `IEnumerable<KeyValuePair<string, Reference>>`.
 
-* prerelease-1.5.1.1.0 - [27-03-23]
-    * `Console.set_cursor_position` in the IO library now accepts two seperate integers
+* ezr² RE - v0.11.2 [09-11-24]
+	* Tasks are no longer awaited before being wrapped and are now wrapped like any other C# object.
+	* Wrapped constructors are now named "make" then "make_1" and so on for variations.
+	* Improved case converter to account for non-alphanum+underscore characters.
+	* Added new method in `CodeExecutor` for adding wrappers to the context.
 
-* prerelease-1.5.1.0.1 - [25-03-23]
-    * Fixed bug in special function `equals`
+* ezr² RE - v0.11.1 [08-11-24]
+	* Fixed bug in C# compatibility wrappers where they won't wrap compliant methods and constructors.
+	* C# type wrappers should now fail when given abstract types.
+	* Improved PascalCase to snake_case converter even more.
 
-* prerelease-1.5.1.0.0 - [23-03-23]
-    * "all" keyword and ',' symbol now interchangeable in normal and QuickSyntax `include` expressions
+* ezr² RE - v0.11.0 [08-11-24]
+	* [BREAKING CHANGE] The ezr² library is no longer officially AOT compatible.
+	* [BREAKING CHANGE] `EzrSharpCompatibilityWrapper.Validate` has been removed. Use `SharpAutoWrapperAttribute.ValidateMethod` instead.
+	* [BREAKING CHANGE] `EzrSharpCompatibilityWrapper.IsSupportedType` and `EzrSharpCompatibilityWrapper.IsSupportedReturnType` have been removed.
+	* [BREAKING CHANGE] `SharpAutoWrapperAttribute.Validate`, `SharpAutoWrapperAttribute.ValidateField` and `SharpAutoWrapperAttribute.ValidateProperty` have been removed.
+	* [BREAKING CHANGE] The `skipValidation` parameter has been removed from the constructors of `EzrSharpCompatibilityField` and `EzrSharpCompatibilityProperty`.
+	* Added support for all C# members and types through C# compatibility wrappers, except for open generic type and method definitions.
+	* Added new `SharpDoNotWrapAttribute` to inform `EzrSharpCompatibilityObjectInstance` and `EzrSharpCompatibilityType` that a member should not be wrapped.
+	* Added new utility methods in `SharpAutoWrapperAttribute` to check if a member is public and to check if a member should be wrapped.
+	* Improved PascalCase to snake_case converter.
+	* Fixed bug relating to empty names for C# wrapped parameters.
 
-* prerelease-1.5.0.0.0 - [21-03-23]
-    * More major changes to module/library system and `include` expression
-    * Context name of value-derived types now the name of the derived type
+* ezr² RE - v0.10.0 [06-11-24]
+	* [BREAKING CHANGE] `EzrArray.Length` is now `EzrArray.Count`.
+	* [BREAKING CHANGE] `EzrList.Length` is now `EzrList.Count`.
+	* [BREAKING CHANGE] `RuntimeEzrObjectDictionary.Length` is now `RuntimeEzrObjectDictionary.Count`.
+	* Dictionaries can now be iterated through using for-each loops.
+	* When requesting the keys of a dictionary, `RuntimeEzrObjectDictionary` will now copy them before returning, except for when using `IEnumerable` overrides.
+	* Fixed reference registration bugs in `EzrList` and `EzrDictionary`.
+	* Fixed context releasing bug in `EzrFunction`.
+	* New `IEzrEnumerable` interface for iterables that can be used by the for-each loop.
+	* New `IDictionary` interface for dictionary-like types.
+
+* ezr² RE - v0.9.0 [04-11-24]
+	* There are *many* breaking changes in this version. Please check the GitHub changelogs for more details.
+	* Overhaul of C# compatibility and source wrappers.
+
+* ezr² RE - v0.8.5 [02-11-24]
+	* [BREAKING CHANGE] `CodeExecutor.s_runtimeContext` is now public-access-only as `CodeExecutor.RuntimeContext`.
+	* Added option to exclude built-in I/O functions from `CodeExecutor.PopulateRuntimeContext`.
+	* Added `EzrBuiltinsUtility.AddBuiltinIOFunctions` to explicitly add built-in I/O functions.
+	* Fixed command line file input for shell.
+
+* ezr² RE - v0.8.4 [02-11-24]
+	* Fixed debug files, again.
+
+* ezr² RE - v0.8.3 [02-11-24]
+	* Fixed warning in `EzrObject` caused by missing `DynamicallyAccessedMembers` attribute.
+	* Fixed debug files.
+
+* ezr² RE - v0.8.2 [02-11-24]
+	* Added portable debug files.
+
+* ezr² RE - v0.8.1 [01-11-24]
+	* Fixed shell printouts.
+
+* ezr² RE - v0.8.0 [01-11-24]
+	* Added some built-ins for `EzrString`, `EzrArray`, `EzrList`, `EzrDictionary` and `EzrCharacterList`.
+
+* ezr² RE - v0.7.0 [01-11-24]
+	* Added slightly jank implementation of EKAs for C# source wrappers.
+	* Improved "show" function with multiple message input and new optional "separator" parameter.
+
+* ezr² RE - v0.6.0 [31-10-24]
+	* [BREAKING CHANGE] EKAs (Extra Keyword Arguments) now use the following syntax: "function abc with more named as keyword_args do ..."
+	* Added EPA (Extra Positional Arguments) support! You can define them like so: "function abc with more as epas do ...". Here, "epas" will be an `EzrList` of the extra arguments.
+	* Improved string representations of `EzrRuntimeExecutable`-s.
+	* Fixed scope handling in for-each loop assignments.
+
+* ezr² RE - v0.5.0 [31-10-24]
+	* [BREAKING CHANGE] `IMutable` has been moved to the `EzrSquared.Runtime` namespace.
+	* [BREAKING CHANGE] The `context` parameter in the constructor for `EzrObject` is no longer nullable.
+	* Added for-each loops! You can now iterate through collections (including strings and character lists) effortlessly.
+	* Strings and character lists are now `IEzrIndexedCollection`-s and can compare against other `IEzrIndexedCollection`-s.
+	* Fixed a cast to `EzrObject` in `Context`.
+
+* ezr² RE - v0.4.0 [27-09-24]
+	* Text objects (strings, characters, character lists), now implement a common interface `IEzrString`.
+	* Runtime errors now implement a common interface `IEzrRuntimeError`.
+
+* ezr² RE - v0.3.1 [14-08-24]
+	* Updated shell with new version.
+
+* ezr² RE - v0.3.0 [14-08-24]
+	* [BREAKING CHANGE] All core executable types have been moved to `EzrSquared.Runtime.Types.Executables`.
+	* [BREAKING CHANGE] Auto wrapped methods in `EzrSharpCompatibilityObjectInstance` will now have their names in snake_case.
+	* [BREAKING CHANGE] `UpdateCreationContext` in `EzrObject` is now part of `IEzrObject`.
+	* [BREAKING CHANGE] `_creationContext` in `EzrObject` is now public as `CreationContext` and is part of `IEzrObject`.
+	* [BREAKING CHANGE] `PascalCaseToLowerCasePlainText` has been moved from `EzrSharpSourceFieldWrapper` to `EzrSharpSourceExecutableWrapper` as an internal protected static method.
+	* [BREAKING CHANGE] The `DynamicallyAccessedMembers` attribute has been removed for `EzrSharpCompatibilityType.SharpType` and `EzrSharpSourceTypeWrapper.SharpType`.
+	* [BREAKING CHANGE] The constructors for `EzrSharpCompatibilityType` and `EzrSharpSourceTypeWrapper` now use the `type` parameter to access the members of the C# type.
+	* [BREAKING CHANGE] The `creationContext` parameter in the constructors for `EzrObject` has been renamed to `parentContext` to maintain consistency.
+	* Auto wrappers now support async `Task`s that return one of the supported primitive types.
+	* `EzrSharpSourceTypeWrapper` now supports auto-wrapping static members through the new `SharpAutoCompatibilityWrapperAttribute` attribute.
+	* Added utility methods in `EzrSharpCompatibilityWrapper` to check if a given type is supported by the C#-to-ezr² and ezr²-to-C# converters.
+	* Added support for `decimal` type in the C#-to-ezr² and ezr²-to-C# converters.
+	* All auto-wrapper types now support overriding the names for members which would be named using `Utils.PascalToSnakeCase` otherwise.
+	* Added type checking in `EzrSharpSourcePropertyWrapper`.
+	* Objects created with `Context.Empty` will have their creation context updated to be the first context they are assigned to.
+	* Improved error messages here and there.
+
+* ezr² RE - v0.2.0 [07-08-24]
+	* [BREAKING CHANGE] SharpTypeWrapperAttribute will now require the type to have one SharpMethodWrapper wrapped constructor to create objects.
+	* [BREAKING CHANGE] All static `WrapperConstructor` methods in runtime error classes have been removed and converted to regular constructors.
+	* [BREAKING CHANGE] EzrSharpSourceExecutableWrapper now inherits directly from EzrObject and implements some overrides.
+	* Static wrapped methods in SharpTypeWrapper wrapped types should work now.
+	* SharpMethodWrapperAttribute now also supports constructors.
+	* Updated error messages returned by SharpFieldWrapperAttribute's validation methods.
+	* Updated all declarations of DynamicallyAccessedMembers attributes to be more specific.
+	* Added some missing built-ins in EzrBuiltinsUtility.
+	* Fixed formatting, removed unused imports.
+	* Updated documentation.
+
+* ezr² RE - v0.1.2 [06-08-24]
+	* Updated build dependencies.
+	* Updated documentation and website.
+
+* ezr² RE - v0.1.1 [05-08-24]
+	* Updated documentation and some graphics.
+
+* ezr² RE - Part 3 [04-08-24]
+	* Almost completed rewriting the Interpreter and its supporting components.
+	* Fixed a ton of bugs in the Lexer, Parser and their supporting components.
+	* Added an improved Shell as a separate project from the main ezr² stuff.
+
+* ezr² Rewrite - Part 2 [13-09-23]
+	* Completed rewriting the Parser (without QuickSyntax support) and its supporting components.
+
+* ezr² Rewrite - Part 1 [10-05-23]
+	* Completed rewriting the Lexer and its supporting components.

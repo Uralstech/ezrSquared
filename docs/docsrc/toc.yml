@@ -1,0 +1,15 @@
+pdfFileName: QuickStartDocumentation.pdf
+pdfTocPage: true
+pdf: true
+pdfPrintBackground: true
+items:
+- name: Learn ezr²
+  href: Learn-ezrSquared.md
+- name: C# and ezr²
+  href: CSharp-and-ezrSquared.md
+- name: Embedding ezr²
+  href: Embedding-ezrSquared.md
+- name: Get started with CSAELs
+  href: Get-started-with-CSAELs.md
+- name: Multilingual ezr²
+  href: Multilingual-ezrSquared.md

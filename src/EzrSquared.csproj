@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputTypes>Library</OutputTypes>
+		<Platforms>AnyCPU</Platforms>
+		<TargetFrameworks>net9.0;netstandard2.1</TargetFrameworks>
+		<LangVersion>13</LangVersion>
+
+		<ImplicitUsings>Disable</ImplicitUsings>
+		<Nullable>Enable</Nullable>
+		
+		<RootNamespace>EzrSquared</RootNamespace>
+		<DebugType>portable</DebugType>
+
+		<PublishSingleFile>True</PublishSingleFile>
+		
+		<SelfContained>True</SelfContained>
+		<IsPublishable>True</IsPublishable>
+
+		<IsTrimmable>False</IsTrimmable>
+		<IsAotCompatible>False</IsAotCompatible>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Product>ezrSquared</Product>
+		<PackageId>ezrSquared</PackageId>
+		<AssemblyName>ezrSquared-lib</AssemblyName>
+
+		<Title>ezr² Portable Library</Title>
+		<Description>The ezr² programming language, as a portable class library! This can be used to integrate ezr² as an embedded scripting language in your apps, websites and more!</Description>
+
+		<PackageVersion>0.11.3-unstable</PackageVersion>
+		
+		<Authors>Udayshankar Ravikumar</Authors>
+		<Company>URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Company>
+		<Copyright>© 2022 - 2024 URAV ADVANCED LEARNING SYSTEMS PRIVATE LIMITED</Copyright>
+
+		<NeutralLanguage>en</NeutralLanguage>
+
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		
+		<PackageProjectUrl>https://uralstech.github.io/ezrSquared/</PackageProjectUrl>
+		<PackageTags>programming language;portable;embeddable;compact;interpreted</PackageTags>
+		<PackageReleaseNotes>See https://github.com/Uralstech/ezrSquared/releases.</PackageReleaseNotes>
+		
+		<RepositoryUrl>https://github.com/uralstech/ezrSquared</RepositoryUrl>
+		<RepositoryBranch>ezrSquared-re</RepositoryBranch>
+
+		<PackageIcon>Icon (256x256).png</PackageIcon>
+
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\Secrets\sgKey.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Shell\**" />
+	  <EmbeddedResource Remove="Shell\**" />
+	  <None Remove="Shell\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\graphics\Icon PNGs\Icon (256x256).png" Pack="True" PackagePath="" />
+		<None Include="..\LICENSE.txt" Pack="True" PackagePath="" />
+		<None Include="..\README.md" Pack="True" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+		<PackageReference Include="PolySharp" Version="1.14.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+		<PolySharpIncludeRuntimeSupportedAttributes>True</PolySharpIncludeRuntimeSupportedAttributes>
+		<DefineConstants>MULTI_TARGETING_SUPPORT_ATTRIBUTES</DefineConstants>
+	</PropertyGroup>
+</Project>

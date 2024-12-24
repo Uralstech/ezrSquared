@@ -1,0 +1,180 @@
+ezr² syntax
+=================
+
+Definitions
+-----------
+
+'\n'		: new line or semicolon character
+|			: or
++			: can have more than one instance of
+?			: optional
+''			: symbol(s)
+""			: qeyword or keyword
+[]			: not structure
+@			: comment
+
+Structures
+----------
+
+@ 'statements' structures can contain multiple 'statement' structures
+statements:
+	statement
+	| statement ('\n'+ statement?)+
+
+@ 'statement' structures can contain return, skip or stop expressions or 'expression' structures
+statement:
+	"return" ("last"? expression)?
+	| "skip"
+	| "stop"
+	| expression
+	
+@ 'variable-identifier' structures contain the syntactic sugar required for the identifier of a variable in a variable definition expression
+@ This is _not_ a structure defined in code and is only used for simplification _in this file_.
+variable-identifier:
+	[identifier]
+	| [qeyword]
+	| junction @ Only if the structure starts with an [identifier] or [qeyword].
+
+@ 'expression' structures can contain item definition expressions or 'quick-expression' structures
+expression:
+	("global" | "private")? "static"? "constant"? "item"? (('(' variable-identifier (',' variable-identifier)+? ')') | variable-identifier) (':' | ':+' | ':-' | ':*' | ':/' | ':%' | ':^' | ':&' | ':|' | ':\' | ':<' | ':>') expression
+	| quick-expression
+
+@ 'quick-expression' structures can contain QuickSyntax item definition expressions or 'junction' structures
+quick-expression:
+	'!' ("g" | "p")? "c"? "d"? (('(' variable-identifier (',' variable-identifier)+? ')') | variable-identifier) (':' | ':+' | ':-' | ':*' | ':/' | ':%' | ':^' | ':&' | ':|' | ':\' | ':<' | ':>') expression
+	| junction
+
+@ 'junction' structures can contain 'and' or 'or' comparison expressions or 'inversion' structures
+junction:
+	inversion ("and" | "or") inversion
+	| inversion
+
+@ 'inversion' structures can contain inversion expressions or 'contains-check' structures
+inversion:
+	'!' "v" inversion
+	| ("invert" | "not") inversion
+	| contains-check
+
+@ 'contains-check' structures can contain is-contained-in, not-contained-in comparison expressions or 'comparison' structures
+contains-check:
+	comparison (("not" "in" | "in") comparison)+
+	| comparison
+
+@ 'comparison' structures can contain equality, inequality, lesser than, greater than, lesser than or equality,
+@ greater than or equality or 'bitwise-or' structures
+comparison: 
+	bitwise-or (('=' | '!' | '<' | '>' | '<=' | '>=') bitwise-or)+
+	| bitwise-or
+
+@ 'bitwise-or' structures can contain bitwise-or expressions or 'bitwise-xor' structures
+bitwise-or:
+	bitwise-xor ('|' bitwise-xor)+
+	| bitwise-xor
+	
+@ 'bitwise-xor' structures can contain bitwise-xor expressions or 'bitwise-and' structures
+bitwise-xor:
+	bitwise-and ('\' bitwise-and)+
+	| bitwise-and
+	
+@ 'bitwise-and' structures can contain bitwise-and expressions or 'bitwise-shift' structures
+bitwise-and:
+	bitwise-shift ('&' bitwise-shift)+
+	| bitwise-shift
+	
+@ 'bitwise-shift' structures can contain bitwise-left-shift or bitwise-right-shift expressions or 'arithmetic-expression' structures
+bitwise-shift:
+	arithmetic-expression (('<<' | '>>') arithmetic-expression)+
+	| arithmetic-expression
+
+@ 'arithmetic-expression' structures can contain addition or subtraction expressions or 'term' structures
+arithmetic-expression:
+	term (('+' | '-') term)+
+	| term
+
+@ 'term' structures can contain multiplication, division or modulus expressions or 'factor' structures
+term:
+	factor (('*' | '/' | '%') factor)+
+	| factor
+
+@ 'factor' structures can contain positive, negative or bitwise-inversion unary expressions or 'power' structures
+factor:
+	('+' | '-' | '~') factor
+	| power
+
+@ 'power' structures can contain power expression or 'object-attribute-access' structures
+power:
+	object-attribute-access ('^' object-attribute-access)+
+	| object-attribute-access
+	
+@ 'object-attribute-access' structures can contain object attribute access expressions or 'call' structures
+object-attribute-access:
+	call ('.' call)+
+	| call
+
+@ 'call' structures can contain function/object instance creation call expressions or 'atom' structures
+call:
+	atom '(' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)? ')'
+	| atom
+
+@ 'atom' structures can contain literal value definition, variable access, parenthetical, array definition, list definition, dictionary definition expressions and 'if-expression' structures
+atom:
+	([integer] | [floating point] | [string] | [character] | [character list])
+	| "global"? "static"? ([identifier] | [qeyword])
+	| '(' '\n'+? expression '\n'+? ')'
+	| '(' '\n'+? (expression '\n'+? ',' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)?)? ')'
+	| '[' '\n'+? (expression '\n'+? (',' '\n'+? expression '\n'+?)+?)? ']'
+	| '{' '\n'+? (expression '\n'+? ':' '\n'+? expression '\n'+? (',' '\n'+? expression '\n'+? ':' '\n'+? expression '\n'+?)+?)? '}'
+	| if-expression
+	| count-expression
+	| for-each-expression
+	| while-expression
+	| try-expression
+	| function-definition-expression
+	| class-definition-expression
+	| include-expression
+	| define-block-expression
+
+@ 'if-expression' structures contain declarations of conditional if-else-if-else expressions.
+if-expression:
+	"if" expression "do" statements ("else" "if" expression "do" statements)+? ("else" "do" statements)? "end"
+	| "if" expression "do" statement ("else" "if" expression "do" statement)+? ("else" "do" statement)?
+	
+@ 'count-expression' structures contain declarations of count loops, which are like for loops in C#.
+count-expression:
+	"count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statements "end"
+	| "count" ("from" expression)? "to" expression ("step" expression)? ("as" expression)? "do" statement
+	
+@ 'for-each-expression' structures contain declarations of for-each loops.
+@ Here, the expression must be a 'contains-check'.
+for-each-expression:
+	"for" "each" expression "do" statements "end"
+	| "for" "each" expression "do" statement
+	
+@ 'while-expression' structures contain declarations of while loops.
+while-expression:
+	"while" expression "do" ((statements "end") | statement)
+
+@ 'try-expression' structures contain declarations of try-catch blocks, which are like try-catch blocks in C#.
+try-expression:
+	"try" "do" statements ("catch" expression ("as" expression)? "do" statements)+? ("catch" ("as" expression)? "do" statements)? "end"
+	| "try" "do" statement ("catch" expression ("as" expression)? "do" statement)+? ("catch" ("as" expression)? "do" statement)?
+	
+@ 'function-definition-expression' structures contain declarations of functions.
+function-definition-expression:
+	("global" | "private")? "static"? "constant"? "function" expression? ("with" (expression (',' expression)+?)? (','? "more" "named"? "as" expression)+?)? "do" ((statements "end") | statement)
+	
+@ 'class-definition-expression' structures contain declarations of classes.
+class-definition-expression:
+	("global" | "private")? "static"? "constant"? "readonly"? "object" expression? ("from" expression (',' expression)+?)? "do" ((statements "end") | statement)
+
+@ 'include-expression' structures contain declarations of include expressions, which are like using statements in C#.
+include-expression:
+	"include" expression ("as" expression)?
+	| "include" expression "from" expression ("as" expression)?
+
+@ 'define-block-expression' structures contain declarations of define blocks, which allow the user to define multiple variables, functions, objects, etc. with the same accessibility modifiers.
+define-block-expression:
+	"define" ("global" | "private") "static"? "constant"? statements "end"
+	| "define" "static" "constant"? statements "end"
+	| "define" "constant" statements "end"

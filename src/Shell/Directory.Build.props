@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+		<BaseOutputPath>..\..\Binaries\Shell\</BaseOutputPath>
+		<BaseIntermediateOutputPath>..\..\Intermediates\Shell\</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>

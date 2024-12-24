@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+		<BaseOutputPath>..\Binaries\ezrSquared\</BaseOutputPath>
+		<BaseIntermediateOutputPath>..\Intermediates\ezrSquared\</BaseIntermediateOutputPath>
+    </PropertyGroup>
+</Project>
