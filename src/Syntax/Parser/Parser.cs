@@ -1086,13 +1086,11 @@ public class Parser
             Advance();
         }
 
-        if (!isArray && elements.Count > 0)
-        {
-            _result.Node.StartPosition = startPosition;
-            _result.Node.EndPosition = endPosition;
-        }
-        else
-            _result.Success(new ArrayLikeNode(elements, false, startPosition, endPosition));
+        _result.Success(
+            !isArray && elements.Count > 0
+            ? new StatementsNode([_result.Node], startPosition, endPosition)
+            : new ArrayLikeNode(elements, false, startPosition, endPosition)
+        );
     }
 
     /// <summary>

@@ -236,10 +236,9 @@ public class Interpreter
     private void VisitArrayLikeNodeList(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
         RuntimeEzrObjectList elementsReferences = new(node.Elements.Count);
-        for (int i = 0; i < node.Elements.Count; i++)
+        foreach (Node element in node.Elements)
         {
-            Node elementNode = node.Elements[i];
-            VisitNode(elementNode, executionContext, callingContext, accessibilityModifiers);
+            VisitNode(element, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
@@ -259,10 +258,11 @@ public class Interpreter
     private void VisitArrayLikeNodeArray(ArrayLikeNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
         IEzrObject[] elements = new IEzrObject[node.Elements.Count];
-        for (int i = 0; i < node.Elements.Count; i++)
+        using IEnumerator<Node> enumerator = node.Elements.GetEnumerator();
+
+        for (int i = 0; enumerator.MoveNext(); i++)
         {
-            Node elementNode = node.Elements[i];
-            VisitNode(elementNode, executionContext, callingContext, accessibilityModifiers);
+            VisitNode(enumerator.Current, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
@@ -282,25 +282,23 @@ public class Interpreter
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
     private void VisitDictionaryNode(DictionaryNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
-        RuntimeEzrObjectDictionary dictionary = [];
-        List<(Node Key, Node Value)> pairs = node.KeyValuePairs;
-
-        for (int i = 0; i < pairs.Count; i++)
+        RuntimeEzrObjectDictionary dictionary = new(node.KeyValuePairs.Count);
+        foreach ((Node key, Node value) in node.KeyValuePairs)
         {
             // Get the key.
-            VisitNode(pairs[i].Key, executionContext, callingContext, accessibilityModifiers);
+            VisitNode(key, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            IEzrObject key = RuntimeResult.Reference.Object;
+            IEzrObject keyObject = RuntimeResult.Reference.Object;
 
             // Get the value.
-            VisitNode(pairs[i].Value, executionContext, callingContext, accessibilityModifiers);
+            VisitNode(value, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
             // Add it to the dictionary!
-            dictionary.Update(key, RuntimeResult.Reference.Object, RuntimeResult);
+            dictionary.Update(keyObject, RuntimeResult.Reference.Object, RuntimeResult);
             if (RuntimeResult.ShouldReturn)
                 return;
         }
@@ -809,19 +807,19 @@ public class Interpreter
     /// <param name="accessibilityModifiers">The accessibility modifiers for objects that will be assigned from the executing <see cref="Node"/>.</param>
     private void VisitIfNode(IfNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
-        for (int i = 0; i < node.Cases.Count; i++)
+        foreach ((Node condition, Node body) in node.Cases)
         {
-            VisitNode(node.Cases[i].Condition, executionContext, callingContext, accessibilityModifiers);
+            VisitNode(condition, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            bool condition = RuntimeResult.Reference.Object.EvaluateBoolean(RuntimeResult);
+            bool conditionEval = RuntimeResult.Reference.Object.EvaluateBoolean(RuntimeResult);
             if (RuntimeResult.ShouldReturn)
                 return;
 
-            if (condition)
+            if (conditionEval)
             {
-                VisitNode(node.Cases[i].Body, executionContext, callingContext, accessibilityModifiers);
+                VisitNode(body, executionContext, callingContext, accessibilityModifiers);
                 return;
             }
         }
@@ -1165,10 +1163,8 @@ public class Interpreter
         IEzrRuntimeError error = RuntimeResult.Error!;
         RuntimeResult.Reset();
 
-        for (int i = 0; i < node.Cases.Count; i++)
+        foreach ((Node errorType, Node? errorVariableNode, Node body) in node.Cases)
         {
-            (Node errorType, Node? errorVariableNode, Node body) = node.Cases[i];
-
             VisitNode(errorType, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
@@ -1248,9 +1244,11 @@ public class Interpreter
         Context newContext = new($"<function parameters>", false, node.StartPosition, executionContext, executionContext.StaticContext);
 
         (string Name, Node Node)[] parameters = new (string, Node)[node.Parameters.Count];
-        for (int i = 0; i < parameters.Length; i++)
+        using IEnumerator<Node> enumerator = node.Parameters.GetEnumerator();
+
+        for (int i = 0; enumerator.MoveNext(); i++)
         {
-            Node parameter = node.Parameters[i];
+            Node parameter = enumerator.Current;
             VisitNode(parameter, newContext, callingContext, AccessMod.None, true);
             if (RuntimeResult.ShouldReturn)
                 return;
@@ -1262,7 +1260,7 @@ public class Interpreter
                 return;
             }
 
-            parameters[i] = (reference.Name, node.Parameters[i]);
+            parameters[i] = (reference.Name, parameter);
         }
 
         OptionalExtraArguments keywordArguments = null;
@@ -1322,9 +1320,11 @@ public class Interpreter
     private void VisitClassDefinitionNode(ClassDefinitionNode node, Context executionContext, Context callingContext, AccessMod accessibilityModifiers)
     {
         EzrClass[] parents = new EzrClass[node.Parents.Count];
-        for (int i = 0; i < parents.Length; i++)
+        using IEnumerator<Node> enumerator = node.Parents.GetEnumerator();
+
+        for (int i = 0; enumerator.MoveNext(); i++)
         {
-            Node parentNode = node.Parents[i];
+            Node parentNode = enumerator.Current;
             VisitNode(parentNode, executionContext, callingContext, accessibilityModifiers);
             if (RuntimeResult.ShouldReturn)
                 return;
@@ -1397,10 +1397,10 @@ public class Interpreter
             Context argumentsContext = new($"<{receiver.TypeName} arguments>", false, receiver.StartPosition, callingContext, callingContext.StaticContext);
             arguments = new Reference[node.Arguments.Count];
 
-            for (int i = 0; i < node.Arguments.Count; i++)
+            using IEnumerator<Node> enumerator = node.Arguments.GetEnumerator();
+            for (int i = 0; enumerator.MoveNext(); i++)
             {
-                Node argument = node.Arguments[i];
-                VisitNode(argument, argumentsContext, callingContext, accessibilityModifiers & ~AccessMod.LocalScope);
+                VisitNode(enumerator.Current, argumentsContext, callingContext, accessibilityModifiers & ~AccessMod.LocalScope);
                 if (RuntimeResult.ShouldReturn)
                     return;
 
